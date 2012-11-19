@@ -94,7 +94,36 @@ define rope_impl => type {
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
+    
+    
+    public protocol => (web_request->isHttps ? 'https://' | 'http://')
+    public method   => web_request->requestMethod
+    public hostname => web_request->httpHost
+    public path     => {
+        local(path) = web_request->requestUri->split('?')->get(1)->split('/')
+        #path->last->contains('.')
+            ? #path->last = #path->last->split('.')->remove&join('.')
+        
+        #path->size > 2 and #path->last->isEmpty ? #path->remove
+        return #path->join('/')
+    }
+    public extension => {
+        local(ext) = web_request->requestUri->split('?')->get(1)->split('/')->last->split('.')
+        #ext->size > 1
+            ? return #ext->last
+        return null
+    }
+    
+
+    public queryParams => web_request->queryParams
+    public postParams  => web_request->postParams
+    public params      => tie(.urlParams, tie(.queryParams, .postParams))->asStaticArray
+    
     public urlParam  (key::string, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #selectAll)
+    public queryParam(key::string, -selectAll::boolean=false) => .getParam('queryParams', #key, #selectAll)
+    public postParam (key::string, -selectAll::boolean=false) => .getParam('postParams' , #key, #selectAll)
+    public param     (key::string, -selectAll::boolean=false) => .getParam('params'     , #key, #selectAll)
+    
     private getParam(type::string, key::string, selectAll::boolean) => {    
         if(#selectAll) => {
             return (
