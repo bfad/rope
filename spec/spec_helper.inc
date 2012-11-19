@@ -21,3 +21,15 @@ if(not var_defined(`_rope_loaded`)) => {
     
     var(_rope_loaded) = true
 }
+
+define mock => type {
+    data private methods::map
+    
+    public onCreate(...) => {
+        .`methods` = map
+        with item in #rest do .`methods`->insert(#item)
+    }
+    
+    public methods     => .`methods`->get(`methods`)
+    public _unknowntag => .`methods`->get(method_name->asString)
+}

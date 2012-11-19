@@ -94,4 +94,13 @@ describe(::rope) => {
             expect(`matchRoute`, rope->matchRoute('/great/scott')->second)
         }
     }
+    
+    describe(`-> invoke`) => {
+        it(`matches the URL to a route and invokes the route's controller`) => {
+            web_request = mock('requestUri' = '/person/robinmckinley')
+            rope->register(`invoke`, -routes=(:'/person/:id')) => { return 'sunshine' }
+            
+            expect(`sunshine`, rope->invoke)
+        }
+    }
 }

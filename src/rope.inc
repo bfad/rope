@@ -18,6 +18,11 @@ define rope_thread => thread {
     public findRoutesSized(key::integer) => .`routes`->find(#key)
 }
 define rope_impl => type {
+    public invoke => {
+        local(route) = .matchRoute(web_request->requestUri->split('?')->get(1))
+        return .controller(#route->second)->invoke
+    }
+    
     public register(controller::string, -routes::staticarray=(:)) => {
         givenBlock? rope_thread->insertController(#controller=givenBlock)
         
