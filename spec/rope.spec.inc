@@ -8,28 +8,43 @@ if(not var_defined('_rope_loaded')) => {
 }
 
 describe(::rope) => {
-    describe(`-> route`) => {
-        it(`requires a givenBlock to be passed to the method`) => {
-            expect->error(error_code_runtimeAssertion, `The route member method requires a givenBlock`) => {
-                rope->route('moose')
+    describe(`-> register`) => {
+        context(`passed a givenBlock`) => {
+            it(`registers the givenBlock to the controller`) => {
+                rope->register('new') => {}
+                expect(rope->controllers->contains('new'))
+                expect(rope->controllers->get('new')->isA(::capture) > 0)
+            }
+            it(`registers any routes passed to the controller`) => {
+                local(num_routes) = rope->routes->find(2)->size
+                rope->register('new', -routes=(:'/moose/hair', '/foo/bar')) => {}
+                expect(2 + #num_routes, rope->routes->find(2)->size)
             }
         }
-        it(`fails when called without any parameters`) => {
-            expect->error(error_code_methodNotFound, `Definition Not Found: rope->route() Candidates were: rope->route(route::string, ...)`) => {
-                rope->route() => {}
+        context(`no givenBlock passed`) => {
+            beforeAll => {
+                rope->register('exists') => {}
             }
-        }
-        it(`takes an undetermined amount of string paramaters`) => {
-            local(params) = array
-            loop(math_random(2,8)) => {
-                #params->insert('ad' * loop_count)
+            it(`throws an error if not passed any routes to assign to the controller`) => {
+                expect->error(error_code_runtimeAssertion, `This method requires you to either also pass routes or a givenBlock`) => {
+                    rope->register('exists')
+                }
             }
-            rope->route(:#params) => {}
-            expect(true)
-        }
-        it(`fails if one of the params is not a string`) => {
-            expect->error(error_code_invalidParameter, `Invalid parameter: The route member method was passed an object that was not a string`) => {
-                rope->route('foo', (:'bar'), 'baz') => {}
+            it(`throws an error if the specified controller does not exist`) => {
+                expect->error(error_code_invalidParameter, `The specified controller does not exist`) => {
+                    rope->register('noexist', -routes=(:'/moose'))
+                }
+            }
+            it(`fails if one of the route params is not a string`) => {
+                expect->error(error_code_invalidParameter, `Invalid parameter: One of the routes passed was not a string`) => {
+                    rope->register('exists', -routes=(:'bar', 3))
+                }
+            }
+            it(`registers the specified routes to the controller`) => {
+                local(num_routes) = rope->routes->find(1)->size
+                
+                rope->register('exists', -routes=(:'hair', 'brush'))
+                expect(2 + #num_routes, rope->routes->find(1)->size)
             }
         }
     }

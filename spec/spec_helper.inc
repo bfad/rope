@@ -21,3 +21,6 @@ if(not var_defined(`_rope_loaded`)) => {
     
     var(_rope_loaded) = true
 }
+
+define rope_impl->controllers => .`controllers`
+define rope_impl->routes      => .`routes`
