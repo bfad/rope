@@ -96,11 +96,16 @@ describe(::rope) => {
     }
     
     describe(`-> invoke`) => {
-        it(`matches the URL to a route and invokes the route's controller`) => {
-            web_request = mock('requestUri' = '/person/robinmckinley')
+        beforeAll => {
             rope->register(`invoke`, -routes=(:'/person/:id')) => { return 'sunshine' }
-            
+            web_request = mock('requestUri' = '/person/robinmckinley')
+        }
+        it(`matches the URL to a route and invokes the route's controller`) => {
             expect(`sunshine`, rope->invoke)
+        }
+        
+        it(`sets up the URL parameters`) => {
+            expect(`robinmckinley`, rope->urlParam(`id`))
         }
     }
 }

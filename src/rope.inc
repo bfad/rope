@@ -18,8 +18,21 @@ define rope_thread => thread {
     public findRoutesSized(key::integer) => .`routes`->find(#key)
 }
 define rope_impl => type {
+    data public urlParams::array = array
+    
     public invoke => {
-        local(route) = .matchRoute(web_request->requestUri->split('?')->get(1))
+        local(route) = .matchRoute(.path)
+        
+        //Setup URL parameters
+        local(elements) = .path->asCopy->remove(1,1)&split('/')
+        local(i) = #elements->size
+        while(#i--) => {
+            local(part) = #route->first->get(loop_count)->asCopy
+            if(`:` == #part->get(1)) => {
+                #part->remove(1,1)
+                .'urlParams'->insert(#part=#elements->get(loop_count))
+            }
+        }
         return .controller(#route->second)->invoke
     }
     
@@ -81,5 +94,21 @@ define rope_impl => type {
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
+    public urlParam  (key::string, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #selectAll)
+    private getParam(type::string, key::string, selectAll::boolean) => {    
+        if(#selectAll) => {
+            return (
+                with param in self->\(tag(#type))->invoke
+                where #param->first == #key
+                select #param->second
+            )->asStaticArray
+        }
+        
+        with param in self->\(tag(#type))->invoke
+        where #param->first == #key
+        do { return #param->second }
+        
+        return void
+    }
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
