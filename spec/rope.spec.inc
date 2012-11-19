@@ -12,13 +12,13 @@ describe(::rope) => {
         context(`passed a givenBlock`) => {
             it(`registers the givenBlock to the controller`) => {
                 rope->register('new') => {}
-                expect(rope->controllers->contains('new'))
-                expect(rope->controllers->get('new')->isA(::capture) > 0)
+                expect(rope->controllerExist('new'))
+                expect(rope->controller('new')->isA(::capture) > 0)
             }
             it(`registers any routes passed to the controller`) => {
-                local(num_routes) = rope->routes->find(2)->size
+                local(num_routes) = rope->routesSized(2)->size
                 rope->register('new', -routes=(:'/moose/hair', '/foo/bar')) => {}
-                expect(2 + #num_routes, rope->routes->find(2)->size)
+                expect(2 + #num_routes, rope->routesSized(2)->size)
             }
         }
         context(`no givenBlock passed`) => {
@@ -41,11 +41,24 @@ describe(::rope) => {
                 }
             }
             it(`registers the specified routes to the controller`) => {
-                local(num_routes) = rope->routes->find(1)->size
+                local(num_routes) = rope->routesSized(1)->size
                 
                 rope->register('exists', -routes=(:'hair', 'brush'))
-                expect(2 + #num_routes, rope->routes->find(1)->size)
+                expect(2 + #num_routes, rope->routesSized(1)->size)
             }
+        }
+        
+        it(`allows for registerd controllers / routes to be accessible in other threads`) => {
+            local(_, readPipe) = split_thread => {
+                local(writePipe) = #1->first
+                handle => { #writePipe->writeObject(`Done`) }
+
+                rope->register('otherThread') => {}
+            }
+            while(true) => { `Done` == #readPipe->readObject? loop_abort }
+            
+            expect(rope->controllerExist('otherThread'))
+            expect(rope->controller('otherThread')->isA(::capture) > 0)
         }
     }
     
