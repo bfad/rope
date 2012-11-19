@@ -26,8 +26,37 @@ define rope_impl => type {
             not .'routes'->contains(#path->size)
                 ? .'routes'->insert(#path->size=array)
             
-            .'routes'->get(#path->size)->insert(#path)
+            .'routes'->get(#path->size)->insert(#path=#controller)
         }
+    }
+    
+    public matchRoute(path::string) => {
+        local(path_split) = #path->asCopy->remove(1,1)&split('/')
+        local(i)          = #path_split->size
+        local(found)      = .routes->find(#i)
+        local(good, better, ii)
+        
+        while(#i-- and #ii := #found->size) => {
+            local(pi) = loop_count
+            #good     = array
+            #better   = array
+            
+            while(#ii--) => {
+                #found->get(loop_count)->first->get(#pi) == #path_split->get(#pi)
+                    ? #better->insert(#found->get(loop_count))
+                #found->get(loop_count)->first->get(#pi)->first == ':'
+                    ? #good->insert(#found->get(loop_count))
+            }
+            #better->size
+                ? #found = #better
+                | #found = #good
+        }
+        #found->size == 0
+            ? fail(error_code_invalidParameter, `No matching route found`)
+        #found->size > 1
+            ? fail(`Multiple routes matched the given path`)
+            
+        return #found->first
     }
 }
 define rope => var(_rope_) || $_rope_ := rope_impl

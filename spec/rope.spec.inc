@@ -48,4 +48,37 @@ describe(::rope) => {
             }
         }
     }
+    
+    describe(`-> matchRoute`) => {
+        beforeAll => {
+            rope->register('matchRoute') => {}
+        }
+        it(`throws an error if it can't find a matching route`) => {
+            expect->error(error_code_invalidParameter, `No matching route found`) => {
+                rope->matchRoute(`/this/path/no/exists`)
+            }
+        }
+        it(`matches routes if the whole path matches`) => {
+            rope->register('matchRoute', -routes=(:'/fly/you/fools'))
+            expect('matchRoute', rope->matchRoute('/fly/you/fools')->second)
+        }
+        it(`throws an error if it matches more than one route`) => {
+            rope->register('matchRoute', -routes=(:'/duplicate/route', '/duplicate/route'))
+            
+            expect->error(error_code_runtimeAssertion, `Multiple routes matched the given path`) => {
+                rope->matchRoute('/duplicate/route')
+            }
+        }
+        it(`allows for wildcard (:name) parts of the path to match anything`) => {
+            rope->register('matchRoute', -routes=(:'/run/for/it/:name'))
+
+            expect(`matchRoute`, rope->matchRoute('/run/for/it/Marty')->second)
+        }
+        it(`prefers matches where where the earlier parts are not wildcards`) => {
+            rope->register('matchRoute' , -routes=(:'/great/:dane'))
+            rope->register('matchRoute2', -routes=(:'/:adj/scott')) => {}
+            
+            expect(`matchRoute`, rope->matchRoute('/great/scott')->second)
+        }
+    }
 }
