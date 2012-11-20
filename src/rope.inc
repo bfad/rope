@@ -164,6 +164,6 @@ define rope_impl => type {
         )
     }
     
-    public version => `0.1`
+    public version => `0.1.1`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
