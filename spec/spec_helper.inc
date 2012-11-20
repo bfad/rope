@@ -30,6 +30,17 @@ define mock => type {
         with item in #rest do .`methods`->insert(#item)
     }
     
+    public setMethod(p::pair) => {
+        .`methods`->insert(#p)
+    }
+    public setMethod   => .`methods`->get(`setMethod`)
     public methods     => .`methods`->get(`methods`)
     public _unknowntag => .`methods`->get(method_name->asString)
+}
+
+define web_response_mock => type {parent mock 
+    public onCreate(...) => ..onCreate(:#rest) 
+    public rawContent=(rhs::string) => {
+        ..setMethod('rawContent'=#rhs)
+    }
 }
