@@ -154,7 +154,7 @@ define rope_impl => type {
             not #item->isA(::keyword)
                 ? loop_continue
             
-            #prepend->append(#item->name->asString + '=#' + loop_count + '->value')
+            #prepend->append(#item->name->asString + '=#' + loop_count + '->value,')
         }
         
         content_body = (
