@@ -108,4 +108,60 @@ describe(::rope) => {
             expect(`robinmckinley`, rope->urlParam(`id`))
         }
     }
+    
+    describe(`-> render`) => {
+        // Need to setup file_forceRoot so paths will be relative
+        // However, can cause problems with lspec, especially when an expect fails
+        // Therefore need to set $_file_forceroot_ = void at the end of every it (in a handle works).
+        beforeAll => {
+            web_response = web_response_mock('rawContent'='')
+            var(my_root) = dir('//tmp/rope-' + lasso_uniqueID)->create&path
+            dir($my_root + '/webroot/')->create
+            dir($my_root + '/views/')->create
+        }
+        beforeEach => {file_forceRoot = $my_root + '/webroot/'}
+        afterAll => {
+            dir($my_root + '/webroot/')->delete
+            dir($my_root + '/views/')->delete
+            dir($my_root)->delete
+            $_file_forceroot_ = void
+        }
+        it(`accepts a file object and throws an error if the file doesn't exist`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(f) = file(file_forceRoot(`/gone.lasso`))
+            expect->error(error_code_resNotFound, `File Not Found: ` + #f->path) => {
+                rope->render(#f)
+            }
+        }
+        it(`accepts a file path and throws an error if the file does not exist`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            expect->error(error_code_resNotFound, `File Not Found: ` + file_forceRoot('/../views//gone.lasso')) => {
+                rope->render(`/gone.lasso`)
+            }
+        }
+        it(`sets content_body to the value of processing the specified file`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(template) = file(file_forceRoot('/basic.lasso'))
+            handle => { #template->exists? #template->close&delete }
+            
+            #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Ho! ' * 3 ?>`)) }
+            rope->render(#template)
+            expect(`Ho! Ho! Ho! `, content_body)
+        }
+        it(`sets content_body to the value of processing the file at the specified path relative to webroot (../views/)`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(template) = file($my_root + '/views/basic2.lasso')
+            handle => { #template->exists? #template->close&delete }
+            #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= local(noun) = {return 'roads'}->detach;#noun()->asCopy->titlecase& + "? Where we're going we don't need " + #noun() + "."; ?>`)) }
+            
+            rope->render('/basic2.lasso')
+            expect(`Roads? Where we're going we don't need roads.`, content_body)
+        }
+        it(`accepts named parameters that are setup as locals for the file being rendered`) => {}
+        it(`keeps [no_square_brackets] at the top of the page when adding locals`) => {}
+    }
 }

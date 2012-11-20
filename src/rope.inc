@@ -140,6 +140,14 @@ define rope_impl => type {
         return void
     }
     
+    public render(path::string) => .render(file(file_forceRoot('/../views/' + #path)))
+    public render(view::file) => {
+        not #view->exists
+            ? fail(error_code_resNotFound, `File Not Found: ` + #view->path)
+        
+        content_body = sourcefile(#view->readString, #view->path, true, true)->invoke
+    }
+    
     public version => `0.1`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
