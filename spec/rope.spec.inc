@@ -250,4 +250,29 @@ describe(::rope) => {
             expect(`html`, rope->extension)
         }
     }
+    
+    
+    describe(`-> renderJSON`) => {
+        beforeAll => { web_response = web_response_mock('rawContent'='') }
+        it(`sets the Content-type header for json`) => {
+            rope->renderJSON('')
+            expect('application/json; charset=UTF-8', web_response->header(`Content-type`))
+        }
+        it(`takes a string it assumes is json_serialize and sets it to content_body`) => {
+            rope->renderJSON('moosehair')
+            expect('moosehair', content_body)
+        }
+        it(`takes an array and sets the content_body to a serialized form of the array`) => {
+            rope->renderJSON(array(1,2,3))
+            expect('[1, 2, 3]', content_body)
+        }
+        it(`takes a staticarray and sets the content_body to a serialized form of the array`) => {
+            rope->renderJSON((:'1','2','3'))
+            expect('["1", "2", "3"]', content_body)
+        }
+        it(`takes a map and sets the content_body to a serialize form of that map`) => {
+            rope->renderJSON(map('moose'='hair'))
+            expect('{"moose": "hair"}', content_body)
+        }
+    }
 }

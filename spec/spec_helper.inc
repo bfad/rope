@@ -39,8 +39,12 @@ define mock => type {
 }
 
 define web_response_mock => type {parent mock 
+    data private headers::map = map
+        
     public onCreate(...) => ..onCreate(:#rest) 
     public rawContent=(rhs::string) => {
         ..setMethod('rawContent'=#rhs)
     }
+    public header(key::string) => .'headers'->find(#key)
+    public replaceHeader(elm::pair) => .'headers'->insert(#elm)
 }

@@ -169,6 +169,12 @@ define rope_impl => type {
         )
     }
     
+    public renderJSON(content::string) => {
+        web_response->replaceHeader('Content-type'='application/json; charset=UTF-8')
+        content_body = #content
+    }
+    public renderJSON(item) => .renderJSON(json_serialize(#item))
+    
     public version => `0.1.3`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
