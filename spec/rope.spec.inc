@@ -168,7 +168,7 @@ describe(::rope) => {
             handle => { #template->exists? #template->close&delete }
             #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
             
-            rope->render('locals.lasso', -name='World')
+            rope->render('locals.lasso', -name='World', -time=date)
             expect(`Hello, World.`, content_body)
         }
     }
