@@ -161,7 +161,15 @@ describe(::rope) => {
             rope->render('/basic2.lasso')
             expect(`Roads? Where we're going we don't need roads.`, content_body)
         }
-        it(`accepts named parameters that are setup as locals for the file being rendered`) => {}
-        it(`keeps [no_square_brackets] at the top of the page when adding locals`) => {}
+        it(`accepts named parameters that are setup as locals for the file being rendered`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(template) = file($my_root + '/views/locals.lasso')
+            handle => { #template->exists? #template->close&delete }
+            #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
+            
+            rope->render('locals.lasso', -name='World')
+            expect(`Hello, World.`, content_body)
+        }
     }
 }

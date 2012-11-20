@@ -140,12 +140,28 @@ define rope_impl => type {
         return void
     }
     
-    public render(path::string) => .render(file(file_forceRoot('/../views/' + #path)))
-    public render(view::file) => {
+    public render(path::string, ...) => .render(file(file_forceRoot('/../views/' + #path)), #rest)
+    public render(view::file, ...)   => .render(#view, #rest) 
+    public render(view::file, params::staticarray) => {
         not #view->exists
             ? fail(error_code_resNotFound, `File Not Found: ` + #view->path)
         
-        content_body = sourcefile(#view->readString, #view->path, true, true)->invoke
+        local(prepend) = ''
+        
+        local(i) = #params->size
+        while(#i--) => {
+            local(item) = #params->get(loop_count)
+            not #item->isA(::keyword)
+                ? loop_continue
+            
+            #prepend->append(#item->name->asString + '=#' + loop_count + '->value')
+        }
+        
+        content_body = (
+            #prepend->size > 0
+                ? sourcefile(`<?lasso local(` + #prepend + `) ?>` + #view->readString, #view->path, true, true)->invoke(:#params)
+                | sourcefile(#view->readString, #view->path, true, true)->invoke
+        )
     }
     
     public version => `0.1`
