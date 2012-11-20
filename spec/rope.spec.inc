@@ -109,6 +109,70 @@ describe(::rope) => {
         }
     }
     
+    
+    describe(`-> include`) => {
+        // Need to setup file_forceRoot so paths will be relative
+        // However, can cause problems with lspec, especially when an expect fails
+        // Therefore need to set $_file_forceroot_ = void at the end of every it (in a handle works).
+        beforeAll => {
+            web_response = web_response_mock('rawContent'='')
+            var(my_root) = dir('//tmp/rope-' + lasso_uniqueID)->create&path
+            dir($my_root + '/webroot/')->create
+            dir($my_root + '/views/')->create
+        }
+        beforeEach => {file_forceRoot = $my_root + '/webroot/'}
+        afterAll => {
+            dir($my_root + '/webroot/')->delete
+            dir($my_root + '/views/')->delete
+            dir($my_root)->delete
+            $_file_forceroot_ = void
+        }
+        it(`accepts a file object and throws an error if the file doesn't exist`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(f) = file(file_forceRoot(`/gone.lasso`))
+            expect->error(error_code_resNotFound, `File Not Found: ` + #f->path) => {
+                rope->include(#f)
+            }
+        }
+        it(`accepts a file path and throws an error if the file does not exist`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            expect->error(error_code_resNotFound, `File Not Found: ` + file_forceRoot('/../views//gone.lasso')) => {
+                rope->include(`/gone.lasso`)
+            }
+        }
+        it(`returns the value of processing the specified file`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(template) = file(file_forceRoot('/basic.lasso'))
+            handle => { #template->exists? #template->close&delete }
+            
+            #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Ho! ' * 3 ?>`)) }
+            
+            expect(`Ho! Ho! Ho! `, rope->include(#template))
+        }
+        it(`sets content_body to the value of processing the file at the specified path relative to webroot (../views/)`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(template) = file($my_root + '/views/basic2.lasso')
+            handle => { #template->exists? #template->close&delete }
+            #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= local(noun) = {return 'roads'}->detach;#noun()->asCopy->titlecase& + "? Where we're going we don't need " + #noun() + "."; ?>`)) }
+            
+            expect(`Roads? Where we're going we don't need roads.`, rope->include('/basic2.lasso'))
+        }
+        it(`accepts named parameters that are setup as locals for the file being included`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(template) = file($my_root + '/views/locals.lasso')
+            handle => { #template->exists? #template->close&delete }
+            #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
+            
+            expect(`Hello, World.`, rope->include('locals.lasso', -name='World', -time=date))
+        }
+    }
+    
+    
     describe(`-> render`) => {
         // Need to setup file_forceRoot so paths will be relative
         // However, can cause problems with lspec, especially when an expect fails
@@ -170,6 +234,20 @@ describe(::rope) => {
             
             rope->render('locals.lasso', -name='World', -time=date)
             expect(`Hello, World.`, content_body)
+        }
+    }
+    
+    
+    describe(`-> extension`) => {
+        it(`returns the extention at the end of the URL path when it exits`) => {
+            web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext.init')
+            
+            expect(`init`, rope->extension)
+        }
+        it(`returns html if there is no extention at the end of the path`) => {
+            web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext/init')
+            
+            expect(`html`, rope->extension)
         }
     }
 }

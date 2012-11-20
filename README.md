@@ -7,16 +7,11 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.1.2
+New in version 0.1.3
 
-- Hotfix to add missing comma
-
-
-New in version 0.1.1
-
-- New Method [rope->render] allows for easily rendering template files
-- When [rope->render] is passed a path it takes it as a relative path and finds the template in /path/to/webroot/../views/my\_template.lasso
-- Additionally, [rope->render] can also take named parameters to be passed in as local variables to the template
+- New [rope->include] methods for rendering views without setting them as content\_body
+- Updated [rope->extension] with tests
+- Updated [rope->extension] to return html if no extension present
 
 
 License
