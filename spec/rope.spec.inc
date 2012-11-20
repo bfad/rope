@@ -172,4 +172,18 @@ describe(::rope) => {
             expect(`Hello, World.`, content_body)
         }
     }
+    
+    
+    describe(`-> extension`) => {
+        it(`returns the extention at the end of the URL path when it exits`) => {
+            web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext.init')
+            
+            expect(`init`, rope->extension)
+        }
+        it(`returns html if there is no extention at the end of the path`) => {
+            web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext/init')
+            
+            expect(`html`, rope->extension)
+        }
+    }
 }

@@ -111,7 +111,7 @@ define rope_impl => type {
         local(ext) = web_request->requestUri->split('?')->get(1)->split('/')->last->split('.')
         #ext->size > 1
             ? return #ext->last
-        return null
+        return 'html'
     }
     
 
