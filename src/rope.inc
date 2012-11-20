@@ -102,7 +102,7 @@ define rope_impl => type {
     public path     => {
         local(path) = web_request->requestUri->split('?')->get(1)->split('/')
         #path->last->contains('.')
-            ? #path->last = #path->last->split('.')->remove&join('.')
+            ? #path->get(#path->size) = #path->last->split('.')->remove&join('.')
         
         #path->size > 2 and #path->last->isEmpty ? #path->remove
         return #path->join('/')

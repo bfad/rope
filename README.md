@@ -7,11 +7,9 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.1.3
+New in version 
 
-- New [rope->include] methods for rendering views without setting them as content\_body
-- Updated [rope->extension] with tests
-- Updated [rope->extension] to return html if no extension present
+- Bugfix [rope->path] had code trying to set the last element in an array like this [#path->last = ...]
 
 
 License
