@@ -7,6 +7,11 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
+New in version 0.1.2
+
+- Hotfix to add missing comma
+
+
 New in version 0.1.1
 
 - New Method [rope->render] allows for easily rendering template files
