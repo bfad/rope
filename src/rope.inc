@@ -81,7 +81,7 @@ define rope_impl => type {
                 | #found = #good
         }
         #found->size == 0
-            ? fail(error_code_invalidParameter, `No matching route found`)
+            ? fail(error_code_fileNotFound, `No matching route found`)
         #found->size > 1
             ? fail(`Multiple routes matched the given path`)
             

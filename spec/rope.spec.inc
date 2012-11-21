@@ -67,7 +67,7 @@ describe(::rope) => {
             rope->register('matchRoute') => {}
         }
         it(`throws an error if it can't find a matching route`) => {
-            expect->error(error_code_invalidParameter, `No matching route found`) => {
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
                 rope->matchRoute(`/this/path/no/exists`)
             }
         }
