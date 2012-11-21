@@ -7,8 +7,10 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 
+New in version 0.1.4
 
+- New [rope->renderJSON] method sets the HTTP response headers up correctly and will take serialized JSON string or a non-string object and serialize it and then set it to [content\_body]
+- Changed the error code for a missing route to 404 (error_code_fileNotFound)
 - Bugfix [rope->path] had code trying to set the last element in an array like this [#path->last = ...]
 
 
