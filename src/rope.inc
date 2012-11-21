@@ -21,17 +21,16 @@ define rope_impl => type {
     data public urlParams::array = array
     
     public invoke => {
-        local(route) = .matchRoute(.path)
+        local(path)  = .path->asCopy->remove(1,1)&split('/')
+        local(route) = .matchRoute(#path)
         
         //Setup URL parameters
-        local(elements) = .path->asCopy->remove(1,1)&split('/')
-        local(i) = #elements->size
+        local(i) = #path->size
         while(#i--) => {
-            local(part) = #route->first->get(loop_count)->asCopy
-            if(`:` == #part->get(1)) => {
-                #part->remove(1,1)
-                .'urlParams'->insert(#part=#elements->get(loop_count))
-            }
+            local(part) = #route->first->get(loop_count)
+            
+            `:` == #part->get(1)
+                ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
         }
         return .controller(#route->second)->invoke
     }
@@ -60,10 +59,10 @@ define rope_impl => type {
         }
     }
     
-    public matchRoute(path::string) => {
-        local(path_split) = #path->asCopy->remove(1,1)&split('/')
-        local(i)          = #path_split->size
-        local(found)      = rope_thread->findRoutesSized(#i)
+    public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
+    private matchRoute(path::array) => {
+        local(i)     = #path->size
+        local(found) = rope_thread->findRoutesSized(#i)
         local(good, better, ii)
         
         while(#i-- and #ii := #found->size) => {
@@ -72,7 +71,7 @@ define rope_impl => type {
             #better   = array
             
             while(#ii--) => {
-                #found->get(loop_count)->first->get(#pi) == #path_split->get(#pi)
+                #found->get(loop_count)->first->get(#pi) == #path->get(#pi)
                     ? #better->insert(#found->get(loop_count))
                 #found->get(loop_count)->first->get(#pi)->first == ':'
                     ? #good->insert(#found->get(loop_count))
@@ -82,7 +81,7 @@ define rope_impl => type {
                 | #found = #good
         }
         #found->size == 0
-            ? fail(error_code_invalidParameter, `No matching route found`)
+            ? fail(error_code_fileNotFound, `No matching route found`)
         #found->size > 1
             ? fail(`Multiple routes matched the given path`)
             
@@ -102,7 +101,7 @@ define rope_impl => type {
     public path     => {
         local(path) = web_request->requestUri->split('?')->get(1)->split('/')
         #path->last->contains('.')
-            ? #path->last = #path->last->split('.')->remove&join('.')
+            ? #path->get(#path->size) = #path->last->split('.')->remove&join('.')
         
         #path->size > 2 and #path->last->isEmpty ? #path->remove
         return #path->join('/')
@@ -144,11 +143,11 @@ define rope_impl => type {
     private viewForPath(path::string)::file => file(file_forceRoot('/../views/' + #path))
     
     public render(path::string, ...) => { content_body = .include(.viewForPath(#path), #rest) }
-    public render(view::file, ...)   => { content_body = .include(#view, #rest) }
+    public render(view::file  , ...) => { content_body = .include(#view, #rest) }
     
     public include(path::string, ...) => .include(.viewForPath(#path), #rest)
     public include(view::file, ...)   => .include(#view, #rest)
-    public include(view::file  , params::staticarray) => {
+    public include(view::file, params::staticarray) => {
         not #view->exists
             ? fail(error_code_resNotFound, `File Not Found: ` + #view->path)
         
@@ -169,6 +168,12 @@ define rope_impl => type {
         )
     }
     
-    public version => `0.1.3`
+    public renderJSON(content::string) => {
+        web_response->replaceHeader('Content-type'='application/json; charset=UTF-8')
+        content_body = #content
+    }
+    public renderJSON(item) => .renderJSON(json_serialize(#item))
+    
+    public version => `0.1.4`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
