@@ -20,6 +20,10 @@ describe(::rope) => {
                 rope->register('new', -routes=(:'/moose/hair', '/foo/bar')) => {}
                 expect(2 + #num_routes, rope->routesSized(2)->size)
             }
+            it(`registers the file path where the given block is registered`) => {
+                rope->register(`new`) => {}
+                expect(currentCapture->callsite_file, rope->controllerPath('new'))
+            }
         }
         context(`no givenBlock passed`) => {
             beforeAll => {
