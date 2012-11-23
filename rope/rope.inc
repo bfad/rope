@@ -9,6 +9,7 @@ define rope_thread => thread {
     public insertController(item::pair)  => .`controllers`->insert(#item)
     public controllerExist(key::string)  => .`controllers`->contains(#key)
     public removeController(key::string) => .`controllers`->remove(#key)
+    public removeAllControllers          => { .'controllers' = map }
     
     public insertRoute(item::pair) => {
         not .`routes`->contains(#item->first->size)
@@ -62,6 +63,7 @@ define rope_impl => type {
     public deregister(controller::string) => {
         rope_thread->removeController(#controller)
     }
+    public deregisterAll => rope_thread->removeAllControllers
     
     public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
     private matchRoute(path::array) => {

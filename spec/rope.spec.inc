@@ -71,6 +71,16 @@ describe(::rope) => {
             expect(not rope->controllerExist('deregister'))
         }
     }
+    describe(`-> deregisterAll`) => {
+        it(`removes all the registered controllers`) => {
+            local(num_ctrls) = rope_thread->controllers->size
+            rope->register('deregisterAll') => {}
+            expect(1 + #num_ctrls, rope_thread->controllers->size)
+            
+            rope->deregisterAll
+            expect(0, rope_thread->controllers->size)
+        }
+    }
     
     describe(`-> matchRoute`) => {
         beforeAll => {
