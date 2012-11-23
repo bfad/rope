@@ -62,6 +62,16 @@ describe(::rope) => {
         }
     }
     
+    describe(`-> deregister`) => {
+        it(`removes the specified controller from the system`) => {
+            rope->register('deregister') => {}
+            expect(rope->controllerExist('deregister'))
+            
+            rope->deregister(`deregister`)
+            expect(not rope->controllerExist('deregister'))
+        }
+    }
+    
     describe(`-> matchRoute`) => {
         beforeAll => {
             rope->register('matchRoute') => {}

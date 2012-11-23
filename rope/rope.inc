@@ -5,9 +5,10 @@ define rope_thread => thread {
     public controllers => .`controllers`
     public routes      => .`routes`
     
-    public controller(key::string)      => .`controllers`->get(#key)
-    public insertController(item::pair) => .`controllers`->insert(#item)
-    public controllerExist(key::string) => .`controllers`->contains(#key)
+    public controller(key::string)       => .`controllers`->get(#key)
+    public insertController(item::pair)  => .`controllers`->insert(#item)
+    public controllerExist(key::string)  => .`controllers`->contains(#key)
+    public removeController(key::string) => .`controllers`->remove(#key)
     
     public insertRoute(item::pair) => {
         not .`routes`->contains(#item->first->size)
@@ -57,6 +58,9 @@ define rope_impl => type {
             
             rope_thread->insertRoute(#path->split(`/`)=#controller)
         }
+    }
+    public deregister(controller::string) => {
+        rope_thread->removeController(#controller)
     }
     
     public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
