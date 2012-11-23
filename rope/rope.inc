@@ -64,6 +64,10 @@ define rope_impl => type {
             rope_thread->insertRoute(#path->split(`/`)=#controller)
         }
     }
+    public reload(controller::string) => {
+        local(path) = .controllerPath(#controller)
+        sourcefile(file(#path)->readString, #path, false, false)->invoke
+    }
     
     public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
     private matchRoute(path::array) => {

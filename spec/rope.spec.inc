@@ -24,6 +24,16 @@ describe(::rope) => {
                 rope->register(`new`) => {}
                 expect(currentCapture->callsite_file, rope->controllerPath('new'))
             }
+            it(`overwrites an existing controller with the same name`) => {
+                rope->register(`new-rewrite`) => { return 'first' }
+                local(first) = rope->controller(`new-rewrite`)->invoke
+                
+                rope->register(`new-rewrite`) => { return 'second' }
+                local(second) = rope->controller(`new-rewrite`)->invoke
+                
+                expect('first' , #first)
+                expect('second', #second)
+            }
         }
         context(`no givenBlock passed`) => {
             beforeAll => {
@@ -281,6 +291,25 @@ describe(::rope) => {
         it(`takes a map and sets the content_body to a serialize form of that map`) => {
             rope->renderJSON(map('moose'='hair'))
             expect('{"moose": "hair"}', content_body)
+        }
+    }
+    
+    
+    describe(`-> reload`) => {
+        it(`reprocesses the file where the specified controller was registered`) => {
+            local(f) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
+            handle => { #f->exists? #f->delete }
+            
+            #f->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload') => { return 'moose' }`)) }
+            import_file(#f)
+            local(first) = rope->controller('reload')->invoke
+            
+            #f->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload') => { return 'hair' }`)) }
+            rope->reload('reload')
+            local(second) = rope->controller('reload')->invoke
+            
+            expect('moose', #first)
+            expect('hair', #second)
         }
     }
 }
