@@ -75,6 +75,10 @@ describe(::rope) => {
             rope->register('matchRoute', -routes=(:'/fly/you/fools'))
             expect('matchRoute', rope->matchRoute('/fly/you/fools')->second)
         }
+        it(`can match the root route (/)`) => {
+            rope->register(`matchRoute`, -routes=(:`/`))
+            expect(`matchRoute`, rope->matchRoute('/')->second)
+        }
         it(`throws an error if it matches more than one route`) => {
             rope->register('matchRoute', -routes=(:'/duplicate/route', '/duplicate/route'))
             

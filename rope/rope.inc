@@ -52,7 +52,7 @@ define rope_impl => type {
             local(path) = #routes->get(loop_count)
             #path->get(1) == `/`
                 ? #path->remove(1,1)
-            #path->get(#path->size) == `/`
+            #path->last == `/`
                 ? #path->remove(#path->size, 1)
             
             rope_thread->insertRoute(#path->split(`/`)=#controller)
@@ -174,6 +174,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.1.4`
+    public version => `0.2`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
