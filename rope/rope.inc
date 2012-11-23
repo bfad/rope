@@ -5,6 +5,7 @@ define rope_thread => thread {
 
     public controllers => .`controllers`
     public routes      => .`routes`
+    public code_paths  => .'code_paths'
     
     public controller(key::string)      => .`controllers`->get(#key)
     public controllerExist(key::string) => .`controllers`->contains(#key)
@@ -12,8 +13,15 @@ define rope_thread => thread {
         .`controllers`->insert(#item)
         .`code_paths` ->insert(#item->first=#path)
     }
-    public removeController(key::string) => .`controllers`->remove(#key)
-    public removeAllControllers => { .'controllers' = map }
+    public removeController(key::string) => {
+        .`controllers`->remove(#key)
+        .`code_paths` ->remove(#key)
+    }
+    public removeAllControllers => {
+        .'controllers' = map
+        .`code_paths`  = map
+        .`routes`      = map
+    }
     
     public codePath(key::string) => .`code_paths`->get(#key)
     

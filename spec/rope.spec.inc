@@ -81,8 +81,12 @@ describe(::rope) => {
             rope->register('deregister') => {}
             expect(rope->controllerExist('deregister'))
             
-            rope->deregister(`deregister`)
+            rope->deregister(`deregister`, -routes=(:`/deregister`))
             expect(not rope->controllerExist('deregister'))
+            expect(void, rope_thread->code_paths->find('deregister'))
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
+                rope->matchRoute(`/deregister`)
+            }
         }
     }
     describe(`-> deregisterAll`) => {
@@ -93,6 +97,8 @@ describe(::rope) => {
             
             rope->deregisterAll
             expect(0, rope_thread->controllers->size)
+            expect(0, rope_thread->routes->size)
+            expect(0, rope_thread->code_paths->size)
         }
     }
     
