@@ -12,6 +12,8 @@ define rope_thread => thread {
         .`controllers`->insert(#item)
         .`code_paths` ->insert(#item->first=#path)
     }
+    public removeController(key::string) => .`controllers`->remove(#key)
+    public removeAllControllers => { .'controllers' = map }
     
     public codePath(key::string) => .`code_paths`->get(#key)
     
@@ -68,6 +70,11 @@ define rope_impl => type {
         local(path) = .controllerPath(#controller)
         sourcefile(file(#path)->readString, #path, false, false)->invoke
     }
+
+    public deregister(controller::string) => {
+        rope_thread->removeController(#controller)
+    }
+    public deregisterAll => rope_thread->removeAllControllers
     
     public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
     private matchRoute(path::array) => {
