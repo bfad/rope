@@ -1,15 +1,29 @@
 define rope_thread => thread {
     data private controllers::map = map,
-         private routes     ::map = map
+         private routes     ::map = map,
+         private code_paths ::map = map
 
     public controllers => .`controllers`
     public routes      => .`routes`
+    public code_paths  => .'code_paths'
     
-    public controller(key::string)       => .`controllers`->get(#key)
-    public insertController(item::pair)  => .`controllers`->insert(#item)
-    public controllerExist(key::string)  => .`controllers`->contains(#key)
-    public removeController(key::string) => .`controllers`->remove(#key)
-    public removeAllControllers          => { .'controllers' = map }
+    public controller(key::string)      => .`controllers`->get(#key)
+    public controllerExist(key::string) => .`controllers`->contains(#key)
+    public insertController(item::pair, path::string) => {
+        .`controllers`->insert(#item)
+        .`code_paths` ->insert(#item->first=#path)
+    }
+    public removeController(key::string) => {
+        .`controllers`->remove(#key)
+        .`code_paths` ->remove(#key)
+    }
+    public removeAllControllers => {
+        .'controllers' = map
+        .`code_paths`  = map
+        .`routes`      = map
+    }
+    
+    public codePath(key::string) => .`code_paths`->get(#key)
     
     public insertRoute(item::pair) => {
         not .`routes`->contains(#item->first->size)
@@ -38,7 +52,7 @@ define rope_impl => type {
     }
     
     public register(controller::string, -routes::staticarray=(:)) => {
-        givenBlock? rope_thread->insertController(#controller=givenBlock)
+        givenBlock? rope_thread->insertController(#controller=givenBlock, currentCapture->continuation->callsite_file)
         
         not givenBlock and #routes->size == 0
             ? fail(`This method requires you to either also pass routes or a givenBlock`)
@@ -60,6 +74,19 @@ define rope_impl => type {
             rope_thread->insertRoute(#path->split(`/`)=#controller)
         }
     }
+    public reload(controller::string) => {
+        local(path) = .controllerPath(#controller)
+        sourcefile(file(#path)->readString, #path, false, false)->invoke
+    }
+    public reload => {
+        local(paths)      = rope_thread->code_paths->values
+        local(paths_done) = set
+        with path in #paths where not #paths_done->contains(#path) do {
+            #paths_done->insert(#path)
+            sourcefile(file(#path)->readString, #path, false, false)->invoke
+        }
+    }
+
     public deregister(controller::string) => {
         rope_thread->removeController(#controller)
     }
@@ -97,6 +124,7 @@ define rope_impl => type {
     
     public controller     (key::string) => rope_thread->controller(#key)
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
+    public controllerPath (key::string) => rope_thread->codePath(#key)
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
     
