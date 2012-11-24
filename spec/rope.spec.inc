@@ -337,5 +337,34 @@ describe(::rope) => {
             expect('moose', #first)
             expect('hair', #second)
         }
+        it(`reloads all registered controllers`) => {
+            // First clear any controllers registered in here or we'll have an infinite loop!
+            rope->deregisterAll
+            
+            local(f1) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
+            local(f2) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
+            handle => {
+                #f1->exists? #f1->delete
+                #f2->exists? #f2->delete
+            }
+            
+            #f1->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload1') => { return 'moose' }`)) }
+            #f2->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload2') => { return 'duck' }`)) }
+            import_file(#f1)
+            import_file(#f2)
+            local(first1) = rope->controller('reload1')->invoke
+            local(first2) = rope->controller('reload2')->invoke
+            
+            #f1->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload1') => { return 'hair' }`)) }
+            #f2->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload2') => { return 'goose' }`)) }
+            rope->reload
+            local(second1) = rope->controller('reload1')->invoke
+            local(second2) = rope->controller('reload2')->invoke
+            
+            expect('moose', #first1)
+            expect('duck' , #first2)
+            expect('hair' , #second1)
+            expect('goose', #second2)
+        }
     }
 }

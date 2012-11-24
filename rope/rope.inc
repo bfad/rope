@@ -78,6 +78,14 @@ define rope_impl => type {
         local(path) = .controllerPath(#controller)
         sourcefile(file(#path)->readString, #path, false, false)->invoke
     }
+    public reload => {
+        local(paths)      = rope_thread->code_paths->values
+        local(paths_done) = set
+        with path in #paths where not #paths_done->contains(#path) do {
+            #paths_done->insert(#path)
+            sourcefile(file(#path)->readString, #path, false, false)->invoke
+        }
+    }
 
     public deregister(controller::string) => {
         rope_thread->removeController(#controller)
