@@ -7,11 +7,10 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.2
+New in version 0.3
 
-- Rope is now being developed as a LassoApp instead of a library
-- Added a landing page and redirect the root route to the landing page
-- Bugfix [rope->register] now properly registers the root path (/)
+- Can now deregister a specified controller
+- Can now deregister all controllers
 
 
 License

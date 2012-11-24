@@ -5,9 +5,11 @@ define rope_thread => thread {
     public controllers => .`controllers`
     public routes      => .`routes`
     
-    public controller(key::string)      => .`controllers`->get(#key)
-    public insertController(item::pair) => .`controllers`->insert(#item)
-    public controllerExist(key::string) => .`controllers`->contains(#key)
+    public controller(key::string)       => .`controllers`->get(#key)
+    public insertController(item::pair)  => .`controllers`->insert(#item)
+    public controllerExist(key::string)  => .`controllers`->contains(#key)
+    public removeController(key::string) => .`controllers`->remove(#key)
+    public removeAllControllers          => { .'controllers' = map }
     
     public insertRoute(item::pair) => {
         not .`routes`->contains(#item->first->size)
@@ -58,6 +60,10 @@ define rope_impl => type {
             rope_thread->insertRoute(#path->split(`/`)=#controller)
         }
     }
+    public deregister(controller::string) => {
+        rope_thread->removeController(#controller)
+    }
+    public deregisterAll => rope_thread->removeAllControllers
     
     public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
     private matchRoute(path::array) => {
@@ -174,6 +180,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.2`
+    public version => `0.3`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
