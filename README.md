@@ -7,10 +7,12 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.3
+New in version 0.4
 
-- Can now deregister a specified controller
-- Can now deregister all controllers
+- Now store and retrieve file path where the controller is registered
+- Can now reload a controller by reprocessing the file it is registered in
+- Can now reload all controllers by reprocessing the files they are registered in
+- Update the de-registration process to include routes and new file code paths
 
 
 License

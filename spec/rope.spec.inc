@@ -20,6 +20,20 @@ describe(::rope) => {
                 rope->register('new', -routes=(:'/moose/hair', '/foo/bar')) => {}
                 expect(2 + #num_routes, rope->routesSized(2)->size)
             }
+            it(`registers the file path where the given block is registered`) => {
+                rope->register(`new`) => {}
+                expect(currentCapture->callsite_file, rope->controllerPath('new'))
+            }
+            it(`overwrites an existing controller with the same name`) => {
+                rope->register(`new-rewrite`) => { return 'first' }
+                local(first) = rope->controller(`new-rewrite`)->invoke
+                
+                rope->register(`new-rewrite`) => { return 'second' }
+                local(second) = rope->controller(`new-rewrite`)->invoke
+                
+                expect('first' , #first)
+                expect('second', #second)
+            }
         }
         context(`no givenBlock passed`) => {
             beforeAll => {
@@ -67,8 +81,12 @@ describe(::rope) => {
             rope->register('deregister') => {}
             expect(rope->controllerExist('deregister'))
             
-            rope->deregister(`deregister`)
+            rope->deregister(`deregister`, -routes=(:`/deregister`))
             expect(not rope->controllerExist('deregister'))
+            expect(void, rope_thread->code_paths->find('deregister'))
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
+                rope->matchRoute(`/deregister`)
+            }
         }
     }
     describe(`-> deregisterAll`) => {
@@ -79,6 +97,8 @@ describe(::rope) => {
             
             rope->deregisterAll
             expect(0, rope_thread->controllers->size)
+            expect(0, rope_thread->routes->size)
+            expect(0, rope_thread->code_paths->size)
         }
     }
     
@@ -297,6 +317,54 @@ describe(::rope) => {
         it(`takes a map and sets the content_body to a serialize form of that map`) => {
             rope->renderJSON(map('moose'='hair'))
             expect('{"moose": "hair"}', content_body)
+        }
+    }
+    
+    
+    describe(`-> reload`) => {
+        it(`reprocesses the file where the specified controller was registered`) => {
+            local(f) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
+            handle => { #f->exists? #f->delete }
+            
+            #f->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload') => { return 'moose' }`)) }
+            import_file(#f)
+            local(first) = rope->controller('reload')->invoke
+            
+            #f->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload') => { return 'hair' }`)) }
+            rope->reload('reload')
+            local(second) = rope->controller('reload')->invoke
+            
+            expect('moose', #first)
+            expect('hair', #second)
+        }
+        it(`reloads all registered controllers`) => {
+            // First clear any controllers registered in here or we'll have an infinite loop!
+            rope->deregisterAll
+            
+            local(f1) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
+            local(f2) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
+            handle => {
+                #f1->exists? #f1->delete
+                #f2->exists? #f2->delete
+            }
+            
+            #f1->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload1') => { return 'moose' }`)) }
+            #f2->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload2') => { return 'duck' }`)) }
+            import_file(#f1)
+            import_file(#f2)
+            local(first1) = rope->controller('reload1')->invoke
+            local(first2) = rope->controller('reload2')->invoke
+            
+            #f1->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload1') => { return 'hair' }`)) }
+            #f2->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload2') => { return 'goose' }`)) }
+            rope->reload
+            local(second1) = rope->controller('reload1')->invoke
+            local(second2) = rope->controller('reload2')->invoke
+            
+            expect('moose', #first1)
+            expect('duck' , #first2)
+            expect('hair' , #second1)
+            expect('goose', #second2)
         }
     }
 }
