@@ -174,6 +174,17 @@ define rope_impl => type {
     }
     
     
+    public continueSession => {
+        session_start(`RopeSession`)
+        if(session_result != "load") => {
+            session_addVar(-name='ANDISessionID', '_sess_rope')
+            var(_sess_rope) = map
+        }
+    }
+    public sess=(rhs::trait_serializable, key::string) => $_sess_rope->insert(#key=#rhs)
+    public sess(key::string) => $_sess_rope->find(#key)
+    
+    
     private viewForPath(path::string)::file => file(file_forceRoot('/../views/' + #path))
     
     public render(path::string, ...) => { content_body = .include(.viewForPath(#path), #rest) }

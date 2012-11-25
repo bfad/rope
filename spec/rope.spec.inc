@@ -367,4 +367,37 @@ describe(::rope) => {
             expect('goose', #second2)
         }
     }
+    
+    
+    /*describe(`-> continueSession`) => {
+        beforeAll => {
+            // Completely clear out any session named RopeSession
+            protect => { session_end(`RopeSession`) }
+        }
+        it(`starts a session named RopeSession if it doesn't exist`) => {
+            expect->error(error_code_invalidParameter, `The key was not found`) => {
+                session_id(`RopeSession`)
+            }
+            rope->continueSession
+            expect(session_id(`RopeSession`))
+        }
+    }
+    describe(`-> sess`) => {
+        it(`allows you to store data in a session`) => {
+            rope->sess('first') = 'class'
+            
+            expect('class', $_sess_rope->find('first'))
+        }
+        it(`throws an error when the value on the rhs is not serializeable`) => {
+            define notSerializable => type {}
+            expect->error => {
+                rope->sess('error') = notSerializable
+            }
+        }
+        it(`allows you to retrieve previously stored session data`) => {
+            rope->sess(`snake`) = `anaconda`
+            
+            expect(`anaconda`, rope->snake(`snake`))
+        }
+    }*/
 }
