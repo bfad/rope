@@ -48,6 +48,7 @@ define rope_impl => type {
             `:` == #part->get(1)
                 ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
         }
+        .continueSession
         return .controller(#route->second)->invoke
     }
     

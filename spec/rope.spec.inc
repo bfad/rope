@@ -142,7 +142,8 @@ describe(::rope) => {
     describe(`-> invoke`) => {
         beforeAll => {
             rope->register(`invoke`, -routes=(:'/person/:id')) => { return 'sunshine' }
-            web_request = mock('requestUri' = '/person/robinmckinley')
+            new_fake_conn
+            var(_req_params) = map(::REQUEST_URI='/person/robinmckinley')
         }
         it(`matches the URL to a route and invokes the route's controller`) => {
             expect(`sunshine`, rope->invoke)
@@ -150,6 +151,13 @@ describe(::rope) => {
         
         it(`sets up the URL parameters`) => {
             expect(`robinmckinley`, rope->urlParam(`id`))
+        }
+        
+        it(`loads the RopeSession`) => {
+            protect => { session_end(`RopeSession`) }
+            
+            rope->invoke
+            expect(session_id(`RopeSession`)->size > 0)
         }
     }
     
