@@ -1,11 +1,14 @@
 define rope_thread => thread {
-    data private controllers::map = map,
-         private routes     ::map = map,
-         private code_paths ::map = map
+    data private controllers ::map = map,
+         private routes      ::map = map,
+         private code_paths  ::map = map,
+         private configLoaded::boolean = false,
+         private config      ::map = map(`app-name`=pair(`UnNamed`,::string))
 
-    public controllers => .`controllers`
-    public routes      => .`routes`
-    public code_paths  => .'code_paths'
+    public controllers  => .`controllers`
+    public routes       => .`routes`
+    public code_paths   => .'code_paths'
+    public configLoaded => .`configLoaded`
     
     public controller(key::string)      => .`controllers`->get(#key)
     public controllerExist(key::string) => .`controllers`->contains(#key)
@@ -32,6 +35,21 @@ define rope_thread => thread {
         .`routes`->get(#item->first->size)->insert(#item)
     }
     public findRoutesSized(key::integer) => .`routes`->find(#key)
+    
+    public config(key::string) => .`config`->find(#key)->first
+    public config(...) => {
+        .configLoaded? fail(`Configuration already loaded`)
+        
+        with el in #rest
+        where #el->isA(::pair)
+        do {
+            not #el->second->isA(.`config`->get(#el->first)->second)
+                ? fail(error_code_invalidParameter, `The "` + #el->first + `" config option requires a ` + string(.`config`->get(#el->first)->second))
+            .`config`->get(#el->first)->first = #el->second
+        }
+        
+        .`configLoaded` = true
+    }
 }
 define rope_impl => type {
     data public urlParams::array = array
@@ -51,6 +69,8 @@ define rope_impl => type {
         .continueSession
         return .controller(#route->second)->invoke
     }
+    
+    public config(...) => rope_thread->config(:#rest)
     
     public register(controller::string, -routes::staticarray=(:)) => {
         givenBlock? rope_thread->insertController(#controller=givenBlock, currentCapture->continuation->callsite_file)

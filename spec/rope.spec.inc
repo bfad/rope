@@ -425,4 +425,32 @@ describe(::rope) => {
             expect(`anaconda`, rope->sess(`snake`))
         }
     }
+    
+    
+    describe(`-> config`) => {
+        beforeEach => {
+            rope_thread->configLoadedFalse
+        }
+        it(`takes a string as a key to lookup a preference`) => {
+            expect(`UnNamed`, rope->config(`app-name`))
+        }
+        it(`allows configuration setup once by taking in pairs - second time fails`) => {
+            rope->config(`app-name`=`MooseHair`)
+            
+            expect(`MooseHair`, rope->config(`app-name`))
+            expect->error => {
+                rope->config(`app-name`=`TEST`)
+            }
+        }
+        it(`throws an error if the key to one of the configuration items does not exist`) => {
+            expect->error => {
+                rope->config(`NO EXIST AT ALL`=`TEST`)
+            }
+        }
+        it(`throws an error if you try and register a value of an improper type to a config option`) => {
+            expect->error(error_code_invalidParameter, `The "app-name" config option requires a string`) => {
+                rope->config(`app-name`=1)
+            }
+        }
+    }
 }

@@ -59,3 +59,6 @@ protect => {\http_server_web_connection}
 define http_server_web_connection->requestParams => var(_req_params) || $_req_params := map
 session_initialize
 new_fake_conn
+
+// rope_thread stuff
+define rope_thread->configLoadedFalse => {.`configLoaded` = false}
