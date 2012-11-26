@@ -142,7 +142,8 @@ describe(::rope) => {
     describe(`-> invoke`) => {
         beforeAll => {
             rope->register(`invoke`, -routes=(:'/person/:id')) => { return 'sunshine' }
-            web_request = mock('requestUri' = '/person/robinmckinley')
+            new_fake_conn
+            var(_req_params) = map(::REQUEST_URI='/person/robinmckinley')
         }
         it(`matches the URL to a route and invokes the route's controller`) => {
             expect(`sunshine`, rope->invoke)
@@ -150,6 +151,13 @@ describe(::rope) => {
         
         it(`sets up the URL parameters`) => {
             expect(`robinmckinley`, rope->urlParam(`id`))
+        }
+        
+        it(`loads the RopeSession`) => {
+            protect => { session_end(`RopeSession`) }
+            
+            rope->invoke
+            expect(session_id(`RopeSession`)->size > 0)
         }
     }
     
@@ -365,6 +373,56 @@ describe(::rope) => {
             expect('duck' , #first2)
             expect('hair' , #second1)
             expect('goose', #second2)
+        }
+    }
+    
+    
+    describe(`-> continueSession`) => {
+        beforeEach => {
+            // Completely clear out any session named RopeSession
+            protect => { session_end(`RopeSession`) }
+            new_fake_conn
+        }
+        it(`starts a session named RopeSession if it doesn't exist`) => {
+            expect(void, session_id(`RopeSession`))
+            rope->continueSession
+            expect(session_id(`RopeSession`)->size > 0)
+        }
+        it(`loads an already existing session on a new connection when passed the right credentials`) => {
+            expect(void, session_id(`RopeSession`))
+            rope->continueSession
+            
+            local(sess_id) = session_id(`RopeSession`)
+            new_fake_conn
+            $_req_params->insert(::HTTP_COOKIE="_LassoSessionTracker_RopeSession=" + #sess_id)
+            rope->continueSession
+
+            expect(#sess_id, session_id(`RopeSession`))
+        }
+    }
+    describe(`-> sess`) => {
+        beforeAll => {
+            // Completely clear out any session named RopeSession
+            protect => { session_end(`RopeSession`) }
+            new_fake_conn
+            rope->continueSession
+            $_req_params->insert(::HTTP_COOKIE="_LassoSessionTracker_RopeSession=" + session_id(`RopeSession`))
+        }
+        it(`allows you to store data in a session`) => {
+            expect(void, $_sess_rope->find('first'))
+            rope->sess('first') = 'class'
+            expect('class', $_sess_rope->find('first'))
+        }
+        it(`throws an error when the value on the rhs is not serializeable`) => {
+            define notSerializable => type {}
+            expect->error => {
+                rope->sess('error') = notSerializable
+            }
+        }
+        it(`allows you to retrieve previously stored session data`) => {
+            rope->sess(`snake`) = `anaconda`
+            
+            expect(`anaconda`, rope->sess(`snake`))
         }
     }
 }
