@@ -48,6 +48,7 @@ define rope_impl => type {
             `:` == #part->get(1)
                 ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
         }
+        .continueSession
         return .controller(#route->second)->invoke
     }
     
@@ -174,6 +175,17 @@ define rope_impl => type {
     }
     
     
+    public continueSession => {
+        session_start(`RopeSession`)
+        if(session_result != "load") => {
+            session_addVar(-name='ANDISessionID', '_sess_rope')
+            var(_sess_rope) = map
+        }
+    }
+    public sess=(rhs::trait_serializable, key::string) => $_sess_rope->insert(#key=#rhs)
+    public sess(key::string) => $_sess_rope->find(#key)
+    
+    
     private viewForPath(path::string)::file => file(file_forceRoot('/../views/' + #path))
     
     public render(path::string, ...) => { content_body = .include(.viewForPath(#path), #rest) }
@@ -208,6 +220,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.4`
+    public version => `0.5`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl

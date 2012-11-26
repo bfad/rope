@@ -48,3 +48,14 @@ define web_response_mock => type {parent mock
     public header(key::string) => .'headers'->find(#key)
     public replaceHeader(elm::pair) => .'headers'->insert(#elm)
 }
+
+define new_fake_conn => {
+    local(con)   = http_server_web_connection(net_tcp)
+    web_request  = web_request_impl(#con)
+    web_response = web_response_impl(#con)
+}
+// For sessions
+protect => {\http_server_web_connection}
+define http_server_web_connection->requestParams => var(_req_params) || $_req_params := map
+session_initialize
+new_fake_conn
