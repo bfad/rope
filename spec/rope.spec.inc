@@ -399,9 +399,34 @@ describe(::rope) => {
 
             expect(#sess_id, session_id(`RopeSession`))
         }
+        it(`doesn't start a session if sessions are turned off`) => {
+            rope_thread->configLoadedFalse
+            rope->config(`sessions-enabled` = false)
+            
+            expect(void, session_id(`RopeSession`))
+            rope->continueSession
+            expect(void, session_id(`RopeSession`))
+        }
+        it(`sets the expired time based on configuration option`) => {
+            session_setDefaultDriver('memory')
+            rope_thread->configLoadedFalse
+            rope->config(`sessions-enabled` = true, 'sessions-expires' = 60)
+            
+            expect(void, session_id(`RopeSession`))
+            rope->continueSession
+            expect(session_id(`RopeSession`)->size > 0)
+            
+            expect(60, 
+                with row in memory_session_driver->sessionsDump 
+                where #row->first == session_id('RopeSession') + '_RopeSession'
+                sum #row->second->expireMinutes
+            )
+        }
     }
     describe(`-> sess`) => {
         beforeAll => {
+            rope_thread->configLoadedFalse
+            rope->config(`sessions-enabled` = true)
             // Completely clear out any session named RopeSession
             protect => { session_end(`RopeSession`) }
             new_fake_conn
@@ -423,6 +448,50 @@ describe(::rope) => {
             rope->sess(`snake`) = `anaconda`
             
             expect(`anaconda`, rope->sess(`snake`))
+        }
+        context(`sessions disabled`) => {
+            beforeAll => {
+                rope_thread->configLoadedFalse
+                rope->config(`sessions-enabled` = false)
+            }
+            it(`throws an error when trying to set a session value`) => {
+                expect->error(error_code_runtimeAssertion, `Sessions are disabled`) => {
+                    rope->sess('not') = 'possible'
+                }
+            }
+            it(`throws an error when trying to get a session value`) => {
+                expect->error(error_code_runtimeAssertion, `Sessions are disabled`) => {
+                    rope->sess('error')
+                }
+            }
+        }
+    }
+    
+    
+    describe(`-> config`) => {
+        beforeEach => {
+            rope_thread->configLoadedFalse
+        }
+        it(`takes a string as a key to lookup a preference`) => {
+            expect(`UnNamed`, rope->config(`app-name`))
+        }
+        it(`allows configuration setup once by taking in pairs - second time fails`) => {
+            rope->config(`app-name`=`MooseHair`)
+            
+            expect(`MooseHair`, rope->config(`app-name`))
+            expect->error => {
+                rope->config(`app-name`=`TEST`)
+            }
+        }
+        it(`throws an error if the key to one of the configuration items does not exist`) => {
+            expect->error => {
+                rope->config(`NO EXIST AT ALL`=`TEST`)
+            }
+        }
+        it(`throws an error if you try and register a value of an improper type to a config option`) => {
+            expect->error(error_code_invalidParameter, `The "app-name" config option requires a string`) => {
+                rope->config(`app-name`=1)
+            }
         }
     }
 }
