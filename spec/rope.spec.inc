@@ -22,7 +22,7 @@ describe(::rope) => {
             }
             it(`registers the file path where the given block is registered`) => {
                 rope->register(`new`) => {}
-                expect(currentCapture->callsite_file, rope->controllerPath('new'))
+                expect(rope->absPath(currentCapture->callsite_file), rope->controllerPath('new'))
             }
             it(`overwrites an existing controller with the same name`) => {
                 rope->register(`new-rewrite`) => { return 'first' }

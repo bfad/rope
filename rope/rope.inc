@@ -77,7 +77,7 @@ define rope_impl => type {
     public config(...) => rope_thread->config(:#rest)
     
     public register(controller::string, -routes::staticarray=(:)) => {
-        givenBlock? rope_thread->insertController(#controller=givenBlock, currentCapture->continuation->callsite_file)
+        givenBlock? rope_thread->insertController(#controller=givenBlock, .absolutePath(currentCapture->continuation->callsite_file))
         
         not givenBlock and #routes->size == 0
             ? fail(`This method requires you to either also pass routes or a givenBlock`)
@@ -98,6 +98,15 @@ define rope_impl => type {
             
             rope_thread->insertRoute(#path->split(`/`)=#controller)
         }
+    }
+    private absolutePath(path::string) => {
+        #path->sub(1,2) == '//'
+            ? return #path
+
+        #path->get(1) != '/'
+            ? #path = io_file_getcwd + '/' + #path
+        
+        return '/' + #path
     }
     public reload(controller::string) => {
         local(path) = .controllerPath(#controller)
