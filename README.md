@@ -7,10 +7,10 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.5
+New in version 0.6
 
-- Added ability to store and retrieve session data
-- Added ability to compile rope.lassoapp
+- New configuration storage that's loaded once
+- Added configuration options for sessions and an application name
 
 
 License
