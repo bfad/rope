@@ -3,7 +3,11 @@ define rope_thread => thread {
          private routes      ::map = map,
          private code_paths  ::map = map,
          private configLoaded::boolean = false,
-         private config      ::map = map(`app-name`=pair(`UnNamed`,::string))
+         private config      ::map = map(
+                `app-name`         = pair(`UnNamed`,::string),
+                `sessions-enabled` = pair(true, ::boolean),
+                `sessions-expires` = pair(1440, ::integer)
+            )
 
     public controllers  => .`controllers`
     public routes       => .`routes`
@@ -196,14 +200,26 @@ define rope_impl => type {
     
     
     public continueSession => {
-        session_start(`RopeSession`)
+        not .config(`sessions-enabled`)? return
+        
+        session_start(`RopeSession`, -expires=.config(`sessions-expires`), -useCookie)
         if(session_result != "load") => {
             session_addVar(-name='ANDISessionID', '_sess_rope')
             var(_sess_rope) = map
         }
     }
-    public sess=(rhs::trait_serializable, key::string) => $_sess_rope->insert(#key=#rhs)
-    public sess(key::string) => $_sess_rope->find(#key)
+    public sess=(rhs::trait_serializable, key::string) => {
+        not .config(`sessions-enabled`)
+            ? fail(`Sessions are disabled`)
+            
+        $_sess_rope->insert(#key=#rhs)
+    }
+    public sess(key::string) => {
+        not .config(`sessions-enabled`)
+            ? fail(`Sessions are disabled`)
+        
+        return $_sess_rope->find(#key)
+    }
     
     
     private viewForPath(path::string)::file => file(file_forceRoot('/../views/' + #path))
