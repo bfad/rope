@@ -7,11 +7,14 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.7
+New in version 0.8
 
-- Ability to reload controllers through the rope LassoApp
-- Changed the stored path for controllers to always be a Lasso absolute path: start with double slash (//)
-- Bugfix: Registering the same route to the same controller no longer registers that route twice
+- New [rope->user] methods for using the rope session to store a user object
+- New [trait\_rope\_user] that user objects stored in [rope->user] need to implement
+- New type [trait\_user] that implements [trait\_rope\_user]
+- New utility method [rope\_cycle] for rotating between a list of items
+- New utility method [rope\_hash] for generating hex encoded hashes
+- New utility method [rope\_randomASCII] that generates a random string of visible ASCII characters
 
 
 License
