@@ -17,7 +17,7 @@
      order by #row->first 
      do {^
     ]
-        <tr class="alt_color[#alt_color]">
+        <tr class="alt_color[#alt_color]" onclick="window.location = '[lassoapp_link('/reload-controller')]?c=[#row->first->encodeUrl]'">
             <td>[#row->first]</td>
             <td>[#row->second]</td>
         </tr>[#alt_color = 1 - #alt_color]
