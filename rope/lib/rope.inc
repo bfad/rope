@@ -215,8 +215,8 @@ define rope_impl => type {
         
         session_start(`RopeSession`, -expires=.config(`sessions-expires`), -useCookie)
         if(session_result != "load") => {
-            session_addVar(-name='ANDISessionID', '_sess_rope')
-            session_addVar(-name='ANDISessionID', '_sess_user')
+            session_addVar(-name='RopeSession', '_sess_rope')
+            session_addVar(-name='RopeSession', '_sess_user')
             var(_sess_rope) = map
             var(_sess_user)
         }
@@ -279,6 +279,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.8`
+    public version => `0.8.1`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
