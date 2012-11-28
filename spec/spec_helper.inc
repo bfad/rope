@@ -62,3 +62,5 @@ new_fake_conn
 
 // rope_thread stuff
 define rope_thread->configLoadedFalse => {.`configLoaded` = false}
+
+define rope_impl->absPath(path::string) => .absolutePath(#path)
