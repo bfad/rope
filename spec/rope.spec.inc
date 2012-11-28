@@ -34,6 +34,12 @@ describe(::rope) => {
                 expect('first' , #first)
                 expect('second', #second)
             }
+            it(`ignores registering the same route to the same controller`) => {
+                local(num_routes) = rope->routesSized(2)->size
+                rope->register('new', -routes=(:'/dupe/route', '/dupe/route')) => {}
+                
+                expect(1 + #num_routes, rope->routesSized(2)->size)
+            }
         }
         context(`no givenBlock passed`) => {
             beforeAll => {
@@ -120,7 +126,8 @@ describe(::rope) => {
             expect(`matchRoute`, rope->matchRoute('/')->second)
         }
         it(`throws an error if it matches more than one route`) => {
-            rope->register('matchRoute', -routes=(:'/duplicate/route', '/duplicate/route'))
+            rope->register('matchRoute', -routes=(:'/duplicate/route'))
+            rope->register('matchRote' , -routes=(:'/duplicate/route')) => {}
             
             expect->error(error_code_runtimeAssertion, `Multiple routes matched the given path`) => {
                 rope->matchRoute('/duplicate/route')

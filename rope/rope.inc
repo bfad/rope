@@ -33,10 +33,12 @@ define rope_thread => thread {
     public codePath(key::string) => .`code_paths`->get(#key)
     
     public insertRoute(item::pair) => {
-        not .`routes`->contains(#item->first->size)
-            ? .`routes`->insert(#item->first->size=array)
+        local(path_size) = #item->first->size
+        not .`routes`->contains(#path_size)
+            ? .`routes`->insert(#path_size=array)
 
-        .`routes`->get(#item->first->size)->insert(#item)
+        not .`routes`->get(#path_size)->contains(#item)
+            ? .`routes`->get(#path_size)->insert(#item)
     }
     public findRoutesSized(key::integer) => .`routes`->find(#key)
     
