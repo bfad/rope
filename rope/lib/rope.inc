@@ -216,7 +216,9 @@ define rope_impl => type {
         session_start(`RopeSession`, -expires=.config(`sessions-expires`), -useCookie)
         if(session_result != "load") => {
             session_addVar(-name='ANDISessionID', '_sess_rope')
+            session_addVar(-name='ANDISessionID', '_sess_user')
             var(_sess_rope) = map
+            var(_sess_user)
         }
     }
     public sess=(rhs::trait_serializable, key::string) => {
@@ -230,6 +232,16 @@ define rope_impl => type {
             ? fail(`Sessions are disabled`)
         
         return $_sess_rope->find(#key)
+    }
+    public user => {
+        not .config(`sessions-enabled`)
+            ? fail(`Sessions are disabled`)
+        return $_sess_user
+    }
+    public user=(rhs::trait_rope_user) => {
+        not .config(`sessions-enabled`)
+            ? fail(`Sessions are disabled`)
+        $_sess_user = #rhs
     }
     
     
@@ -267,6 +279,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.7`
+    public version => `0.8`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl

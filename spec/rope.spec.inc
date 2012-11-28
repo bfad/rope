@@ -501,4 +501,48 @@ describe(::rope) => {
             }
         }
     }
+    
+    
+    describe(`-> user`) => {
+        beforeAll => {
+            rope_thread->configLoadedFalse
+            rope->config(`sessions-enabled` = true)
+            // Completely clear out any session named RopeSession
+            protect => { session_end(`RopeSession`) }
+            new_fake_conn
+            rope->continueSession
+            $_req_params->insert(::HTTP_COOKIE="_LassoSessionTracker_RopeSession=" + session_id(`RopeSession`))
+        }
+        it(`allows for storing a user object in a session`) => {
+            expect(null, $_sess_user)
+            rope->user = rope_user(1, 'Ditka')
+            expect('Ditka', $_sess_user->username)
+        }
+        it(`throws an error if not passed a serializeable object`) => {
+            define notSerializable => type {}
+            expect->error => {
+                rope->user = notSerializable
+            }
+        }
+        it(`allows a stored user object to be retrieved`) => {
+            rope->user = rope_user(1, 'this is heavy')
+            expect('this is heavy', rope->user->username)
+        }
+        context(`sessions disabled`) => {
+            beforeAll => {
+                rope_thread->configLoadedFalse
+                rope->config(`sessions-enabled` = false)
+            }
+            it(`throw an error when setting the user if sessions are turned off`) => {
+                expect->error(error_code_runtimeAssertion, `Sessions are disabled`) => {
+                    rope->user = rope_user(1, 'foo')
+                }
+            }
+            it(`throw an error when getting the user if sessions are turned off`) => {
+                expect->error(error_code_runtimeAssertion, `Sessions are disabled`) => {
+                    rope->user
+                }
+            }
+        }
+    }
 }
