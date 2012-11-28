@@ -7,10 +7,11 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.6
+New in version 0.7
 
-- New configuration storage that's loaded once
-- Added configuration options for sessions and an application name
+- Ability to reload controllers through the rope LassoApp
+- Changed the stored path for controllers to always be a Lasso absolute path: start with double slash (//)
+- Bugfix: Registering the same route to the same controller no longer registers that route twice
 
 
 License
