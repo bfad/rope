@@ -33,10 +33,12 @@ define rope_thread => thread {
     public codePath(key::string) => .`code_paths`->get(#key)
     
     public insertRoute(item::pair) => {
-        not .`routes`->contains(#item->first->size)
-            ? .`routes`->insert(#item->first->size=array)
+        local(path_size) = #item->first->size
+        not .`routes`->contains(#path_size)
+            ? .`routes`->insert(#path_size=array)
 
-        .`routes`->get(#item->first->size)->insert(#item)
+        not .`routes`->get(#path_size)->contains(#item)
+            ? .`routes`->get(#path_size)->insert(#item)
     }
     public findRoutesSized(key::integer) => .`routes`->find(#key)
     
@@ -77,7 +79,7 @@ define rope_impl => type {
     public config(...) => rope_thread->config(:#rest)
     
     public register(controller::string, -routes::staticarray=(:)) => {
-        givenBlock? rope_thread->insertController(#controller=givenBlock, currentCapture->continuation->callsite_file)
+        givenBlock? rope_thread->insertController(#controller=givenBlock, .absolutePath(currentCapture->continuation->callsite_file))
         
         not givenBlock and #routes->size == 0
             ? fail(`This method requires you to either also pass routes or a givenBlock`)
@@ -98,6 +100,15 @@ define rope_impl => type {
             
             rope_thread->insertRoute(#path->split(`/`)=#controller)
         }
+    }
+    private absolutePath(path::string) => {
+        #path->sub(1,2) == '//'
+            ? return #path
+
+        #path->get(1) != '/'
+            ? #path = io_file_getcwd + '/' + #path
+        
+        return '/' + #path
     }
     public reload(controller::string) => {
         local(path) = .controllerPath(#controller)
@@ -256,6 +267,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.6`
+    public version => `0.7`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
