@@ -18,6 +18,7 @@ if(not var_defined(`_rope_loaded`)) => {
     not #path_here->endsWith('/') ? #path_here += '/'
 
     import_file(file(#path_here + '../rope/rope.inc'))
+    import_file(file(#path_here + '../rope/rope_user.inc'))
     
     var(_rope_loaded) = true
 }
