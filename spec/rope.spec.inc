@@ -515,8 +515,8 @@ describe(::rope) => {
         }
         it(`allows for storing a user object in a session`) => {
             expect(null, $_sess_user)
-            rope->user = 'Ditka'
-            expect('Ditka', $_sess_user)
+            rope->user = rope_user(1, 'Ditka')
+            expect('Ditka', $_sess_user->username)
         }
         it(`throws an error if not passed a serializeable object`) => {
             define notSerializable => type {}
@@ -525,8 +525,8 @@ describe(::rope) => {
             }
         }
         it(`allows a stored user object to be retrieved`) => {
-            rope->user = 'this is heavy'
-            expect('this is heavy', rope->user)
+            rope->user = rope_user(1, 'this is heavy')
+            expect('this is heavy', rope->user->username)
         }
         context(`sessions disabled`) => {
             beforeAll => {
@@ -535,7 +535,7 @@ describe(::rope) => {
             }
             it(`throw an error when setting the user if sessions are turned off`) => {
                 expect->error(error_code_runtimeAssertion, `Sessions are disabled`) => {
-                    rope->user = 'foo'
+                    rope->user = rope_user(1, 'foo')
                 }
             }
             it(`throw an error when getting the user if sessions are turned off`) => {

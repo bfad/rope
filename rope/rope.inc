@@ -238,7 +238,7 @@ define rope_impl => type {
             ? fail(`Sessions are disabled`)
         return $_sess_user
     }
-    public user=(rhs::trait_serializable) => {
+    public user=(rhs::trait_rope_user) => {
         not .config(`sessions-enabled`)
             ? fail(`Sessions are disabled`)
         $_sess_user = #rhs
