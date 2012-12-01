@@ -149,6 +149,8 @@ define rope_impl => type {
                 ? #found = #better
                 | #found = #good
         }
+        #found->size == 0 and .controllerExist(`rope-fallback`)
+            ? return pair(#path=`rope-fallback`)
         #found->size == 0
             ? fail(error_code_fileNotFound, `No matching route found`)
         #found->size > 1

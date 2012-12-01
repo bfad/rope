@@ -144,6 +144,15 @@ describe(::rope) => {
             
             expect(`matchRoute`, rope->matchRoute('/great/scott')->second)
         }
+        
+        it(`if rope-fallback controller is defined it is called when no route matches`) => {
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
+                rope->matchRoute(`/this/path/no/exists`)
+            }
+            rope->register(`rope-fallback`) => {}
+            
+            expect(`rope-fallback`, rope->matchRoute(`/this/path/no/exists`)->second)
+        }
     }
     
     describe(`-> invoke`) => {
