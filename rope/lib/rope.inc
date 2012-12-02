@@ -168,7 +168,7 @@ define rope_impl => type {
     
     
     public protocol => (web_request->isHttps ? 'https://' | 'http://')
-    public method   => web_request->requestMethod
+    public method   => .param(`_method`) || web_request->requestMethod
     public hostname => web_request->httpHost
     public path     => {
         local(path) = web_request->requestUri->split('?')->get(1)->split('/')

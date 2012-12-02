@@ -554,4 +554,49 @@ describe(::rope) => {
             }
         }
     }
+    
+    
+    describe(`-> method`) => {
+        it(`returns the HTTP method as found in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(::REQUEST_METHOD='PUT')
+
+            expect(bytes(`PUT`), bytes(rope->method))
+        }
+        it(`returns the value of a query parameter named _method when it exists instead of the value in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(
+                ::REQUEST_METHOD = 'GET', 
+                ::REQUEST_URI    = '/http/method?_method=PUT',
+                ::QUERY_STRING   = bytes(`_method=PUT`)
+            )
+            
+            expect(`GET`, web_request->requestMethod)
+            expect(`PUT`, rope->method)
+        }
+        it(`returns the value of a post parameter named _method when it exists instead of the value in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(
+                ::REQUEST_METHOD = 'POST', 
+                ::REQUEST_URI    = '/http/method',
+                ::CONTENT_TYPE   = 'application/x-www-form-urlencoded'
+            )
+            var(_req_stdin) = bytes(`_method=PUT`)
+            
+            expect(`POST`, web_request->requestMethod)
+            expect(`PUT` , rope->method)
+        }
+        it(`returns the value of a url parameter named _method when it exists instead of the value in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(
+                ::REQUEST_METHOD = 'GET', 
+                ::REQUEST_URI    = '/http/method/PUT'
+            )
+            rope->register(`http-method`, -routes=(:`/http/method/:_method`)) => {}
+            rope->invoke
+            
+            expect(`GET`, web_request->requestMethod)
+            expect(`PUT`, rope->method)
+        }
+    }
 }
