@@ -23,6 +23,15 @@ define rope_thread => thread {
     public removeController(key::string) => {
         .`controllers`->remove(#key)
         .`code_paths` ->remove(#key)
+        
+        with item in .'routes'->eachPair do {
+            local(routes) = #item->second
+            local(index)  = 0
+            while(#routes->size > #index++) => {
+                #routes->get(#index)->second == #key
+                    ? #routes->remove(#index--) // Removing an item means we need to recheck current position
+            }
+        }
     }
     public removeAllControllers => {
         .'controllers' = map

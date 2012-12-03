@@ -84,14 +84,17 @@ describe(::rope) => {
     
     describe(`-> deregister`) => {
         it(`removes the specified controller from the system`) => {
-            rope->register('deregister') => {}
+            rope->register('deregister', -routes=(:`/deregister`, `/deregisterme`)) => {}
             expect(rope->controllerExist('deregister'))
             
-            rope->deregister(`deregister`, -routes=(:`/deregister`))
+            rope->deregister(`deregister`)
             expect(not rope->controllerExist('deregister'))
             expect(void, rope_thread->code_paths->find('deregister'))
             expect->error(error_code_fileNotFound, `No matching route found`) => {
                 rope->matchRoute(`/deregister`)
+            }
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
+                rope->matchRoute(`/deregisterme`)
             }
         }
     }
