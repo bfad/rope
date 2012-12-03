@@ -1,5 +1,6 @@
 define rope_thread => thread {
-    data private controllers ::map = map,
+    data private startupFiles::map = map,
+         private controllers ::map = map,
          private routes      ::map = map,
          private code_paths  ::map = map,
          private configLoaded::boolean = false,
@@ -14,6 +15,31 @@ define rope_thread => thread {
     public code_paths   => .'code_paths'
     public configLoaded => .`configLoaded`
     
+    public onCreate => {
+        if(`production` != sys_getEnv(`ROPE_ENV`)) => {
+            with path in dir(sys_userStartupPath)->eachFilePathRecursive 
+            do .`startupFiles`->insert(#path=file(#path)->modificationTime)
+        }
+    }
+
+    public startupCheckNLoad => {
+        `production` == sys_getEnv(`ROPE_ENV`)
+            ? return
+
+        local(cur_files_tracking) = .startupFiles->keys->asArray
+
+        with path in dir(sys_userStartupPath)->eachFilePathRecursive
+        let f = file(#path) do {
+            .startupFiles->contains(#path)
+                ? #cur_files_tracking->removeAll(#path)
+            if(not .startupFiles->contains(#path) or #f->modificationTime > .startupFiles->get(#path)) => {
+                .`startupFiles`->insert(#path=#f->modificationTime)
+                sourcefile(#f->readString, #path, false, false)->invoke
+            }
+        }
+        with path in #cur_files_tracking do .`startupFiles`->remove(#path)
+    }
+
     public controller(key::string)      => .`controllers`->get(#key)
     public controllerExist(key::string) => .`controllers`->contains(#key)
     public insertController(item::pair, path::string) => {
@@ -70,6 +96,8 @@ define rope_impl => type {
     data public urlParams::array = array
     
     public invoke => {
+        rope_thread->startupCheckNLoad
+
         local(path)  = .path->asCopy->remove(1,1)&split('/')
         local(route) = .matchRoute(#path)
         
