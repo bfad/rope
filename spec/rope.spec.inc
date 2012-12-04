@@ -296,7 +296,7 @@ describe(::rope) => {
             
             expect(`Ho! Ho! Ho! `, rope->include(#template))
         }
-        it(`sets content_body to the value of processing the file at the specified path relative to webroot (../views/)`) => {
+        it(`sets content_body to the value of processing the file at the specified absolute path relative to webroot (../views/)`) => {
             handle => { $_file_forceroot_ = void }
             
             local(template) = file($my_root + '/views/basic2.lasso')
@@ -305,6 +305,23 @@ describe(::rope) => {
             
             expect(`Roads? Where we're going we don't need roads.`, rope->include('/basic2.lasso'))
         }
+        it(`handles passing a relative path that's relative to the current file that is inside the views folder`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(nested_dir) = dir ($my_root + '/views/nest/')
+            local(nested_t1)  = file($my_root + '/views/nest/basic1.lasso')
+            local(nested_t2)  = file($my_root + '/views/nest/basic2.lasso')
+            handle => { 
+                #nested_t1 ->exists? #nested_t1 ->close&delete
+                #nested_t2 ->exists? #nested_t2 ->close&delete
+                #nested_dir->exists? #nested_dir->delete
+            }
+            #nested_dir->create
+            #nested_t1 ->doWithClose => { #1->openTruncate&writeBytes(bytes(`[rope->include('basic2.lasso')]`)) }
+            #nested_t2 ->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= local(noun) = {return 'water'}->detach;#noun()->asCopy->titlecase& + "? Where we're going we don't need " + #noun() + "."; ?>`)) }
+            
+            expect(`Water? Where we're going we don't need water.`, rope->include('/nest/basic1.lasso'))
+        }
         it(`accepts named parameters that are setup as locals for the file being included`) => {
             handle => { $_file_forceroot_ = void }
             
@@ -312,7 +329,7 @@ describe(::rope) => {
             handle => { #template->exists? #template->close&delete }
             #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
             
-            expect(`Hello, World.`, rope->include('locals.lasso', -name='World', -time=date))
+            expect(`Hello, World.`, rope->include('/locals.lasso', -name='World', -time=date))
         }
     }
     
@@ -376,7 +393,7 @@ describe(::rope) => {
             handle => { #template->exists? #template->close&delete }
             #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
             
-            rope->render('locals.lasso', -name='World', -time=date)
+            rope->render('/locals.lasso', -name='World', -time=date)
             expect(`Hello, World.`, content_body)
         }
     }

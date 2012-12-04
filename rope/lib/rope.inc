@@ -291,7 +291,12 @@ define rope_impl => type {
     }
     
     
-    private viewForPath(path::string)::file => file(file_forceRoot('/../views/' + #path))
+    private viewForPath(path::string)::file => {
+        `/` == #path->get(1)
+            ? return file(file_forceRoot('/../views/' + #path))
+        
+        return file(file_forceRoot(currentCapture->continuation->continuation->callsite_file->stripLastComponent + '/' + #path))
+    }
     
     public render(path::string, ...) => { content_body = .include(.viewForPath(#path), #rest) }
     public render(view::file  , ...) => { content_body = .include(#view, #rest) }
