@@ -1,5 +1,6 @@
 define rope_thread => thread {
-    data private controllers ::map = map,
+    data private startupFiles::map = map,
+         private controllers ::map = map,
          private routes      ::map = map,
          private code_paths  ::map = map,
          private configLoaded::boolean = false,
@@ -14,6 +15,34 @@ define rope_thread => thread {
     public code_paths   => .'code_paths'
     public configLoaded => .`configLoaded`
     
+    public onCreate => {
+        if(`production` != sys_getEnv(`ROPE_ENV`)) => {
+            with path in dir(sys_userStartupPath)->eachFilePathRecursive 
+            do .`startupFiles`->insert(#path=file(#path)->modificationTime)
+        }
+    }
+
+    public findFilesToReload => {
+        `production` == sys_getEnv(`ROPE_ENV`)
+            ? return
+
+        local(cur_files_tracking) = .startupFiles->keys->asArray
+        local(files_to_reload)    = array
+
+        with path in dir(sys_userStartupPath)->eachFilePathRecursive
+        let f = file(#path) do {
+            .startupFiles->contains(#path)
+                ? #cur_files_tracking->removeAll(#path)
+            if(not .startupFiles->contains(#path) or #f->modificationTime > .startupFiles->get(#path)) => {
+                .`startupFiles`->insert(#path=#f->modificationTime)
+                #files_to_reload->insert(#path)
+            }
+        }
+        with path in #cur_files_tracking do .`startupFiles`->remove(#path)
+
+        return #files_to_reload
+    }
+
     public controller(key::string)      => .`controllers`->get(#key)
     public controllerExist(key::string) => .`controllers`->contains(#key)
     public insertController(item::pair, path::string) => {
@@ -70,6 +99,9 @@ define rope_impl => type {
     data public urlParams::array = array
     
     public invoke => {
+        `production` != sys_getEnv(`ROPE_ENV`)
+            ? .startupCheckNLoad
+
         local(path)  = .path->asCopy->remove(1,1)&split('/')
         local(route) = .matchRoute(#path)
         
@@ -83,6 +115,9 @@ define rope_impl => type {
         }
         .continueSession
         return .controller(#route->second)->invoke
+    }
+    public startupCheckNLoad => {
+        with path in rope_thread->findFilesToReload do sourcefile(file(`/` + #path)->readString, #path, false, false)->invoke
     }
     
     public config(...) => rope_thread->config(:#rest)

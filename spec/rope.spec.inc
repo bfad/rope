@@ -178,6 +178,79 @@ describe(::rope) => {
             rope->invoke
             expect(session_id(`RopeSession`)->size > 0)
         }
+
+        context(`when ROPE_ENV environment variable not set to production`) => {
+            beforeAll => {
+                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
+                sys_setEnv('ROPE_ENV', 'dev')
+            }
+            afterAll => {
+                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+            }
+            it(`loads new files that it finds in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method => { return 'moose' }`)) }
+
+                expect->error => { my_test_method }
+                rope->invoke
+                expect(`moose`, my_test_method)
+            }
+            it(`detects and reloads files that have changed in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method => { return 'moose' }`)) }
+                rope->invoke
+                expect(`moose`, my_test_method)
+
+                // Gotta wait so that modification time will be changed
+                sleep(1000)
+                
+                #new_file->doWithClose => { #1->openTruncate&writeBytes(bytes(`define my_test_method => { return 'goose' }`)) }
+                rope->invoke
+                expect(`goose`, my_test_method)
+            }
+        }
+        context(`when ROPE_ENV environment variable is set to production`) => {
+            beforeAll => {
+                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
+                sys_setEnv('ROPE_ENV', 'production')
+            }
+            afterAll => {
+                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+            }
+            it(`ignores new files that it finds in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method2 => { return 'moose' }`)) }
+
+                expect->error => { my_test_method2 }
+                rope->invoke
+                expect->error => { my_test_method2 }
+            }
+            it(`ignores files that have changed in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method2 => { return 'moose' }`)) }
+                import_file(#new_file)
+                expect(`moose`, my_test_method2)
+
+                // Gotta wait so that modification time will be changed
+                sleep(1000)
+                
+                #new_file->doWithClose => { #1->openTruncate&writeBytes(bytes(`define my_test_method2 => { return 'goose' }`)) }
+                rope->invoke
+                expect(`moose`, my_test_method2)
+            }
+        }
     }
     
     
