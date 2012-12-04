@@ -22,11 +22,12 @@ define rope_thread => thread {
         }
     }
 
-    public startupCheckNLoad => {
+    public findFilesToReload => {
         `production` == sys_getEnv(`ROPE_ENV`)
             ? return
 
         local(cur_files_tracking) = .startupFiles->keys->asArray
+        local(files_to_reload)    = array
 
         with path in dir(sys_userStartupPath)->eachFilePathRecursive
         let f = file(#path) do {
@@ -34,10 +35,12 @@ define rope_thread => thread {
                 ? #cur_files_tracking->removeAll(#path)
             if(not .startupFiles->contains(#path) or #f->modificationTime > .startupFiles->get(#path)) => {
                 .`startupFiles`->insert(#path=#f->modificationTime)
-                sourcefile(#f->readString, #path, false, false)->invoke
+                #files_to_reload->insert(#path)
             }
         }
         with path in #cur_files_tracking do .`startupFiles`->remove(#path)
+
+        return #files_to_reload
     }
 
     public controller(key::string)      => .`controllers`->get(#key)
@@ -96,7 +99,8 @@ define rope_impl => type {
     data public urlParams::array = array
     
     public invoke => {
-        rope_thread->startupCheckNLoad
+        `production` != sys_getEnv(`ROPE_ENV`)
+            ? .startupCheckNLoad
 
         local(path)  = .path->asCopy->remove(1,1)&split('/')
         local(route) = .matchRoute(#path)
@@ -111,6 +115,9 @@ define rope_impl => type {
         }
         .continueSession
         return .controller(#route->second)->invoke
+    }
+    public startupCheckNLoad => {
+        with path in rope_thread->findFilesToReload do sourcefile(file(`/` + #path)->readString, #path, false, false)->invoke
     }
     
     public config(...) => rope_thread->config(:#rest)
