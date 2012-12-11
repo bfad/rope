@@ -12,7 +12,6 @@ define rope_thread => thread {
     data private startupFiles::map = map,
          private controllers ::map = map,
          private routes      ::map = map,
-         private code_paths  ::map = map,
          private configLoaded::boolean = false,
          private config      ::map = map(
                 `app-name`         = pair(`UnNamed`,::string),
@@ -22,7 +21,6 @@ define rope_thread => thread {
 
     public controllers  => .`controllers`
     public routes       => .`routes`
-    public code_paths   => .'code_paths'
     public configLoaded => .`configLoaded`
     /**!
         When not in a poduction environment, Rope grabs the current modification times
@@ -67,13 +65,11 @@ define rope_thread => thread {
 
     public controller(key::string)      => .`controllers`->get(#key)
     public controllerExist(key::string) => .`controllers`->contains(#key)
-    public insertController(item::pair, path::string) => {
+    public insertController(item::pair) => {
         .`controllers`->insert(#item)
-        .`code_paths` ->insert(#item->first=#path)
     }
     public removeController(key::string) => {
         .`controllers`->remove(#key)
-        .`code_paths` ->remove(#key)
         
         with item in .'routes'->eachPair do {
             local(routes) = #item->second
@@ -86,11 +82,9 @@ define rope_thread => thread {
     }
     public removeAllControllers => {
         .'controllers' = map
-        .`code_paths`  = map
         .`routes`      = map
     }
     
-    public codePath(key::string) => .`code_paths`->get(#key)
     
     public insertRoute(item::pair) => {
         local(path_size) = #item->first->size
@@ -192,7 +186,7 @@ define rope_impl => type {
             rope->register('new-controller', -routes=(:'/moose/hair/rhino'))
     */
     public register(controller::string, -routes::staticarray=(:)) => {
-        givenBlock? rope_thread->insertController(#controller=givenBlock, .absolutePath(currentCapture->continuation->callsite_file))
+        givenBlock? rope_thread->insertController(#controller=givenBlock)
         
         not givenBlock and #routes->size == 0
             ? fail(`This method requires you to either also pass routes or a givenBlock`)
@@ -222,18 +216,6 @@ define rope_impl => type {
             ? #path = io_file_getcwd + '/' + #path
         
         return '/' + #path
-    }
-    public reload(controller::string) => {
-        local(path) = .controllerPath(#controller)
-        sourcefile(file(#path)->readString, #path, false, false)->invoke
-    }
-    public reload => {
-        local(paths)      = rope_thread->code_paths->values
-        local(paths_done) = set
-        with path in #paths where not #paths_done->contains(#path) do {
-            #paths_done->insert(#path)
-            sourcefile(file(#path)->readString, #path, false, false)->invoke
-        }
     }
 
     public deregister(controller::string) => {
@@ -292,7 +274,6 @@ define rope_impl => type {
     
     public controller     (key::string) => rope_thread->controller(#key)
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
-    public controllerPath (key::string) => rope_thread->codePath(#key)
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
     
