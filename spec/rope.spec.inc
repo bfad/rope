@@ -84,14 +84,17 @@ describe(::rope) => {
     
     describe(`-> deregister`) => {
         it(`removes the specified controller from the system`) => {
-            rope->register('deregister') => {}
+            rope->register('deregister', -routes=(:`/deregister`, `/deregisterme`)) => {}
             expect(rope->controllerExist('deregister'))
             
-            rope->deregister(`deregister`, -routes=(:`/deregister`))
+            rope->deregister(`deregister`)
             expect(not rope->controllerExist('deregister'))
             expect(void, rope_thread->code_paths->find('deregister'))
             expect->error(error_code_fileNotFound, `No matching route found`) => {
                 rope->matchRoute(`/deregister`)
+            }
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
+                rope->matchRoute(`/deregisterme`)
             }
         }
     }
@@ -144,6 +147,15 @@ describe(::rope) => {
             
             expect(`matchRoute`, rope->matchRoute('/great/scott')->second)
         }
+        
+        it(`if rope-fallback controller is defined it is called when no route matches`) => {
+            expect->error(error_code_fileNotFound, `No matching route found`) => {
+                rope->matchRoute(`/this/path/no/exists`)
+            }
+            rope->register(`rope-fallback`) => {}
+            
+            expect(`rope-fallback`, rope->matchRoute(`/this/path/no/exists`)->second)
+        }
     }
     
     describe(`-> invoke`) => {
@@ -165,6 +177,79 @@ describe(::rope) => {
             
             rope->invoke
             expect(session_id(`RopeSession`)->size > 0)
+        }
+
+        context(`when ROPE_ENV environment variable not set to production`) => {
+            beforeAll => {
+                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
+                sys_setEnv('ROPE_ENV', 'dev')
+            }
+            afterAll => {
+                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+            }
+            it(`loads new files that it finds in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method => { return 'moose' }`)) }
+
+                expect->error => { my_test_method }
+                rope->invoke
+                expect(`moose`, my_test_method)
+            }
+            it(`detects and reloads files that have changed in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method => { return 'moose' }`)) }
+                rope->invoke
+                expect(`moose`, my_test_method)
+
+                // Gotta wait so that modification time will be changed
+                sleep(1000)
+                
+                #new_file->doWithClose => { #1->openTruncate&writeBytes(bytes(`define my_test_method => { return 'goose' }`)) }
+                rope->invoke
+                expect(`goose`, my_test_method)
+            }
+        }
+        context(`when ROPE_ENV environment variable is set to production`) => {
+            beforeAll => {
+                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
+                sys_setEnv('ROPE_ENV', 'production')
+            }
+            afterAll => {
+                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+            }
+            it(`ignores new files that it finds in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method2 => { return 'moose' }`)) }
+
+                expect->error => { my_test_method2 }
+                rope->invoke
+                expect->error => { my_test_method2 }
+            }
+            it(`ignores files that have changed in LassoStartup`) => {
+                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                handle => {
+                    #new_file->exists? #new_file->delete
+                }
+                #new_file->doWithClose => { #1->openWrite&writeBytes(bytes(`define my_test_method2 => { return 'moose' }`)) }
+                import_file(#new_file)
+                expect(`moose`, my_test_method2)
+
+                // Gotta wait so that modification time will be changed
+                sleep(1000)
+                
+                #new_file->doWithClose => { #1->openTruncate&writeBytes(bytes(`define my_test_method2 => { return 'goose' }`)) }
+                rope->invoke
+                expect(`moose`, my_test_method2)
+            }
         }
     }
     
@@ -211,7 +296,7 @@ describe(::rope) => {
             
             expect(`Ho! Ho! Ho! `, rope->include(#template))
         }
-        it(`sets content_body to the value of processing the file at the specified path relative to webroot (../views/)`) => {
+        it(`sets content_body to the value of processing the file at the specified absolute path relative to webroot (../views/)`) => {
             handle => { $_file_forceroot_ = void }
             
             local(template) = file($my_root + '/views/basic2.lasso')
@@ -220,6 +305,23 @@ describe(::rope) => {
             
             expect(`Roads? Where we're going we don't need roads.`, rope->include('/basic2.lasso'))
         }
+        it(`handles passing a relative path that's relative to the current file that is inside the views folder`) => {
+            handle => { $_file_forceroot_ = void }
+            
+            local(nested_dir) = dir ($my_root + '/views/nest/')
+            local(nested_t1)  = file($my_root + '/views/nest/basic1.lasso')
+            local(nested_t2)  = file($my_root + '/views/nest/basic2.lasso')
+            handle => { 
+                #nested_t1 ->exists? #nested_t1 ->close&delete
+                #nested_t2 ->exists? #nested_t2 ->close&delete
+                #nested_dir->exists? #nested_dir->delete
+            }
+            #nested_dir->create
+            #nested_t1 ->doWithClose => { #1->openTruncate&writeBytes(bytes(`[rope->include('basic2.lasso')]`)) }
+            #nested_t2 ->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= local(noun) = {return 'water'}->detach;#noun()->asCopy->titlecase& + "? Where we're going we don't need " + #noun() + "."; ?>`)) }
+            
+            expect(`Water? Where we're going we don't need water.`, rope->include('/nest/basic1.lasso'))
+        }
         it(`accepts named parameters that are setup as locals for the file being included`) => {
             handle => { $_file_forceroot_ = void }
             
@@ -227,7 +329,7 @@ describe(::rope) => {
             handle => { #template->exists? #template->close&delete }
             #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
             
-            expect(`Hello, World.`, rope->include('locals.lasso', -name='World', -time=date))
+            expect(`Hello, World.`, rope->include('/locals.lasso', -name='World', -time=date))
         }
     }
     
@@ -291,7 +393,7 @@ describe(::rope) => {
             handle => { #template->exists? #template->close&delete }
             #template->doWithClose => { #1->openWrite&writeBytes(bytes(`<?= 'Hello, ' + #name + '.' ?>`)) }
             
-            rope->render('locals.lasso', -name='World', -time=date)
+            rope->render('/locals.lasso', -name='World', -time=date)
             expect(`Hello, World.`, content_body)
         }
     }
@@ -543,6 +645,51 @@ describe(::rope) => {
                     rope->user
                 }
             }
+        }
+    }
+    
+    
+    describe(`-> method`) => {
+        it(`returns the HTTP method as found in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(::REQUEST_METHOD='PUT')
+
+            expect(bytes(`PUT`), bytes(rope->method))
+        }
+        it(`returns the value of a query parameter named _method when it exists instead of the value in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(
+                ::REQUEST_METHOD = 'GET', 
+                ::REQUEST_URI    = '/http/method?_method=PUT',
+                ::QUERY_STRING   = bytes(`_method=PUT`)
+            )
+            
+            expect(`GET`, web_request->requestMethod)
+            expect(`PUT`, rope->method)
+        }
+        it(`returns the value of a post parameter named _method when it exists instead of the value in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(
+                ::REQUEST_METHOD = 'POST', 
+                ::REQUEST_URI    = '/http/method',
+                ::CONTENT_TYPE   = 'application/x-www-form-urlencoded'
+            )
+            var(_req_stdin) = bytes(`_method=PUT`)
+            
+            expect(`POST`, web_request->requestMethod)
+            expect(`PUT` , rope->method)
+        }
+        it(`returns the value of a url parameter named _method when it exists instead of the value in the web_request`) => {
+            new_fake_conn
+            var(_req_params) = map(
+                ::REQUEST_METHOD = 'GET', 
+                ::REQUEST_URI    = '/http/method/PUT'
+            )
+            rope->register(`http-method`, -routes=(:`/http/method/:_method`)) => {}
+            rope->invoke
+            
+            expect(`GET`, web_request->requestMethod)
+            expect(`PUT`, rope->method)
         }
     }
 }

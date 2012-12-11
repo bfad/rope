@@ -7,9 +7,14 @@ Rope is a light-weight framework built for Lasso 9.
 Release Notes
 -------------
 
-New in version 0.8.1
+New in version 0.9
 
-- Bugfix: Session variables now added to RopeSession instead of ANDISession
+- New fallback controller that can be created for unmatched paths
+- Now [rope->method] take into account query or post param named _method (since browsers forms can only do GET & POST)
+- New autoreloading feature that checks for changes / additions to files in LassoStartup for each request and loads the change or added files
+- Now [rope->include] can be given relative paths to other view files
+- Added doc comments that will eventually be used when autogenerating the API documentation
+- Bugfix: Routes assigned to a controller are now removed when the controller is deregistered
 
 
 License
