@@ -19,7 +19,7 @@ function loadListingFor(elm, e) {
 
     // Spinner for loading
     elm.addClass("is_listing").append('<div id="circleLoading"><div id="circleLoading_1" class="circleLoading"></div><div id="circleLoading_2" class="circleLoading"></div><div id="circleLoading_3" class="circleLoading"></div><br style="clear: left;" /></div>');
-    $.get('list.xhr', {path: elm.data('path')}, function(data){
+    $.get('list.xhr', {path: elm.data('path'), exts: $("#lasso_exts").val()}, function(data){
         var html = '<ul>';
         for(i in data.files) {
             html += '<li class="is_file" data-path="' + elm.data('path') + '/' + data.files[i] + '">' + data.files[i] + '</li>';
@@ -36,9 +36,22 @@ function loadListingFor(elm, e) {
 function reloadFile(elm, e) {
     if(e)
         e.stopPropagation();
-/*
-    $.get('reload.xhr', {path: elm.data('path')}, function(data) {
 
-    }, 'json')
-*/
+    // Hide files and show spinner
+    $("#file_browser").hide().after('<div id="circleLoading"><div id="circleLoading_1" class="circleLoading"></div><div id="circleLoading_2" class="circleLoading"></div><div id="circleLoading_3" class="circleLoading"></div><br style="clear: left;" /></div>');
+    $.ajax({
+             url: 'reload.xhr',
+            data: {path: elm.data('path')},
+        dataType: 'html', 
+         success: function(data) {
+            alert("Success reloaded this file.");
+            $("#circleLoading").remove();
+            $("#file_browser").show();
+        },
+        error: function(data) {
+            alert(data.responseText.replace(/<br \/>\n/g, '\n').replace(/<br \/>/g, '\n').replace(/<\/?[^>]+(>|$)/g, " ").replace(/ ( )+/g, ' '));
+            $("#circleLoading").remove();
+            $("#file_browser").show();
+        }
+    });
 }
