@@ -1,4 +1,5 @@
 PROJECT = rope
+PROJECT_LASSOAPP_DIR = lassoapp
 CC = gcc
 KERNEL_NAME = $(shell uname -s)
 
@@ -52,17 +53,30 @@ BC_FINALE_NAME = $(basename $@)$(BC_EXT)
 LASSOAPP_FINALE_NAME = $(basename $@)$(LASSOAPP_EXT)
 EXE_FINAL_NAME = $(basename $@)
 
-all: $(PROJECT).lassoapp
+ifeq (test -d $(LASSO9_HOME), 0)
+INSTALL_HOME = $(LASSO9_HOME)
+else
+INSTALL_HOME = /var/lasso/home
+endif
+
+
+
+all: $(PROJECT).lassoapp $(PROJECT)
 	
 debug:
 	$(MAKE) DEBUG=1 -j2
 	
+install:
+	mkdir -p $(INSTALL_HOME)/bin
+	mkdir -p $(INSTALL_HOME)/LassoApps
+	mv -f $(PROJECT) $(INSTALL_HOME)/bin/
+	mv -f $(PROJECT).lassoapp $(INSTALL_HOME)/LassoApps
 
 makefile: ;
 
 %.d.$(INTERMEDIATE_EXT): %.$(LASSO_EXT)
 	"$(LASSO9_MODULE_CMD)" $(MODULE_DLL_FLAGS) -o $@ $<
-%.ap.$(INTERMEDIATE_EXT): $(PROJECT)/
+%.ap.$(INTERMEDIATE_EXT): $(PROJECT_LASSOAPP_DIR)/
 	"$(LASSO9_MODULE_CMD)" $(MODULE_LASSOAPP_FLAGS) -o $@ $<
 %.a.$(INTERMEDIATE_EXT): %.$(LASSO_EXT)
 	"$(LASSO9_MODULE_CMD)" $(MODULE_APP_FLAGS) -o $@ $<

@@ -150,20 +150,25 @@ define run_server => {
     sys_setEnv('LASSO9_MASTER_HOME', sys_getEnv('LASSO9_MASTER_HOME') or '/var/lasso/home/')
     sys_setEnv('LASSO9_HOME'       , #project_path + '/lasso_home/')
 
-    database_initialize
-     session_initialize
-    lassoapp_initialize
-       admin_initialize
-         log_initialize
-       email_initialize
-       ljapi_initialize
-    security_initialize
+    protect => {
+        handle_error => {
+            stdoutnl(error_code + ': ' + error_msg + '\n' + error_stack)
+        }
+        database_initialize
+         session_initialize
+        lassoapp_initialize
+           admin_initialize
+             log_initialize
+           email_initialize
+           ljapi_initialize
+        security_initialize
 
-    stdoutnl('Loading Startup Items')
-    dir_import(dir(sys_userStartupPath), #scriptExts)
+        stdoutnl('Loading Startup Items')
+        dir_import(dir(sys_userStartupPath), #scriptExts)
 
-    stdoutnl('Starting webserver on ' + #httpAddr + ':' + #httpPort)
-    http_server->start(#httpPort, #httpAddr, -handler=rope_connection_handler(#httpRoot, #scriptExts))
+        stdoutnl('Starting webserver on ' + #httpAddr + ':' + #httpPort)
+        http_server->start(#httpPort, #httpAddr, -handler=rope_connection_handler(#httpRoot, #scriptExts))
+    }
 }
 
 1 == $argv->size
