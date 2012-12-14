@@ -17,7 +17,7 @@ if(not var_defined(`_rope_loaded`)) => {
     not #path_here->beginsWith('/')? #path_here = io_file_getcwd + '/' + #path_here
     not #path_here->endsWith('/') ? #path_here += '/'
 
-    import_folder(dir(#path_here + '../rope/lib/'))
+    import_folder(dir(#path_here + '../lassoapp/lib/'))
     
     var(_rope_loaded) = true
 }
