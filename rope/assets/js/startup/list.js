@@ -55,3 +55,21 @@ function reloadFile(elm, e) {
         }
     });
 }
+
+function reloadAll() {
+    $("#file_browser").hide().after('<div id="circleLoading"><div id="circleLoading_1" class="circleLoading"></div><div id="circleLoading_2" class="circleLoading"></div><div id="circleLoading_3" class="circleLoading"></div><br style="clear: left;" /></div>');
+    $.ajax({
+             url: 'reload-all.xhr',
+            data: {exts: $("#lasso_exts").val()},
+         success: function(data) {
+            alert("Successfully reloaded all files.");
+            $("#circleLoading").remove();
+            $("#file_browser").show();
+        },
+        error: function(data) {
+            alert(data.responseText.replace(/<br \/>\n/g, '\n').replace(/<br \/>/g, '\n').replace(/<\/?[^>]+(>|$)/g, " ").replace(/ ( )+/g, ' '));
+            $("#circleLoading").remove();
+            $("#file_browser").show();
+        }
+    });
+}

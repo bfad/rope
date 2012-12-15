@@ -17,10 +17,14 @@
 </head>
 <body class="fixed">
     <h1>LassoStartup Files</h1>
+    
+    <p>
+        Space-separated list of Lasso Extensions: <textarea id="lasso_exts" name="lasso_exts" rows="2" cols="24">inc lasso lo las</textarea>
+    </p>
 
-    <p>Click on a folder to reveal it's contents. Click on a file to reload it, or <a href="[lassoapp_link('/startup/reload-all')]">reload all files</a></p>
+    <p>Click on a folder to reveal it's contents. Click on a file to reload it, or <button onclick="reloadAll()">reload all files</button></p>
     <div id="file_browser" data-path="[sys_userStartupPath]"></div>
     <br />
-    Space-separated list of Lasso Extensions: <textarea id="lasso_exts" name="lasso_exts" rows="2" cols="24">inc lasso lo las</textarea>
+    
 </body>
 </html>

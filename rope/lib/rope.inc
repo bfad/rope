@@ -158,7 +158,8 @@ define rope_impl => type {
         with path in rope_thread->findFilesToReload do sourcefile(file(`/` + #path)->readString, #path, false, false)->invoke
     }
     
-    public config(...) => rope_thread->config(:#rest)
+    public config(...)  => rope_thread->config(:#rest)
+    public configLoaded => rope_thread->configLoaded
     
     /**!
         This method serves two functions: 1) It registers a controller and its code 
