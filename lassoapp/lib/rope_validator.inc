@@ -7,12 +7,14 @@ define generateSeries->by   => .`by`
 define rope_validator => type {
     data
         private validations::map,
-        private values     ::map=map
+        private values     ::map=map,
+        private failed     ::staticarray
 
     // Getters
     public
         validations => .`validations`,
-        values      => .`values`
+        values      => .`values`,
+        failed      => .`failed`
     
     
     public onCreate(validations::map, ...) => {
@@ -30,6 +32,16 @@ define rope_validator => type {
         .`validations` = #validations
     }
     
+    public allValid => {
+        .`failed` = (
+            with key in .validations->keys
+            where not .validate(#key)
+            select #key
+        )->asStaticArray
+        
+        return (.failed->size == 0)
+    }
+    
     public validate(key::string) => {
         local(
             validations = .validations->find(#key),
@@ -41,10 +53,11 @@ define rope_validator => type {
             ? return true
         
         local(
-            val_type  = #validations->find(`type`),
-            val_min   = #validations->find(`min`),
-            val_max   = #validations->find(`max`),
-            val_range = #validations->find(`range`),
+            val_type   = #validations->find(`type`),
+            val_min    = #validations->find(`min`),
+            val_max    = #validations->find(`max`),
+            val_range  = #validations->find(`range`),
+            val_custom = #validations->find(`custom`),
         )
         
         // Validate type
@@ -78,6 +91,11 @@ define rope_validator => type {
             #val < #min or #val > #max
                 ? return false
         }
+        
+        
+        // Validate custom
+        #val_custom->isA(::capture)
+            ? return boolean(#val_custom(#value, .values))
         
         return true
     }

@@ -202,5 +202,76 @@ describe(::rope_validator) => {
                 expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
             }
         }
+        
+        context('when there is a custom validation') => {
+            it(`returns false when the block returns nothing`) => {
+                local(validations) = map('rhino' = map('custom' = _() => {} ))
+                
+                expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
+            }
+            it(`returns true when the block returns true`) => {
+                local(validations) = map('rhino' = map('custom' = _() => { return true } ))
+                
+                expect(rope_validator(#validations, -rhino=1)->validate('rhino'))
+            }
+            it(`returns false when the block returns false`) => {
+                local(validations) = map('rhino' = map('custom' = _() => { return false } ))
+                
+                expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
+            }
+            it(`passes the value as the first parameter when invoking the given block`) => {
+                local(validations) = map('rhino' = map('custom' = _() => { return (#1 == 42) } ))
+                
+                expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
+            }
+            it(`passes the values map as the second parameter when invoking the given block`) => {
+                local(validations) = map('rhino' = map('custom' = _() => { return (#1 == #2->find('rhino')) } ))
+                
+                expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
+            }
+            
+            it(`returns true without further checks if the type is null and null is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=null, 'custom' = _() => { return false } ))
+                
+                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
+            }
+            it(`returns true without further checks if the type is void and void is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=void, 'custom' = _() => { return false } ))
+                
+                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
+            }
+        }
+    }
+    
+    
+    describe(`-> allValid`) => {
+        local(validations) = map(
+            'moose' = map('type' = ::string),
+            'rhino' = map('type' = ::integer)
+        )
+        
+        it(`returns true if all data elements are valid`) => {
+            expect(rope_validator(#validations, -moose='hair', -rhino=42)->allValid)
+        }
+        it(`returns false if any data element is invalid`) => {
+            expect(not rope_validator(#validations, -moose='hair', -rhino='horn')->allValid)
+        }
+        it(`sets the failed data member to an empty array if all valid`) => {
+            local(validator) = rope_validator(#validations, -moose='hair', -rhino=42)
+            
+            expect(null, #validator->failed)
+            expect(#validator->allValid)
+            expect(::staticarray, #validator->failed->type)
+            expect(0, #validator->failed->size)
+        }
+        it(`sets the failed data member to an array of those keys that were found to be invalid`) => {
+            local(validator) = rope_validator(#validations, -moose='hair', -rhino='horn')
+            
+            expect(null, #validator->failed)
+            expect(not #validator->allValid)
+            expect(::staticarray, #validator->failed->type)
+            expect(1, #validator->failed->size)
+            expect('rhino', #validator->failed->get(1))
+        }
     }
 }
