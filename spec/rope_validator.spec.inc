@@ -273,5 +273,25 @@ describe(::rope_validator) => {
             expect(1, #validator->failed->size)
             expect('rhino', #validator->failed->get(1))
         }
+        it(`doesn't run through the validations if it has already done so`) => {
+            local(validator) = rope_validator(map('rhino'=map('custom'=_() => {yield 1; yield 2; yield 3;} )), -rhino=2)
+            
+            #validator->allValid
+            #validator->allValid
+            expect(2, #validator->validations->find('rhino')->find('custom')->invoke)
+        }
+    }
+    
+    
+    describe(`-> hasAllValidRun`) => {
+        it(`returns false if the allValid method hasn't run`) => {
+            expect(not rope_validator(map, -foo=1)->hasAllValidRun)
+        }
+        it(`returns true if the allValid method has run`) => {
+            local(validator) = rope_validator(map, -foo=1)
+
+            #validator->allValid
+            expect(#validator->hasAllValidRun)
+        }
     }
 }

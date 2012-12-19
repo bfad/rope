@@ -33,14 +33,17 @@ define rope_validator => type {
     }
     
     public allValid => {
-        .`failed` = (
-            with key in .validations->keys
-            where not .validate(#key)
-            select #key
-        )->asStaticArray
+        not .hasAllValidRun?
+            .`failed` = (
+                with key in .validations->keys
+                where not .validate(#key)
+                select #key
+            )->asStaticArray
         
         return (.failed->size == 0)
     }
+    
+    public hasAllValidRun => boolean(.`failed`->isA(::staticarray))
     
     public validate(key::string) => {
         local(
