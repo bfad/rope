@@ -57,4 +57,40 @@ describe(::rope_validator) => {
             do expect(#test_value->values->contains(#value))
         }
     }
+    
+    
+    describe(`-> validate(key::string)`) => {
+        //it(`returns true when the data for the key is valid`)
+        //it(`returns false when the data for the key is invalid`)
+        context('when there are no validations') => {
+            it(`returns true when the specified key isn't found in the validations`) => {
+                expect(rope_validator(map, -foo=2)->validate('breath'))
+            }
+            it(`returns true when the validations for the specified key is an empty map`) => {
+                expect(rope_validator(map('foo'=map), -foo=2)->validate('foo'))
+            }
+            it(`returns true when the validations for the specified key is an unknown validation type`) => {
+                expect(rope_validator(map('foo'=map('r12ndone'=2)), -foo=2)->validate('foo'))
+            }
+        }
+        
+        context('when there is a type validation') => {
+            local(validations) = map(
+                'moose' = map('type'=::string),
+                'rhino' = map('type'=(: ::string, ::integer)),
+            )
+            it(`returns true when the specified value is of the type specified`) => {
+                expect(rope_validator(#validations, -moose='')->validate('moose'))
+            }
+            it(`returns true when the specified value is of one of the specified types`) => {
+                expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
+            }
+            it(`returns false when the specified value is not of the type specified`) => {
+                expect(not rope_validator(#validations, -moose=42)->validate('moose'))
+            }
+            it(`returns false when the specified value is not of one of the specified types`) => {
+                expect(not rope_validator(#validations, -rhino=date)->validate('rhino'))
+            }
+        }
+    }
 }
