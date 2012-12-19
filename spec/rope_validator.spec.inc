@@ -92,5 +92,115 @@ describe(::rope_validator) => {
                 expect(not rope_validator(#validations, -rhino=date)->validate('rhino'))
             }
         }
+        
+        context('when there is a min validation') => {
+            local(validations) = map('rhino' = map('min'=2))
+            
+            context(`the value type is *not* a trait_finite`) => {
+                it(`returns true when the value is >= the minimum specified`) => {
+                    expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino=2)->validate('rhino'))
+                }
+                it(`returns false when the value is < the minimum specified`) => {
+                    expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
+                }
+            }
+            context(`the value type is a trait_finite`) => {
+                it(`returns true when the size of the value is >= the minimum specified`) => {
+                    expect(rope_validator(#validations, -rhino='42')->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino='two')->validate('rhino'))
+                }
+                it(`returns false when the size of the value is < the minimum specified`) => {
+                    expect(not rope_validator(#validations, -rhino='1')->validate('rhino'))
+                }
+            }
+            
+            it(`returns true without further checks if the type is null and null is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=(: ::null, ::integer), 'min'=2))
+                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
+            }
+            it(`returns true without further checks if the type is void and void is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=(: ::void, ::integer), 'min'=2))
+                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
+            }
+        }
+        
+        context('when there is a max validation') => {
+            local(validations) = map('rhino' = map('max'=2))
+            
+            context(`the value type is *not* a trait_finite`) => {
+                it(`returns true when the value is <= the maximum specified`) => {
+                    expect(rope_validator(#validations, -rhino=0)->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino=2)->validate('rhino'))
+                }
+                it(`returns false when the value is > the maximum specified`) => {
+                    expect(not rope_validator(#validations, -rhino=42)->validate('rhino'))
+                }
+            }
+            context(`the value type is a trait_finite`) => {
+                it(`returns true when the size of the value is <= the maximum specified`) => {
+                    expect(rope_validator(#validations, -rhino='42')->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino='')->validate('rhino'))
+                }
+                it(`returns false when the size of the value is > the maximum specified`) => {
+                    expect(not rope_validator(#validations, -rhino='rhino')->validate('rhino'))
+                }
+            }
+            
+            it(`returns true without further checks if the type is null and null is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=(: ::null, ::integer), 'max'=2))
+                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
+            }
+            it(`returns true without further checks if the type is void and void is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=(: ::void, ::integer), 'max'=2))
+                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
+            }
+        }
+        
+        context('when there is a range validation') => {
+            local(validations) = map('rhino' = map('range'=2 to 4))
+            
+            context(`the value type is *not* a trait_finite`) => {
+                it(`returns true when the value is >= the minimum specified`) => {
+                    expect(rope_validator(#validations, -rhino=3)->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino=2)->validate('rhino'))
+                }
+                it(`returns false when the value is < the minimum specified`) => {
+                    expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
+                }
+                it(`returns true when the value is <= the maximum specified`) => {
+                    expect(rope_validator(#validations, -rhino=4)->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino=3)->validate('rhino'))
+                }
+                it(`returns false when the value is > the maximum specified`) => {
+                    expect(not rope_validator(#validations, -rhino=42)->validate('rhino'))
+                }
+            }
+            context(`the value type is a trait_finite`) => {
+                it(`returns true when the size of the value is >= the minimum specified`) => {
+                    expect(rope_validator(#validations, -rhino='42')->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino='two')->validate('rhino'))
+                }
+                it(`returns false when the size of the value is < the minimum specified`) => {
+                    expect(not rope_validator(#validations, -rhino='1')->validate('rhino'))
+                }
+                it(`returns true when the size of the value is <= the maximum specified`) => {
+                    expect(rope_validator(#validations, -rhino='two')->validate('rhino'))
+                    expect(rope_validator(#validations, -rhino='mare')->validate('rhino'))
+                }
+                it(`returns false when the size of the value is > the maximum specified`) => {
+                    expect(not rope_validator(#validations, -rhino='rhino')->validate('rhino'))
+                }
+            }
+            
+            it(`returns true without further checks if the type is null and null is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=(: ::null, ::integer), 'range'=2 to 4))
+                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
+            }
+            it(`returns true without further checks if the type is void and void is an allowed type`) => {
+                local(validations) = map('rhino' = map('type'=(: ::void, ::integer), 'range'=2 to 4))
+                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
+            }
+        }
     }
 }
