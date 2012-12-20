@@ -35,7 +35,7 @@ define rope_validator => type {
     public allValid => {
         not .hasAllValidRun?
             .`failed` = (
-                with key in .validations->keys
+                with key in .values->keys
                 where not .validate(#key)
                 select #key
             )->asStaticArray
