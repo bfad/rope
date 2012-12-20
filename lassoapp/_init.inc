@@ -7,4 +7,4 @@ local(lib) = (:
 )
 with f in #lib do lassoapp_include_current(#f)
 
-lassoapp_include_current('/root.inc')
+rope->register(`root`, -routes=(:'/')) => { redirect_url('/lasso9/rope') }

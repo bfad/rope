@@ -50,3 +50,16 @@ define rope_randomASCII(len::integer) => {
     }
     return #ret
 }
+
+
+
+define dir_import(d::dir, ext::staticarray=(:'lasso', 'inc')) => {
+    with f in #d->eachFile
+    where #ext->contains(#f->path->split('.')->last) 
+    do file_import(#f)
+
+    with f in #d->eachDir do dir_import(#f)
+}
+define file_import(f::file) => {
+    sourcefile(#f->readString, #f->path, false, false)->invoke
+}
