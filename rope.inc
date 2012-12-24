@@ -14,6 +14,14 @@ usage: " + #cmd + " new PROJECT_NAME\n
 define run_new => {
     $argc < 3 ? usage
     
+    local(path_master_home) = '/' + (sys_getEnv(`LASSO9_MASTER_HOME`) || '/var/lasso/home') + '/'
+    if(not file(#path_master_home + 'LassoApps/rope.lassoapp')->exists
+        and not file(#path_master_home + 'LassoApps-disabled/rope.lassoapp')->exists
+    ) => {
+        stdoutnl("ERROR: Could not find rope.lassoapp in " + #path_master_home + " directory.")
+        sys_exit(-1)
+    }
+    
     local(path_project) = string($argv->get(3))
     #path_project->removeTrailing('/')
     
@@ -42,6 +50,9 @@ define run_new => {
     dir('SQLiteDBs/')    ->create
     
     io_file_symlink('../webapp' , 'LassoStartup')
+    local(f_ropeapp) = file(#path_master_home + 'LassoApps-disabled/rope.lassoapp')
+    #f_ropeapp->exists
+        ? #f_ropeapp->copyTo('LassoApps/' + #f_ropeapp->name)
 }
 
 define run_server => {
