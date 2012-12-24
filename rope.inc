@@ -14,14 +14,27 @@ usage: " + #cmd + " new PROJECT_NAME\n
 define run_new => {
     $argc < 3 ? usage
     
-    local(path_project) = $argv->get(3)
-    dir(#path_project)->create&setcwd
+    local(path_project) = string($argv->get(3))
+    #path_project->removeTrailing('/')
     
+    local(project_name) = #path_project->lastcomponent
+    #project_name->replace('_', ' ')&titlecase
+    
+    dir(#path_project)->create&setcwd
     dir('webapp/')    ->create
     dir('webroot/')   ->create
     dir('views/')     ->create
-    dir('lasso_home/')->create&setcwd
     
+    file('webapp/_config.inc')->doWithClose => {
+        #1->writeString("\
+            not rope->configLoaded?\n\
+            rope->config(\n    \
+                `app-name` = `" + #project_name + "`,\n\
+            )"
+        )
+    }
+    
+    dir('lasso_home/')   ->create&setcwd
     dir('JavaLibraries/')->create
     dir('JDBCDrivers/')  ->create
     dir('LassoApps/')    ->create
