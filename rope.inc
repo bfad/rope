@@ -11,17 +11,39 @@ usage: " + #cmd + " new PROJECT_NAME\n
     sys_exit(-1)
 }
 
+define path_master_home => (sys_getEnv(`LASSO9_MASTER_HOME`) || '/var/lasso/home') + '/'
+
 define run_new => {
     $argc < 3 ? usage
     
-    local(path_project) = $argv->get(3)
-    dir(#path_project)->create&setcwd
+    if(not file(path_master_home + 'LassoApps/rope.lassoapp')->exists
+        and not file(path_master_home + 'LassoApps-disabled/rope.lassoapp')->exists
+    ) => {
+        stdoutnl("ERROR: Could not find rope.lassoapp in " + path_master_home + " directory.")
+        sys_exit(-1)
+    }
     
+    local(path_project) = string($argv->get(3))
+    #path_project->removeTrailing('/')
+    
+    local(project_name) = #path_project->lastcomponent
+    #project_name->replace('_', ' ')&titlecase
+    
+    dir(#path_project)->create&setcwd
     dir('webapp/')    ->create
     dir('webroot/')   ->create
     dir('views/')     ->create
-    dir('lasso_home/')->create&setcwd
     
+    file('webapp/_config.inc')->doWithClose => {
+        #1->writeString("\
+            not rope->configLoaded?\n\
+            rope->config(\n    \
+                `app-name` = `" + #project_name + "`,\n\
+            )"
+        )
+    }
+    
+    dir('lasso_home/')   ->create&setcwd
     dir('JavaLibraries/')->create
     dir('JDBCDrivers/')  ->create
     dir('LassoApps/')    ->create
@@ -29,6 +51,9 @@ define run_new => {
     dir('SQLiteDBs/')    ->create
     
     io_file_symlink('../webapp' , 'LassoStartup')
+    local(f_ropeapp) = file(path_master_home + 'LassoApps-disabled/rope.lassoapp')
+    #f_ropeapp->exists
+        ? #f_ropeapp->copyTo('LassoApps/' + #f_ropeapp->name)
 }
 
 define run_server => {
@@ -127,6 +152,13 @@ define run_server => {
     }
     not dir(#project_path)->exists or not dir(#project_path + '/lasso_home/')->exists
         ? fail('The specified project path does not exist or is not a valid rope project')
+        
+    if(not file(path_master_home + 'LassoApps/rope.lassoapp')->exists
+        and not file(#project_path + '/lasso_home/LassoApps/rope.lassoapp')->exists
+    ) => {
+        stdoutnl("ERROR: Could not find rope.lassoapp in " + path_master_home + " directory.")
+        sys_exit(-1)
+    }
 
     // Set everything up
     /*
@@ -147,7 +179,7 @@ define run_server => {
     specify a different home using command-line options. (Any user-set LASSO9_HOME env 
     variable will be ignored and overridden.)
     */
-    sys_setEnv('LASSO9_MASTER_HOME', sys_getEnv('LASSO9_MASTER_HOME') or '/var/lasso/home/')
+    sys_setEnv('LASSO9_MASTER_HOME', path_master_home)
     sys_setEnv('LASSO9_HOME'       , #project_path + '/lasso_home/')
 
     protect => {
