@@ -111,9 +111,10 @@ define run_server => {
                 }
             }
             // keep alive requests use the same thread, so reset thread-local data
-            web_request = null
+            web_request  = null
             web_response = null
-            document = null
+            document     = null
+            var(_rope_)  = null
             var(_lassoapp_include_stack_) = null
             var(__HTML_REPLY__) = ''
         }
