@@ -127,10 +127,10 @@ define rope_impl => type {
         this method and follows these steps:
 
             #. If we are not running in production mode, it checks for any new files in
-            LassoStartup or any modified existing files and loads them. 
+               LassoStartup or any modified existing files and loads them. 
 
             #. It matches the URL path to a route. If there are any URL parameters in 
-            the path then it also loads them up.
+               the path then it also loads them up.
 
             #. It continues the Rope Session as long as sessions aren't turned off.
 
@@ -232,10 +232,10 @@ define rope_impl => type {
             #. The Route must be the same number of parts as the path.
 
             #. Routes can have wild-card parts, indicated by the part starting with a
-            colon. (These are matched as URL parameters later.) However, the matcher
-            prefers those routes whose earliest parts match non-wildcard parts. This
-            means that for two routes "/prada/:id" and "/:designer/shoes", the URL 
-            "/prada/shoes" will match the first - "/prada/:id".
+               colon. (These are matched as URL parameters later.) However, the matcher
+               prefers those routes whose earliest parts match non-wildcard parts. This
+               means that for two routes "/prada/:id" and "/:designer/shoes", the URL 
+               "/prada/shoes" will match the first - "/prada/:id".
 
             #. All the parts must be found to match either exactly or a wildcard.
 
