@@ -8,6 +8,29 @@ if(not var_defined('_rope_loaded')) => {
 }
 
 describe(::rope) => {
+    describe(`-> env`) => {
+        afterAll => {
+            sys_unsetEnv('ROPE_ENV')
+        }
+        it(`returns "dev" when ROPE_ENV variable not set`) => {
+            expect(::void, sys_getEnv('ROPE_ENV')->type)
+            expect("dev", rope->env)
+        }
+        it(`returns the value set in the ROPE_ENV variable`) => {
+            sys_setEnv('ROPE_ENV', 'fast')
+            
+            expect('fast', sys_getEnv('ROPE_ENV'))
+            expect('fast', rope->env)
+        }
+        it(`returns "" when ROPE_ENV variable is set to an empty string`) => {
+            sys_setEnv('ROPE_ENV', '')
+            
+            expect('', sys_getEnv('ROPE_ENV'))
+            expect('', rope->env)
+        }
+    }
+    
+    
     describe(`-> register`) => {
         context(`passed a givenBlock`) => {
             it(`registers the givenBlock to the controller`) => {

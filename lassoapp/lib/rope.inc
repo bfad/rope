@@ -278,6 +278,13 @@ define rope_impl => type {
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
     
+    /**!
+        This method returns "dev" if the ROPE_ENV environment variable has not been set.
+        Otherwise it returns the value stored in the environment variable, even if that
+        value is an empty string
+    */
+    public env => (sys_getEnv('ROPE_ENV')->isA(::void) ? 'dev' | sys_getEnv('ROPE_ENV'))
+    
     
     public protocol => (web_request->isHttps ? 'https://' | 'http://')
     public method   => .param(`_method`) || web_request->requestMethod
