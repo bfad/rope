@@ -198,11 +198,10 @@ describe(::rope) => {
 
         context(`when ROPE_ENV environment variable not set to production`) => {
             beforeAll => {
-                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
                 sys_setEnv('ROPE_ENV', 'dev')
             }
             afterAll => {
-                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+                sys_unsetEnv('ROPE_ENV')
             }
             it(`loads new files that it finds in LassoStartup`) => {
                 local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
@@ -234,11 +233,10 @@ describe(::rope) => {
         }
         context(`when ROPE_ENV environment variable is set to production`) => {
             beforeAll => {
-                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
                 sys_setEnv('ROPE_ENV', 'production')
             }
             afterAll => {
-                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+                sys_unsetEnv('ROPE_ENV')
             }
             it(`ignores new files that it finds in LassoStartup`) => {
                 local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')

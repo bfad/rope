@@ -137,7 +137,7 @@ define rope_impl => type {
             #. It executes the controller block that matches the route that was found.
     */
     public invoke => {
-        `production` != sys_getEnv(`ROPE_ENV`)
+        `production` != .env
             ? .startupCheckNLoad
 
         local(path)  = .path->asCopy->remove(1,1)&split('/')
