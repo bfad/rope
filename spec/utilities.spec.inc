@@ -26,3 +26,45 @@ describe(::rope_cycle) => {
         expect(`moose`, #cycle())
     }
 }
+
+
+describe(::stringOrNull) => {
+    it(`fails if the object isn't a bytes`) => {
+        expect->error => {
+            stringOrNull(3)
+        }
+        expect->error(error_code_noerror, error_msg_noerror) => {
+            stringOrNull(bytes(''))
+        }
+    }
+    it(`returns null if the object is empty`)  => {
+        expect->null(stringOrNull(bytes('')))
+    }
+    it(`returns the object if it is not empt`) => {
+        expect('foo', stringOrNull(bytes('foo')))
+    }
+}
+describe(::integerOrNull) => {
+    it(`fails if the object isn't a bytes`) => {
+        expect->error => {
+            integerOrNull(3)
+        }
+        expect->error(error_code_noerror, error_msg_noerror) => {
+            integerOrNull(bytes(''))
+        }
+    }
+    it(`returns null if the object is empty`)  => {
+        expect->null(integerOrNull(bytes('')))
+    }
+    it(`returns the object if it is not empt`) => {
+        expect(42, integerOrNull(bytes('42')))
+    }
+}
+describe(::dateOrNull) => {
+    it(`returns null if the object is empty`)  => {
+        expect->null(dateOrNull(bytes('')))
+    }
+    it(`returns the object if it is not empt`) => {
+        expect(date('2013-01-01'), dateOrNull(bytes('2013-01-01')))
+    }
+}

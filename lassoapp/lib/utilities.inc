@@ -63,3 +63,39 @@ define dir_import(d::dir, ext::staticarray=(:'lasso', 'inc')) => {
 define file_import(f::file) => {
     sourcefile(#f->readString, #f->path, false, false)->invoke
 }
+
+
+/**!
+This method takes in a bytes object and returns null if it is empty or the value
+as returned by the invokation of the tag passed as the second parameter. (Note,
+this may actually be the "onCreate" method of a type and not actual invoke-ing.)
+
+It is meant to be used as the "private" method that gets called behind the
+scenes for the "...OrNull" methods: ``stringOrNull``, ``dateOrNull``, etc.
+*/
+define orNullWrap(value::bytes , method::tag) => (#value->size == 0 ? null | \#method(#value))
+define orNullWrap(value::string, method::tag) => (#value->size == 0 ? null | \#method(#value))
+/**!
+This method takes in a bytes object and returns null if it is empty or the value
+as a string if it is not. It is meant to be used in the ``-as`` paramater of a
+``rope->param()`` (and it's siblings) method call. Ex::
+    
+    rope->param('rhino', -as=::stringOrNull)
+*/
+define stringOrNull(value) => orNullWrap(#value, ::string)
+/**!
+This method takes in a bytes object and returns null if it is empty or the value
+as an integer if it is not. It is meant to be used in the ``-as`` paramater of a
+``rope->param()`` (and it's siblings) method call. Ex::
+    
+    rope->param('rhino', -as=::integerOrNull)
+*/
+define integerOrNull(value) => orNullWrap(#value, ::integer)
+/**!
+This method takes in a bytes object and returns null if it is empty or the value
+as a date if it is not. It is meant to be used in the ``-as`` paramater of a
+``rope->param()`` (and it's siblings) method call. Ex::
+    
+    rope->param('rhino', -as=::dateOrNull)
+*/
+define dateOrNull(value) => orNullWrap(string(#value), ::date)
