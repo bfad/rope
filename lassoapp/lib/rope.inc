@@ -309,10 +309,10 @@ define rope_impl => type {
     public postParams  => web_request->postParams
     public params      => tie(.urlParams, tie(.queryParams, .postParams))->asStaticArray
     
-    public urlParam  (key::string, -as::tag=::string, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #as, #selectAll)
-    public queryParam(key::string, -as::tag=::string, -selectAll::boolean=false) => .getParam('queryParams', #key, #as, #selectAll)
-    public postParam (key::string, -as::tag=::string, -selectAll::boolean=false) => .getParam('postParams' , #key, #as, #selectAll)
-    public param     (key::string, -as::tag=::string, -selectAll::boolean=false) => .getParam('params'     , #key, #as, #selectAll)
+    public urlParam  (key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #as, #selectAll)
+    public queryParam(key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('queryParams', #key, #as, #selectAll)
+    public postParam (key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('postParams' , #key, #as, #selectAll)
+    public param     (key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('params'     , #key, #as, #selectAll)
     
     private getParam(type::string, key::string, as::tag, selectAll::boolean) => {
         if(#selectAll) => {
