@@ -309,12 +309,12 @@ define rope_impl => type {
     public postParams  => web_request->postParams
     public params      => tie(.urlParams, tie(.queryParams, .postParams))->asStaticArray
     
-    public urlParam  (key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #as, #selectAll)
-    public queryParam(key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('queryParams', #key, #as, #selectAll)
-    public postParam (key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('postParams' , #key, #as, #selectAll)
-    public param     (key::string, -as::tag=::stringOrNull, -selectAll::boolean=false) => .getParam('params'     , #key, #as, #selectAll)
+    public urlParam  (key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #as, #default, #selectAll)
+    public queryParam(key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('queryParams', #key, #as, #default, #selectAll)
+    public postParam (key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('postParams' , #key, #as, #default, #selectAll)
+    public param     (key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('params'     , #key, #as, #default, #selectAll)
     
-    private getParam(type::string, key::string, as::tag, selectAll::boolean) => {
+    private getParam(type::string, key::string, as::tag, default::any, selectAll::boolean) => {
         if(#selectAll) => {
             return (
                 with param in self->\(tag(#type))->invoke
@@ -327,7 +327,7 @@ define rope_impl => type {
         where #param->first == #key
         do { return \#as(#param->second) }
         
-        return void
+        return #default
     }
     
     
