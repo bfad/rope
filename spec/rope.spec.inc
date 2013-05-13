@@ -659,4 +659,84 @@ describe(::rope) => {
             expect(`PUT`, rope->method)
         }
     }
+    
+    
+    describe(`-> statusMsg`) => {
+        define rope_impl->tmpStatusMsg      => .`status_msg`
+        define rope_impl->tmpStatusMsg(set) => { .`status_msg` = #set }
+        
+        context(`called without any parameters`) => {
+            beforeAll => { rope->tmpStatusMsg(null) }
+            afterAll  => { rope->tmpStatusMsg(null) }
+            it(`returns "null" when no status message has been set`) => {
+                expect(null, rope->statusMsg)
+            }
+            it(`returns a map of the set status and message`) => {
+                local(item) = map(`status`=`error`, `message`=`Help! Help!`)
+                rope->tmpStatusMsg(#item)
+                local(result) = rope->statusMsg
+                
+                expect(#item->size, #result->size)
+                with key in #item->keys
+                let elm1 = #item->find(#key)
+                let elm2 = #result->find(#key)
+                do { expect(#elm1, #elm2) }
+            }
+        }
+        
+        it(`takes in a pair and sets the first item to the status and second to the message`) => {
+            rope->tmpStatusMsg(null)
+            rope->statusMsg(`success`=`rhino`)
+            local(result) = rope->statusMsg
+            
+            expect(`success`, #result->find('status'))
+            expect(`rhino`  , #result->find('message'))
+        }
+        it(`takes two arguments, the first is set to the status and the second to the message`) => {
+            rope->statusMsg(`warning`, `moose hair!`)
+            local(result) = rope->statusMsg
+            
+            expect(`warning`    , #result->find('status'))
+            expect(`moose hair!`, #result->find('message'))
+        }
+        
+        context(`called with the -status parameter`) => {
+            it(`returns "null" when no status message has been set`) => {
+                rope->tmpStatusMsg(null)
+                expect(null, rope->statusMsg(-status))
+            }
+            it(`returns just the status part of the status message`) => {
+                rope->statusMsg(`status`, `fire`)
+                expect(`status`, rope->statusMsg(-status))
+            }
+        }
+        
+        context(`called with the -message parameter`) => {
+            it(`returns "null" when no status message has been set`) => {
+                rope->tmpStatusMsg(null)
+                expect(null, rope->statusMsg(-message))
+            }
+            it(`returns just the message part of the status message`) => {
+                rope->statusMsg(``, `Inconceivable!`)
+                expect(`Inconceivable!`, rope->statusMsg(-message))
+            }
+        }
+        
+        it(`throws an error if both -status and -message are passed to it`) => {
+            expect->error(error_code_invalidParameter, `You can't specify both the status and the message`) => {
+                rope->statusMsg(-status, -message)
+            }
+        }
+    }
+//    describe(`-> statusMsgSuccess`) => {
+//      
+//        it(`sets the status_msg data element up with a status of "success" and a message of whatever is passed to it`) => {
+//            expect('', rope->tmpShowStatusMsg->asString)
+//
+//            rope->statusMsgSuccess(`My message`)
+//
+//            expect(`success`   , rope->tmpShowStatusMsg->find(`status`))
+//            expect(`My message`, rope->tmpShowStatusMsg->find('message'))
+//        }
+//    }
 }

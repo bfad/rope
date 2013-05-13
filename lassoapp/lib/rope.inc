@@ -120,7 +120,8 @@ define rope_thread => thread {
 }
 ::rope_thread->doccomment = tag('rope_thread_thread$')->doccomment
 define rope_impl => type {
-    data public urlParams::array = array
+    data public urlParams::array = array,
+        private status_msg
     
     /**!
         This is where the magic all happens. Every web request that rope handles runs
@@ -329,6 +330,24 @@ define rope_impl => type {
         
         return #default
     }
+    
+    
+    public statusMsg(-status::boolean=false, -message::boolean=false) => {
+        fail_if(#status && #message, error_code_invalidParameter, `You can't specify both the status and the message`)
+          
+        null === .`status_msg`
+            ? return null
+        
+        #status
+            ? return .`status_msg`->find(`status`)
+        #message
+            ? return .`status_msg`->find(`message`)
+
+        return .`status_msg`
+    }
+    
+    public statusMsg(stat_msg::pair)            => { .`status_msg` = map(`status`=#stat_msg->first, `message`=#stat_msg->second) }
+    public statusMsg(stat::string, msg::string) => { .`status_msg` = map(`status`=#stat           , `message`=#msg             ) }
     
     
     public continueSession => {
