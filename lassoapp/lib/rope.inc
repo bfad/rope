@@ -345,8 +345,10 @@ define rope_impl => type {
 
         return .`status_msg`
     }
-    public statusMsg(stat_msg::pair)            => { .`status_msg` = map(`status`=#stat_msg->first, `message`=#stat_msg->second) }
-    public statusMsg(stat::string, msg::string) => { .`status_msg` = map(`status`=#stat           , `message`=#msg             ) }
+    public statusMsg(stat::string, msg::string) => { 
+        .`status_msg` = map(`status`=#stat, `message`=#msg)
+    }
+    public statusMsg(stat_msg::pair) => .statusMsg(#stat_msg->first, #stat_msg->second)
     
     public statusMsgSuccess(msg::string) => .statusMsg(`success`, #msg)
     public statusMsgWarning(msg::string) => .statusMsg(`warning`, #msg)
