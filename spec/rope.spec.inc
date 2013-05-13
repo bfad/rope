@@ -727,16 +727,33 @@ describe(::rope) => {
                 rope->statusMsg(-status, -message)
             }
         }
+    
+        describe(`-> statusMsgSuccess`) => {
+            it(`sets the status_msg data element up with a status of "success" and a message of whatever is passed to it`) => {
+                rope->tmpStatusMsg(null)
+                rope->statusMsgSuccess(`My message`)
+
+                expect(`success`   , rope->statusMsg->find(`status`))
+                expect(`My message`, rope->statusMsg->find('message'))
+            }
+        }
+        describe(`-> statusMsgWarning`) => {
+            it(`sets the status_msg data element up with a status of "warning" and a message of whatever is passed to it`) => {
+                rope->tmpStatusMsg(null)
+                rope->statusMsgWarning(`you've been warned`)
+
+                expect(`warning`           , rope->statusMsg->find(`status`))
+                expect(`you've been warned`, rope->statusMsg->find('message'))
+            }
+        }
+        describe(`-> statusMsgError`) => {
+            it(`sets the status_msg data element up with a status of "error" and a message of whatever is passed to it`) => {
+                rope->tmpStatusMsg(null)
+                rope->statusMsgError(`No Error`)
+
+                expect(`error`   , rope->statusMsg->find(`status`))
+                expect(`No Error`, rope->statusMsg->find('message'))
+            }
+        }
     }
-//    describe(`-> statusMsgSuccess`) => {
-//      
-//        it(`sets the status_msg data element up with a status of "success" and a message of whatever is passed to it`) => {
-//            expect('', rope->tmpShowStatusMsg->asString)
-//
-//            rope->statusMsgSuccess(`My message`)
-//
-//            expect(`success`   , rope->tmpShowStatusMsg->find(`status`))
-//            expect(`My message`, rope->tmpShowStatusMsg->find('message'))
-//        }
-//    }
 }
