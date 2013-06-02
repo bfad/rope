@@ -388,6 +388,11 @@ define rope_impl => type {
             ? fail(`Sessions are disabled`)
         $_sess_user = #rhs
     }
+    public user=(rhs::null) => {
+        not .config(`sessions-enabled`)
+            ? fail(`Sessions are disabled`)
+        $_sess_user = #rhs
+    }
     
     
     private viewForPath(path::string)::file => {
