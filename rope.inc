@@ -77,6 +77,10 @@ define run_server => {
     }
 
 
+		// 9.2.6 bug
+		library_thread_loader->loadLibrary((sys_masterHomePath || sys_homePath) + '/LassoLibraries/builtins/list.' + sys_dll_ext)
+		library_thread_loader->loadLibrary((sys_masterHomePath || sys_homePath) + '/LassoLibraries/lassoserver/http_server.' + sys_dll_ext) 
+
     define rope_connection_handler => type { parent http_server_connection_handler
         public onCreate(root::string, exts::trait_forEach) => ..onCreate(#root, #exts)
     
