@@ -27,8 +27,8 @@ host setup and adapt it to your system's Apache configuration.
    link the "lasso_home" directory in your Rope application to where the 
    instance's home directory used to be::
 
-	$> sudo rm -rf /var/lasso/instances/default
-	$> sudo ln -s /var/www/example/lasso_home /var/lasso/instances/default
+   $> sudo rm -rf /var/lasso/instances/default
+   $> sudo ln -s /var/www/example/lasso_home /var/lasso/instances/default
 
 #. Back in the browser, navigate to the environment variable and add the
    following environment variable: ``ROPE_ENV=production``.
@@ -38,26 +38,26 @@ host setup and adapt it to your system's Apache configuration.
 #. Make your Apache virtual host site configuration look something like the
    following::
 
-	<VirtualHost *:80>
-		ServerAdmin webmaster@localhost
+   <VirtualHost *:80>
+      ServerAdmin webmaster@localhost
 
-		DocumentRoot /var/www/example/webroot
-		<Directory />
-			Options FollowSymLinks
-			AllowOverride None
-		</Directory>
-		<Directory /var/www/example/webroot/>
-			Options FollowSymLinks
-			AllowOverride None
-			Order allow,deny
-			allow from all
-		</Directory>
+      DocumentRoot /var/www/example/webroot
+      <Directory />
+         Options FollowSymLinks
+         AllowOverride None
+      </Directory>
+      <Directory /var/www/example/webroot/>
+         Options FollowSymLinks
+         AllowOverride None
+         Order allow,deny
+         allow from all
+      </Directory>
 
-		RewriteEngine on
-		RewriteCond %{REQUEST_URI}  !^/lasso9/.*$
-		RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
-		RewriteRule ^(.*)$ /lasso9/rope/url_handler.lasso [L,NS,H=lasso9-handler,E=LASSOSERVER_APP_PREFIX:/lasso9/rope]
-	</VirtualHost>
-	
+      RewriteEngine on
+      RewriteCond %{REQUEST_URI}  !^/lasso9/.*$
+      RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+      RewriteRule ^(.*)$ /lasso9/rope/url_handler.lasso [L,NS,H=lasso9-handler,E=LASSOSERVER_APP_PREFIX:/lasso9/rope]
+   </VirtualHost>
+   
 #. Once your Apache settings are setup, reload Apache and your should now be
    running.

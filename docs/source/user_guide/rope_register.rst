@@ -11,9 +11,9 @@ Registering a Controller
 ------------------------
 The example below registers a block of code in the Rope application::
 
-	rope->register(`home`) => {
-		content_body = "Hello, World!"
-	}
+   rope->register(`home`) => {
+      content_body = "Hello, World!"
+   }
 
 Your Rope application now has a controller named "home" that could be executed
 by calling ``rope->controller('home')->invoke``. It is currently not attached to
@@ -25,7 +25,7 @@ Registering a Route to a Controller
 Once a controller has been registered into your application, it can then be
 assigned to a route::
 
-	rope->register(`home`, -routes=(:'/'))
+   rope->register(`home`, -routes=(:'/'))
 
 The "routes" named parameter takes a staticarray of routes that Rope will use to
 match URLs to that controller. (For details on the matching process, see the
@@ -42,9 +42,9 @@ Registering a Controller Code Block and Routes
 It is possible to register a controller with a block of code and the routes it
 responds all at once::
 
-	rope->register(`hello-name`, -routes(:'/:name')) => {
-		content_body = "Hello, " + rope->param('name')
-	}
+   rope->register(`hello-name`, -routes(:'/:name')) => {
+      content_body = "Hello, " + rope->param('name')
+   }
 
 In this example, I have registered a code block and its route all at once. This
 route is a wild-card route that will match any URL that is only one level deep.
@@ -53,9 +53,9 @@ In other words, it would match "http://example.com/John" but not
 of the path they represent by their name using the ``rope->param`` method.
 
 .. note::
-	Now that the controller has been registered, I could register additional routes
-	later on if I wanted to using the sytax shown
-	:ref:`above <rope-register-block-and-routes>`.
+   Now that the controller has been registered, I could register additional routes
+   later on if I wanted to using the sytax shown
+   :ref:`above <rope-register-block-and-routes>`.
 
 
 .. _ug-matching-url-to-routes:

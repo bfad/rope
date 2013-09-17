@@ -12,8 +12,8 @@ To create a new Rope application, open a terminal and change to the directory
 you want to create the new project in and issue the ``rope new <NAME>`` command
 or the short-cut ``rope n <NAME>`` command. Ex::
 
-	$> cd ~/projects/
-	$> rope new do_list
+   $> cd ~/projects/
+   $> rope new do_list
 
 The above example will create a directory named "do_list" in the projects
 directory in your home folder. That new directory will contain the basic file
@@ -26,8 +26,8 @@ To run your Rope application, change your working directory to the top-level of
 your Rope application and then issue the ``rope server`` or ``rope s`` command.
 Ex::
 
-	$> cd ~/projects/do_list
-	$> rope s
+   $> cd ~/projects/do_list
+   $> rope s
 
 This starts the built-in web server and loads up your Rope application. While
 this web server is suitable for development work, you should look into deploying

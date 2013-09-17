@@ -6,17 +6,17 @@ value. The following are a list of Rope configuration settings, their default
 values, and what they do:
 
 app-name
-	*Default Value:* "UnNamed"
+   *Default Value:* "UnNamed"
 
-	This is the name of your application - choose it wisely!
+   This is the name of your application - choose it wisely!
 
 sessions-enabled
-	*Default Value:* true
-	
-	If enabled, allows for using ``rope->sess`` to store and retrieve session
-	values. This value must be set to ``true`` to use ``rope->user``.
+   *Default Value:* true
+   
+   If enabled, allows for using ``rope->sess`` to store and retrieve session
+   values. This value must be set to ``true`` to use ``rope->user``.
 
 sessions-expires
-	*Default Value:* 1440
-	
-	This specifies the timeout value for sessions in minutes.
+   *Default Value:* 1440
+   
+   This specifies the timeout value for sessions in minutes.
