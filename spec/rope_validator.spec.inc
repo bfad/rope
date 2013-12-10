@@ -7,291 +7,233 @@ if(not var_defined('_rope_loaded')) => {
     sourcefile(#f->readString, #f->path, false, false)->invoke
 }
 
-describe(::rope_validator) => {
-    describe(`-> onCreate`) => {
-        it(`takes in a map of validations and an arbitrary amount of keywords name/value`) => {
-            expect->error(error_code_noError, error_msg_noError) => {
-                rope_validator(map, -moose='hair')
-                rope_validator(map, -moose='hair', -foo='bar')
-            }
-        }
-        it(`takes in a map of validations and an arbitrary amount of pairs`) => {
-            expect->error(error_code_noError, error_msg_noError) => {
-                rope_validator(map, 'moose'='hair')
-                rope_validator(map, 'moose'='hair', 'foo'='bar')
-            }
-        }
-        it(`throws a "method not found" error if not passed anything to the rest parameters`) => {
-            expect->error(error_code_methodNotFound, error_msg_methodNotFound + `: Candidtates are rope_validator(validations::map, ...)`) => {
-                rope_validator(map)
-            }
-        }
-        it(`throws an invalid parameter error if an element in the rest params is not a pair or keyword`) => {
-            expect->error(error_code_invalidParameter, error_msg_invalidParameter) => {
-                rope_validator(map, 2)
-            }
-            expect->error(error_code_invalidParameter, error_msg_invalidParameter) => {
-                rope_validator(map, -moose=3, 'hair')
-            }
-        }
-        it(`sets the values data member to a map of the keywords or pairs passed in and the validations data method to the map passed in`) => {
-            local(validations) = map('moose' = map)
-            local(test_value) = map('foo'='bar', 'bah'='humbugh')
-            local(validator) = rope_validator(#validations, -foo='bar', "bah"="humbugh")
-            
-            // For some reason, just comparing the maps isn't working right, so doing it manually
-            expect(#validations->size, #validator->validations->size)
-            
-            with key in #validator->validations->keys
-            do expect(#validations->keys->contains(#key))
-            
-            with value in #validator->validations->values
-            do expect(#validations->values->contains(#value))
-            
-            expect(#test_value->size, #validator->values->size)
-            
-            with key in #validator->values->keys
-            do expect(#test_value->keys->contains(#key))
-            
-            with value in #validator->values->values
-            do expect(#test_value->values->contains(#value))
-        }
-    }
-    
-    
-    describe(`-> validate(key::string)`) => {
-        //it(`returns true when the data for the key is valid`)
-        //it(`returns false when the data for the key is invalid`)
-        context('when there are no validations') => {
-            it(`returns true when the specified key isn't found in the validations`) => {
-                expect(rope_validator(map, -foo=2)->validate('breath'))
-            }
-            it(`returns true when the validations for the specified key is an empty map`) => {
-                expect(rope_validator(map('foo'=map), -foo=2)->validate('foo'))
-            }
-            it(`returns true when the validations for the specified key is an unknown validation type`) => {
-                expect(rope_validator(map('foo'=map('r12ndone'=2)), -foo=2)->validate('foo'))
-            }
-        }
-        
-        context('when there is a type validation') => {
-            local(validations) = map(
-                'moose' = map('type'=::string),
-                'rhino' = map('type'=(: ::string, ::integer)),
-            )
-            it(`returns true when the specified value is of the type specified`) => {
-                expect(rope_validator(#validations, -moose='')->validate('moose'))
-            }
-            it(`returns true when the specified value is of one of the specified types`) => {
-                expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
-            }
-            it(`returns false when the specified value is not of the type specified`) => {
-                expect(not rope_validator(#validations, -moose=42)->validate('moose'))
-            }
-            it(`returns false when the specified value is not of one of the specified types`) => {
-                expect(not rope_validator(#validations, -rhino=date)->validate('rhino'))
-            }
-        }
-        
-        context('when there is a min validation') => {
-            local(validations) = map('rhino' = map('min'=2))
-            
-            context(`the value type is *not* a trait_finite`) => {
-                it(`returns true when the value is >= the minimum specified`) => {
-                    expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino=2)->validate('rhino'))
-                }
-                it(`returns false when the value is < the minimum specified`) => {
-                    expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
-                }
-            }
-            context(`the value type is a trait_finite`) => {
-                it(`returns true when the size of the value is >= the minimum specified`) => {
-                    expect(rope_validator(#validations, -rhino='42')->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino='two')->validate('rhino'))
-                }
-                it(`returns false when the size of the value is < the minimum specified`) => {
-                    expect(not rope_validator(#validations, -rhino='1')->validate('rhino'))
-                }
-            }
-            
-            it(`returns true without further checks if the type is null and null is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=(: ::null, ::integer), 'min'=2))
-                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
-            }
-            it(`returns true without further checks if the type is void and void is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=(: ::void, ::integer), 'min'=2))
-                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
-            }
-        }
-        
-        context('when there is a max validation') => {
-            local(validations) = map('rhino' = map('max'=2))
-            
-            context(`the value type is *not* a trait_finite`) => {
-                it(`returns true when the value is <= the maximum specified`) => {
-                    expect(rope_validator(#validations, -rhino=0)->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino=2)->validate('rhino'))
-                }
-                it(`returns false when the value is > the maximum specified`) => {
-                    expect(not rope_validator(#validations, -rhino=42)->validate('rhino'))
-                }
-            }
-            context(`the value type is a trait_finite`) => {
-                it(`returns true when the size of the value is <= the maximum specified`) => {
-                    expect(rope_validator(#validations, -rhino='42')->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino='')->validate('rhino'))
-                }
-                it(`returns false when the size of the value is > the maximum specified`) => {
-                    expect(not rope_validator(#validations, -rhino='rhino')->validate('rhino'))
-                }
-            }
-            
-            it(`returns true without further checks if the type is null and null is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=(: ::null, ::integer), 'max'=2))
-                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
-            }
-            it(`returns true without further checks if the type is void and void is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=(: ::void, ::integer), 'max'=2))
-                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
-            }
-        }
-        
-        context('when there is a range validation') => {
-            local(validations) = map('rhino' = map('range'=2 to 4))
-            
-            context(`the value type is *not* a trait_finite`) => {
-                it(`returns true when the value is >= the minimum specified`) => {
-                    expect(rope_validator(#validations, -rhino=3)->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino=2)->validate('rhino'))
-                }
-                it(`returns false when the value is < the minimum specified`) => {
-                    expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
-                }
-                it(`returns true when the value is <= the maximum specified`) => {
-                    expect(rope_validator(#validations, -rhino=4)->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino=3)->validate('rhino'))
-                }
-                it(`returns false when the value is > the maximum specified`) => {
-                    expect(not rope_validator(#validations, -rhino=42)->validate('rhino'))
-                }
-            }
-            context(`the value type is a trait_finite`) => {
-                it(`returns true when the size of the value is >= the minimum specified`) => {
-                    expect(rope_validator(#validations, -rhino='42')->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino='two')->validate('rhino'))
-                }
-                it(`returns false when the size of the value is < the minimum specified`) => {
-                    expect(not rope_validator(#validations, -rhino='1')->validate('rhino'))
-                }
-                it(`returns true when the size of the value is <= the maximum specified`) => {
-                    expect(rope_validator(#validations, -rhino='two')->validate('rhino'))
-                    expect(rope_validator(#validations, -rhino='mare')->validate('rhino'))
-                }
-                it(`returns false when the size of the value is > the maximum specified`) => {
-                    expect(not rope_validator(#validations, -rhino='rhino')->validate('rhino'))
-                }
-            }
-            
-            it(`returns true without further checks if the type is null and null is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=(: ::null, ::integer), 'range'=2 to 4))
-                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
-            }
-            it(`returns true without further checks if the type is void and void is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=(: ::void, ::integer), 'range'=2 to 4))
-                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
-            }
-        }
-        
-        context('when there is a custom validation') => {
-            it(`returns false when the block returns nothing`) => {
-                local(validations) = map('rhino' = map('custom' = _() => {} ))
-                
-                expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
-            }
-            it(`returns true when the block returns true`) => {
-                local(validations) = map('rhino' = map('custom' = _() => { return true } ))
-                
-                expect(rope_validator(#validations, -rhino=1)->validate('rhino'))
-            }
-            it(`returns false when the block returns false`) => {
-                local(validations) = map('rhino' = map('custom' = _() => { return false } ))
-                
-                expect(not rope_validator(#validations, -rhino=1)->validate('rhino'))
-            }
-            it(`passes the value as the first parameter when invoking the given block`) => {
-                local(validations) = map('rhino' = map('custom' = _() => { return (#1 == 42) } ))
-                
-                expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
-            }
-            it(`passes the values map as the second parameter when invoking the given block`) => {
-                local(validations) = map('rhino' = map('custom' = _() => { return (#1 == #2->find('rhino')) } ))
-                
-                expect(rope_validator(#validations, -rhino=42)->validate('rhino'))
-            }
-            
-            it(`returns true without further checks if the type is null and null is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=null, 'custom' = _() => { return false } ))
-                
-                expect(rope_validator(#validations, -rhino=null)->validate('rhino'))
-            }
-            it(`returns true without further checks if the type is void and void is an allowed type`) => {
-                local(validations) = map('rhino' = map('type'=void, 'custom' = _() => { return false } ))
-                
-                expect(rope_validator(#validations, -rhino=void)->validate('rhino'))
-            }
-        }
-    }
-    
-    
-    describe(`-> allValid`) => {
-        local(validations) = map(
-            'moose' = map('type' = ::string),
-            'rhino' = map('type' = ::integer)
-        )
-        
-        it(`returns true if all data elements are valid`) => {
-            expect(rope_validator(#validations, -moose='hair', -rhino=42)->allValid)
-        }
-        it(`returns false if any data element is invalid`) => {
-            expect(not rope_validator(#validations, -moose='hair', -rhino='horn')->allValid)
-        }
-        it(`sets the failed data member to an empty array if all valid`) => {
-            local(validator) = rope_validator(#validations, -moose='hair', -rhino=42)
-            
-            expect(null, #validator->failed)
-            expect(#validator->allValid)
-            expect(::staticarray, #validator->failed->type)
-            expect(0, #validator->failed->size)
-        }
-        it(`sets the failed data member to an array of those keys that were found to be invalid`) => {
-            local(validator) = rope_validator(#validations, -moose='hair', -rhino='horn')
-            
-            expect(null, #validator->failed)
-            expect(not #validator->allValid)
-            expect(::staticarray, #validator->failed->type)
-            expect(1, #validator->failed->size)
-            expect('rhino', #validator->failed->get(1))
-        }
-        it(`doesn't run through the validations if it has already done so`) => {
-            local(validator) = rope_validator(map('rhino'=map('custom'=_() => {yield 1; yield 2; yield 3;} )), -rhino=2)
-            
-            #validator->allValid
-            #validator->allValid
-            expect(2, #validator->validations->find('rhino')->find('custom')->invoke)
-        }
-    }
-    
-    
-    describe(`-> hasAllValidRun`) => {
-        it(`returns false if the allValid method hasn't run`) => {
-            expect(not rope_validator(map, -foo=1)->hasAllValidRun)
-        }
-        it(`returns true if the allValid method has run`) => {
-            local(validator) = rope_validator(map, -foo=1)
 
-            #validator->allValid
-            expect(#validator->hasAllValidRun)
+// The type to be used for stuff
+define test_typeValidator => type {
+    trait { import trait_rope_objectValidator }
+
+    data public ropeValidations = map(
+        ::fail1 = { return false },
+        ::fail2 = { return 'bad' },
+        ::pass1 = { return true  },
+        ::pass2 = { return       }
+    )
+
+    public fail1 => `fail1`
+    public fail2 => `fail2`
+    public pass1 => `pass1`
+    public pass2 => `pass2`
+}
+
+
+describe(::trait_rope_objectValidator) => {
+    describe(`-> ropeValidate`) => {
+        context(`passed a string or a tag`) => {
+            it(`returns the result of running the specified validation`) => {
+                expect(false, test_typeValidator->ropeValidate(`fail1`))
+                expect('bad', test_typeValidator->ropeValidate(::fail2))
+                expect(true , test_typeValidator->ropeValidate(`pass1`))
+                expect(void , test_typeValidator->ropeValidate(::pass2))
+            }
+
+            it(`returns void if the specified validation does not exist`) => {
+                expect(void, test_typeValidator->ropeValidate(`_not_here_`))
+                expect(void, test_typeValidator->ropeValidate(::_not_here_))
+            }
+
+            it(`allows memberstreams to be a validator`) => {
+                define foo_test_valid_stuff(p) => `hello, ` + #p
+
+                local(test) = test_typeValidator
+                #test->ropeValidations = map(::fail1=\foo_test_valid_stuff)
+
+                expect(`hello, fail1`, #test->ropeValidate(::fail1))
+            }
+        }
+
+        it(`runs through all the validations and returns an array of the fields that failed`) => {
+            local(failed) = test_typeValidator->ropeValidate
+            local(expect) = (:`fail1`=`This field is invalid`, `fail2`=`bad`)
+            
+            expect(#expect, #failed)
+        }
+
+        context(`passed an array of keys to validate`) => {
+            it(`throws an error if there are no items in the list`) => {
+                expect->error => { test_typeValidator->ropeValidate((:)) }
+            }
+            it(`only validates the specified the specified keys`) => {
+                expect((: `fail2`=`bad`), test_typeValidator->ropeValidate((: ::fail2)))
+            }
+            it(`returns the failed validation in the order of the keys`) => {
+                local(test) = test_typeValidator
+                #test->ropeValidations = map(
+                    ::fail1 = { return 'bad3' },
+                    ::fail2 = { return 'bad2' },
+                    ::pass1 = { return 'bad1' },
+                    ::pass2 = { return 'bad4' }
+                )
+                local(expected) = (:
+                    `pass1`=`bad1`,
+                    `fail2`=`bad2`,
+                    `fail1`=`bad3`,
+                    `pass2`=`bad4`
+                )
+                expect(#expected, #test->ropeValidate((: ::pass1, ::fail2, `fail1`, `pass2`)))
+            }
+        }
+    }
+
+
+    describe(`-> ropeIsValid`) => {
+        it(`returns true if the string-specified validation returns true or void`) => {
+            local(test) = test_typeValidator
+            #test->ropeValidations = map(
+                ::pass1 = { return true },
+                ::pass2 = { return      }
+            )
+
+            expect(true, #test->ropeIsValid(`pass1`))
+            expect(true, #test->ropeIsValid(`pass2`))
+        }
+        it(`returns false if the string-specfied validation returns string or false`) => {
+            local(test) = test_typeValidator
+            #test->ropeValidations = map(
+                ::fail1 = { return false },
+                ::fail2 = { return 'bad' }
+            )
+
+            expect(false, #test->ropeIsValid(`fail1`))
+            expect(false, #test->ropeIsValid(`fail2`))
+        }
+
+        it(`returns true if the tag-specified validation returns true or void`) => {
+            local(test) = test_typeValidator
+            #test->ropeValidations = map(
+                ::pass1 = { return true },
+                ::pass2 = { return      }
+            )
+
+            expect(true, #test->ropeIsValid(`pass1`))
+            expect(true, #test->ropeIsValid(`pass2`))
+        }
+        it(`returns false if the tag-specfied validation returns string or false`) => {
+            local(test) = test_typeValidator
+            #test->ropeValidations = map(
+                ::fail1 = { return false },
+                ::fail2 = { return 'bad' }
+            )
+            
+            expect(false, #test->ropeIsValid(`fail1`))
+            expect(false, #test->ropeIsValid(`fail2`))
+        }
+
+        it(`returns true if all are valid`) => {
+            local(test) = test_typeValidator
+            #test->ropeValidations = map(
+                ::fail1 = { return true },
+                ::fail2 = { return true },
+                ::pass1 = { return true }
+            )
+
+            expect(#test->ropeIsValid)
+        }
+        it(`returns false if any are invalid`) => {
+            expect(not test_typeValidator->ropeIsValid)
+        }
+    }
+}
+
+describe(::rv_notEmpty) => {
+    it(`returns a memberstream with method name of rv_notEmpty when called with no parameters`) => {
+        local(t) = rv_notEmpty
+        expect(::memberstream, #t->type)
+    }
+
+    context(`passed a value to check`) => {
+        it(`returns the default validation message if the value is void`) => {
+            expect("Field can not be empty", rv_notEmpty(void))
+        }
+        it(`returns the default validation message if the value is null`) => {
+            expect("Field can not be empty", rv_notEmpty(null))
+        }
+        it(`returns the default validation message if value->size is zero`) => {
+            expect("Field can not be empty", rv_notEmpty(``))
+        }
+        it(`returns void if none of the other conditions are met`) => {
+            expect(void, rv_notEmpty('ha!'))
+        }
+
+        it(`allows the message to be set by an optional second param`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notEmpty(void, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_containedIn) => {
+    it(`Takes in an object that understands the >> operator and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_containedIn((:1,'a'))->type)
+    }
+    it(`takes anobject that understands the >> operator and a string to use for message and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_containedIn((:1, 'a'), 'bad')->type)
+    }
+
+    context(`passed both a value and a container list`) => {
+        it(`returns void if the value is contained by the specified set`) => {
+            expect(void, rv_containedIn('a', (:1,'a')))
+        }
+        it(`returns the default validation message if the value is not in the set`) => {
+            expect(`Field must be one of 1, a`, rv_containedIn('z', (:1,'a')))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not in the set`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_containedIn('z', (:1,'a'), `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(contains_test) = rv_containedIn((:'a', 'b', 'c'))
+        it(`returns void if the value is contained by the specified set`) => {
+            expect(void, #contains_test(`b`))
+        }
+        it(`returns the default validation message if the value is not in the set`) => {
+            expect("Field must be one of a, b, c", #contains_test(`Z`))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not in the set`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #contains_test('z', `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_inRange) => {
+    it(`Takes in a generateSeries object and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_inRange(1 to 10)->type)
+    }
+    it(`takes a generateSeries and string to use for message and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_inRange(1 to 10, `bad`)->type)
+    }
+
+    context(`passed both a value and a generateSeries`) => {
+        it(`returns void if the value is in the series`) => {
+            expect(void, rv_inRange(3, 1 to 5))
+        }
+        it(`returns the default validation message if the value is not in the series`) => {
+            expect(`Field must be between 1 and 5`, rv_inRange(-3, 1 to 5))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not in the series`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_inRange(-3, 1 to 5, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(contains_test) = rv_inRange(1 to 5)
+        it(`returns void if the value is contained by the specified set`) => {
+            expect(void, #contains_test(3))
+        }
+        it(`returns the default validation message if the value is not in the set`) => {
+            expect("Field must be between 1 and 5", #contains_test(-3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not in the set`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #contains_test(-3, `rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 }

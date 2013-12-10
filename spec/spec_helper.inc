@@ -55,7 +55,10 @@ define new_fake_conn => {
     web_response = web_response_impl(#con)
 }
 // For sessions
-protect => {\http_server_web_connection}
+protect => {
+    \list
+    \http_server_web_connection
+}
 define http_server_web_connection->requestParams => var(_req_params) || $_req_params := map
 define http_server_web_connection->stdin         => var(_req_stdin)  || $_req_stdin  := ``
 session_initialize
