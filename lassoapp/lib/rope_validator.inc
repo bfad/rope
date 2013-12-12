@@ -20,13 +20,15 @@ define trait_rope_objectValidator => trait {
         #keys->isA(::trait_finiteForEach) and #keys->size == 0
             ? fail(`Nothing to validate`)
         
-        return (
-            with key in #keys
-            let validation = .ropeValidate(#key)
-            where #validation != void 
-            where (#validation->isNotA(::boolean) or #validation == false)
-            select pair(#key->asString, #validation || `This field is invalid`)
-        )->asStaticArray
+        local(ret) = map
+        
+        with key in #keys
+        let validation = .ropeValidate(#key)
+        where #validation != void 
+        where (#validation->isNotA(::boolean) or #validation == false)
+        do #ret->insert(#key->asString = #validation || `This field is invalid`)
+        
+        return #ret
     }
 
     provide ropeIsValid() => .ropeValidate->size == 0

@@ -53,9 +53,10 @@ describe(::trait_rope_objectValidator) => {
 
         it(`runs through all the validations and returns an array of the fields that failed`) => {
             local(failed) = test_typeValidator->ropeValidate
-            local(expect) = (:`fail1`=`This field is invalid`, `fail2`=`bad`)
+            local(expect) = map(`fail1`=`This field is invalid`, `fail2`=`bad`)
             
-            expect(#expect, #failed)
+            expect(#expect->keys  , #failed->keys)
+            expect(#expect->values, #failed->values)
         }
 
         context(`passed an array of keys to validate`) => {
@@ -63,23 +64,11 @@ describe(::trait_rope_objectValidator) => {
                 expect->error => { test_typeValidator->ropeValidate((:)) }
             }
             it(`only validates the specified the specified keys`) => {
-                expect((: `fail2`=`bad`), test_typeValidator->ropeValidate((: ::fail2)))
-            }
-            it(`returns the failed validation in the order of the keys`) => {
-                local(test) = test_typeValidator
-                #test->ropeValidations = map(
-                    ::fail1 = { return 'bad3' },
-                    ::fail2 = { return 'bad2' },
-                    ::pass1 = { return 'bad1' },
-                    ::pass2 = { return 'bad4' }
-                )
-                local(expected) = (:
-                    `pass1`=`bad1`,
-                    `fail2`=`bad2`,
-                    `fail1`=`bad3`,
-                    `pass2`=`bad4`
-                )
-                expect(#expected, #test->ropeValidate((: ::pass1, ::fail2, `fail1`, `pass2`)))
+                local(result) = test_typeValidator->ropeValidate((: ::fail2))
+                local(expect) = map(`fail2`=`bad`)
+
+                expect(#expect->keys  , #result->keys)
+                expect(#expect->values, #result->values)
             }
         }
     }
