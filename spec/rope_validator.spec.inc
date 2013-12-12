@@ -163,7 +163,7 @@ describe(::rv_containedIn) => {
     it(`Takes in an object that understands the >> operator and returns a memberstream of the method to call`) => {
         expect(::memberstream, rv_containedIn((:1,'a'))->type)
     }
-    it(`takes anobject that understands the >> operator and a string to use for message and returns a memberstream of the method to call`) => {
+    it(`takes an object that understands the >> operator and a string to use for message and returns a memberstream of the method to call`) => {
         expect(::memberstream, rv_containedIn((:1, 'a'), 'bad')->type)
     }
 
@@ -193,6 +193,40 @@ describe(::rv_containedIn) => {
     }
 }
 
+describe(::rv_notContainedIn) => {
+    it(`Takes in an object that understands the !>> operator and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_notContainedIn((:1,'a'))->type)
+    }
+    it(`Takes a an object that understands the !>> operator and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_notContainedIn((:1,'a'), `bad`)->type)
+    }
+
+    context(`passed a given value and a container list`) => {
+        it(`returns void if the value is not contained by the specified set`) => {
+            expect(void, rv_notContainedIn('b', (:1,'a')))
+        }
+        it(`returns the default validation message if the value is in the set`) => {
+            expect(`Field must not be one of 1, a`, rv_notContainedIn('a', (:1,'a')))
+        }
+        it(`allows for a custom validation messag if the value is in the set`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notContainedIn('a', (:1,'a'), `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(contains_test) = rv_notContainedIn((:'a', 'b', 'c'))
+        it(`returns void if the value is not contained by the specified set`) => {
+            expect(void, #contains_test('d'))
+        }
+        it(`returns the default validation message if the value is in the set`) => {
+            expect("Field must not be one of a, b, c", #contains_test('a'))
+        }
+        it(`allows for a custom validation messag if the value is in the set`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #contains_test('c', `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
 describe(::rv_inRange) => {
     it(`Takes in a generateSeries object and returns a memberstream of the method to call`) => {
         expect(::memberstream, rv_inRange(1 to 10)->type)
@@ -215,14 +249,336 @@ describe(::rv_inRange) => {
 
     context(`invoked with a value to check`) => {
         local(contains_test) = rv_inRange(1 to 5)
-        it(`returns void if the value is contained by the specified set`) => {
+        it(`returns void if the value is in the series`) => {
             expect(void, #contains_test(3))
         }
-        it(`returns the default validation message if the value is not in the set`) => {
+        it(`returns the default validation message if the value is not in the series`) => {
             expect("Field must be between 1 and 5", #contains_test(-3))
         }
-        it(`allows an optional custom validation message to be returned if the value is not in the set`) => {
+        it(`allows an optional custom validation message to be returned if the value is not in the series`) => {
             expect(`rhinos run rapidly, reaching rates of 35 mph`, #contains_test(-3, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_notInRange) => {
+    it(`Takes in a generateSeries object and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_notInRange(1 to 10)->type)
+    }
+    it(`takes a generateSeries and string to use for message and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_notInRange(1 to 10, `bad`)->type)
+    }
+
+    context(`passed both a value and a generateSeries`) => {
+        it(`returns void if the value is not in the series`) => {
+            expect(void, rv_notInRange(0, 1 to 5))
+        }
+        it(`returns the default validation message if the value is in the series`) => {
+            expect(`Field must not be between 1 and 5`, rv_notInRange(3, 1 to 5))
+        }
+        it(`allows an optional custom validation message to be returned if the value is in the series`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notInRange(3, 1 to 5, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(contains_test) = rv_notInRange(1 to 5)
+        it(`returns void if the value is not contained by the series`) => {
+            expect(void, #contains_test(0))
+        }
+        it(`returns the default validation message if the value is in the series`) => {
+            expect("Field must not be between 1 and 5", #contains_test(3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is in the series`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #contains_test(3, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_isValue) => {
+    it(`Takes in a value and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_isValue(`rhino`)->type)
+    }
+    it(`Takes a value and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_isValue(42, -message=`Wrong question`)->type)
+    }
+
+    context(`passed a given value and an expected value`) => {
+        it(`returns void if the two values are equal`) => {
+            expect(void, rv_isValue('rhino', `rhino`))
+        }
+        it(`returns the default validation message if the values aren't equal`) => {
+            expect(`Field must be rhino`, rv_isValue('gem', `rhino`))
+        }
+        it(`allows for a custom validation messag if the values aren't equal`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isValue('gem', `rhino`, -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_isValue(`rhino`)
+        it(`returns void if the value is equal to the specified value`) => {
+            expect(void, #value_test('rhino'))
+        }
+        it(`returns void if the value is equal to the specified value - different type`) => {
+            expect(void, #value_test(true))
+        }
+        it(`returns the default validation message if the value is not equal to the specified value`) => {
+            expect("Field must be rhino", #value_test(-3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not equal to the specified value`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test(-3, -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_isNotValue) => {
+    it(`Takes in a value and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_isNotValue(`rhino`)->type)
+    }
+    it(`Takes a value and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_isNotValue(42, -message=`Wrong question`)->type)
+    }
+
+    context(`passed a given value and an expected value`) => {
+        it(`returns void if the two values are not equal`) => {
+            expect(void, rv_isNotValue('rhino', `rhino1`))
+        }
+        it(`returns the default validation message if the values are equal`) => {
+            expect(`Field must not be rhino`, rv_isNotValue('rhino', `rhino`))
+        }
+        it(`allows for a custom validation messag if the values are equal`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isNotValue('rhino', `rhino`, -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_isNotValue(`rhino`)
+        it(`returns void if the value is not equal to the specified value`) => {
+            expect(void, #value_test('gem'))
+        }
+        it(`returns void if the value is not equal to the specified value - different type`) => {
+            expect(void, #value_test(false))
+        }
+        it(`returns the default validation message if the value is equal to the specified value`) => {
+            expect("Field must not be rhino", #value_test('rhino'))
+        }
+        it(`allows an optional custom validation message to be returned if the value is equal to the specified value`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test('rhino', -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_isExactly) => {
+    it(`Takes in a value and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_isExactly(`rhino`)->type)
+    }
+    it(`Takes a value and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_isExactly(42, -message=`Wrong question`)->type)
+    }
+
+    context(`passed a given value and an expected value`) => {
+        it(`returns void if the two values are exactly equal`) => {
+            expect(void, rv_isExactly('rhino', `rhino`))
+        }
+        it(`returns the default validation message if the values aren't exactly equal`) => {
+            expect(`Field must be rhino`, rv_isExactly('gem', `rhino`))
+        }
+        it(`allows for a custom validation messag if the values aren't exactly equal`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isExactly('gem', `rhino`, -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_isExactly(`rhino`)
+        it(`returns void if the value is exactly equal to the specified value`) => {
+            expect(void, #value_test('rhino'))
+        }
+        it(`returns the default validation message if the value is equal but not exactly equal to the specified value`) => {
+            expect(`rhino` == true)
+            expect("Field must be rhino", #value_test(true))
+        }
+        it(`returns the default validation message if the value is not exactly equal to the specified value`) => {
+            expect("Field must be rhino", #value_test(-3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not exactly equal to the specified value`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test(-3, -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_isNotExactly) => {
+    it(`Takes in a value and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_isNotExactly(`rhino`)->type)
+    }
+    it(`Takes a value and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_isNotExactly(42, -message=`Wrong question`)->type)
+    }
+
+    context(`passed a given value and an expected value`) => {
+        it(`returns void if the two values are not exactly equal`) => {
+            expect(void, rv_isNotExactly('rhino', `rhino1`))
+        }
+        it(`returns the default validation message if the values are exactly equal`) => {
+            expect(`Field must not be rhino`, rv_isNotExactly('rhino', `rhino`))
+        }
+        it(`allows for a custom validation messag if the values are exactly equal`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isNotExactly('rhino', `rhino`, -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_isNotExactly(`rhino`)
+        it(`returns void if the value is not exactly equal to the specified value`) => {
+            expect(void, #value_test('gem'))
+        }
+        it(`returns void if the value is equal but not exactly equal to the specified value`) => {
+            expect(`rhino` == true)
+            expect(void, #value_test(true))
+        }
+        it(`returns the default validation message if the value is exactly equal to the specified value`) => {
+            expect("Field must not be rhino", #value_test('rhino'))
+        }
+        it(`allows an optional custom validation message to be returned if the value is exactly equal to the specified value`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test('rhino', -message=`rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+
+describe(::rv_isA) => {
+    it(`Takes in a tag and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_isA(::string)->type)
+    }
+    it(`Takes a tag and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_isA(::string, `Wrong question`)->type)
+    }
+
+    context(`passed a given value and an expected tag`) => {
+        it(`returns void if the value is an object that is a type or trait specified by the tag`) => {
+            expect(void, rv_isA('rhino', ::string))
+        }
+        it(`returns the default validation message if the value is not an object that is a type or tait specified by the tag`) => {
+            expect(`Field must be a string`, rv_isA(null, ::string))
+        }
+        it(`allows for a custom validation messag if the value is not an object that is a type or tait specified by the tag`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isA(void, ::string, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_isA(::string)
+        it(`returns void if the value is an object that is a type or trait specified by the tag`) => {
+            expect(void, #value_test('rhino'))
+        }
+        it(`returns the default validation message if the value is not an object that is a type or trait specified by the tag`) => {
+            expect("Field must be a string", #value_test(-3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is not an object that is a type or trait specified by the tag`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test(-3, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_isNotA) => {
+    it(`Takes in a tag and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_isNotA(::string)->type)
+    }
+    it(`Takes a tag and a string to use for the error message returning a memberstream to call`) => {
+        expect(::memberstream, rv_isNotA(::string, `Wrong question`)->type)
+    }
+
+    context(`passed a given value and an expected tag`) => {
+        it(`returns void if the value is an object that is not a type or trait specified by the tag`) => {
+            expect(void, rv_isNotA('rhino', ::integer))
+        }
+        it(`returns the default validation message if the value is an object that is a type or tait specified by the tag`) => {
+            expect(`Field must not be a null`, rv_isNotA(null, ::null))
+        }
+        it(`allows for a custom validation messag if the value is an object that is a type or tait specified by the tag`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isNotA(void, ::void, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_isNotA(::integer)
+        it(`returns void if the value is an object that is not a type or trait specified by the tag`) => {
+            expect(void, #value_test('rhino'))
+        }
+        it(`returns the default validation message if the value is an object that is a type or trait specified by the tag`) => {
+            expect("Field must not be a integer", #value_test(-3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is an object that is a type or trait specified by the tag`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test(-3, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+
+describe(::rv_greaterThan) => {
+    it(`Takes in an integer and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_greaterThan(10)->type)
+    }
+    it(`takes an integer and string to use for message and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_greaterThan(10, `bad`)->type)
+    }
+
+    context(`passed both an integer value to check and an integer`) => {
+        it(`returns void if the value is greater than the integer`) => {
+            expect(void, rv_greaterThan(3, 1))
+        }
+        it(`returns the default validation message if the value is less than the integer`) => {
+            expect(`Field must be greater than 1`, rv_greaterThan(-3, 1))
+        }
+        it(`allows an optional custom validation message to be returned if the value is less than the integer`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_greaterThan(-3, 1, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_greaterThan(1)
+        it(`returns void if the value is greater than the integer`) => {
+            expect(void, #value_test(3))
+        }
+        it(`returns the default validation message if the value is less than the integer`) => {
+            expect("Field must be greater than 1", #value_test(-3))
+        }
+        it(`allows an optional custom validation message to be returned if the value is less than the integer`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test(-3, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+}
+
+describe(::rv_lessThan) => {
+    it(`Takes in an integer and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_lessThan(10)->type)
+    }
+    it(`takes an integer and string to use for message and returns a memberstream of the method to call`) => {
+        expect(::memberstream, rv_lessThan(10, `bad`)->type)
+    }
+
+    context(`passed both an integer value to check and an integer`) => {
+        it(`returns void if the value is less than the integer`) => {
+            expect(void, rv_lessThan(3, 5))
+        }
+        it(`returns the default validation message if the value is greater than the integer`) => {
+            expect(`Field must be less than 5`, rv_lessThan(30, 5))
+        }
+        it(`allows an optional custom validation message to be returned if the value is greater than the integer`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_lessThan(30, 5, `rhinos run rapidly, reaching rates of 35 mph`))
+        }
+    }
+
+    context(`invoked with a value to check`) => {
+        local(value_test) = rv_lessThan(5)
+        it(`returns void if the value is less than the integer`) => {
+            expect(void, #value_test(3))
+        }
+        it(`returns the default validation message if the value is greater than the integer`) => {
+            expect("Field must be less than 5", #value_test(30))
+        }
+        it(`allows an optional custom validation message to be returned if the value is greater than the integer`) => {
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, #value_test(30, `rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 }
