@@ -51,6 +51,25 @@ define rope_randomASCII(len::integer) => {
     return #ret
 }
 
+/**!
+    Returns the specified number of random characters - each being one of 0-9, a-z,
+    or A-Z
+*/
+define rope_randomAlphaNumeric(len::integer) => {
+    local(ret) = ''
+    while(#len--) => {
+        match(math_random(1,99) % 3) => {
+        case(0)
+            #ret->append(bytes->import8bits(math_random(48, 57))&asString)
+        case(1)
+            #ret->append(bytes->import8bits(math_random(65, 90))&asString)
+        case
+            #ret->append(bytes->import8bits(math_random(97, 122))&asString)
+        }
+    }
+    return #ret
+}
+
 
 
 define dir_import(d::dir, ext::staticarray=(:'lasso', 'inc')) => {
