@@ -12,6 +12,7 @@ define rope_thread => thread {
     data private startupFiles::map = map,
          private controllers ::map = map,
          private routes      ::map = map,
+         private routeLinks  ::map = map,
          private configLoaded::boolean = false,
          private config      ::map = map(
                 `app-name`         = pair(`UnNamed`,::string),
@@ -19,9 +20,11 @@ define rope_thread => thread {
                 `sessions-expires` = pair(1440, ::integer)
             )
 
-    public controllers  => .`controllers`
-    public routes       => .`routes`
-    public configLoaded => .`configLoaded`
+    public
+        controllers  => .`controllers`,
+        routes       => .`routes`,
+        routeLinks   => .`routeLinks`,
+        configLoaded => .`configLoaded`
     /**!
         When not in a poduction environment, Rope grabs the current modification times
         for all files in LassoStartup so that each time ``rope->invoke`` is called
@@ -70,6 +73,7 @@ define rope_thread => thread {
     }
     public removeController(key::string) => {
         .`controllers`->remove(#key)
+        .`routeLinks` ->remove(#key)
         
         with item in .'routes'->eachPair do {
             local(routes) = #item->second
@@ -83,6 +87,7 @@ define rope_thread => thread {
     public removeAllControllers => {
         .'controllers' = map
         .`routes`      = map
+        .`routeLinks`  = map
     }
     
     
@@ -93,8 +98,19 @@ define rope_thread => thread {
 
         not .`routes`->get(#path_size)->contains(#item)
             ? .`routes`->get(#path_size)->insert(#item)
+
+        local(key)  = #item->second
+        local(path) = #item->first
+        not .`routeLinks`->contains(#key)
+            ? .`routeLinks`->insert(#key=array)
+        
+        not .`routeLinks`->find(#key)->contains(#path)
+            ? .`routeLinks`->find(#key)->insert(#path)
+        
     }
     public findRoutesSized(key::integer) => .`routes`->find(#key)
+
+    public routeLink(key::string) => .`routeLinks`->find(#key)
     
     public config(key::string) => .`config`->find(#key)->first
     /**!
@@ -121,7 +137,8 @@ define rope_thread => thread {
 ::rope_thread->doccomment = tag('rope_thread_thread$')->doccomment
 define rope_impl => type {
     data public urlParams::array = array,
-        private status_msg
+        private status_msg,
+        private links::map = map
     
     /**!
         This is where the magic all happens. Every web request that rope handles runs
@@ -278,6 +295,32 @@ define rope_impl => type {
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
+
+    public link(key::string, index::integer)                  => .link(#key, #index, (:))
+    public link(key::string, values::trait_positionallyKeyed) => .link(#key,      1, #values)
+    public link(key::string, index::integer=1, values::trait_positionallyKeyed=(:)) => {
+        local(paths) = .`links`->find(#key) || rope_thread->routeLink(#key)
+        .`links` !>> #key
+            ? .`links`->insert(#key=#paths)
+
+        // vp is value position - used to keep track of where we're at in the params list
+        local(vp)     = 1
+        local(v_size) = #values->size
+        local(result) = ''
+        with item in #paths->get(#index) do {
+            // Deal with dynamic URL params
+            if(#item->beginsWith(':')) => {
+                #vp > #v_size
+                    ? fail('Link has missing dynamic values')
+
+                #result->append('/' + #values->get(#vp++))
+            else
+                #result->append('/' + #item)
+            }
+        }
+
+        return #result
+    }
     
     /**!
         This method returns "dev" if the ROPE_ENV environment variable has not been set.
