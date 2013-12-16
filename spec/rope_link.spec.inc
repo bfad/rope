@@ -22,6 +22,11 @@ describe(`rope -> link`) => {
             rope->register('funk', -routes=(:'/moose')) => {}
             expect('/rhino', rope->link('funk'))
         }
+        it(`even works on the plain root path`) => {
+            rope->register(`root`, -routes=(:`/`)) => {}
+
+            expect(`/`, rope->link('root'))
+        }
     }
 
     context(`controller has multiple simple paths`) => {

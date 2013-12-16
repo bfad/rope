@@ -319,7 +319,7 @@ define rope_impl => type {
             }
         }
 
-        return #result
+        return #result || '/'
     }
     
     /**!
