@@ -313,7 +313,7 @@ define rope_impl => type {
                 #vp > #v_size
                     ? fail('Link has missing dynamic values')
 
-                #result->append('/' + #values->get(#vp++))
+                #result->append('/' + string(#values->get(#vp++))->asBytes->encodeUrl)
             else
                 #result->append('/' + #item)
             }

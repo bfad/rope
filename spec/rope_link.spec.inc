@@ -60,5 +60,8 @@ describe(`rope -> link`) => {
             expect('/rhino/white/run', rope->link('url-params', (:'white')))
             expect('/user/42/photo/7', rope->link('url-params', 2, (:42, 7)))
         }
+        it(`returns the path with the filled-in values URL encoded`) => {
+            expect(`/rhino/white%2Fgrey/run`, rope->link('url-params', (:'white/grey')))
+        }
     }
 }
