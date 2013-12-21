@@ -47,7 +47,7 @@ describe(::stringOrNull) => {
 describe(::integerOrNull) => {
     it(`fails if the object isn't a bytes`) => {
         expect->error => {
-            integerOrNull(3)
+            integerOrNull(date)
         }
         expect->error(error_code_noerror, error_msg_noerror) => {
             integerOrNull(bytes(''))

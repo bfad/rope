@@ -101,7 +101,10 @@ as a string if it is not. It is meant to be used in the ``-as`` paramater of a
     
     rope->param('rhino', -as=::stringOrNull)
 */
-define stringOrNull(value) => orNullWrap(#value, ::string)
+define stringOrNull(value)         => orNullWrap(#value, ::string)
+define stringOrNull(value::null)   => null
+define stringOrNull(value::void)   => null
+define stringOrNull(value::string) => #value
 /**!
 This method takes in a bytes object and returns null if it is empty or the value
 as an integer if it is not. It is meant to be used in the ``-as`` paramater of a
@@ -109,7 +112,10 @@ as an integer if it is not. It is meant to be used in the ``-as`` paramater of a
     
     rope->param('rhino', -as=::integerOrNull)
 */
-define integerOrNull(value) => orNullWrap(#value, ::integer)
+define integerOrNull(value)          => orNullWrap(#value, ::integer)
+define integerOrNull(value::null)    => null
+define integerOrNull(value::void)    => null
+define integerOrNull(value::integer) => #value
 /**!
 This method takes in a bytes object and returns null if it is empty or the value
 as a date if it is not. It is meant to be used in the ``-as`` paramater of a
@@ -117,4 +123,8 @@ as a date if it is not. It is meant to be used in the ``-as`` paramater of a
     
     rope->param('rhino', -as=::dateOrNull)
 */
-define dateOrNull(value) => orNullWrap(string(#value), ::date)
+define dateOrNull(value::bytes)  => dateOrNull(string(#value))
+define dateOrNull(value::null)   => null
+define dateOrNull(value::void)   => null
+define dateOrNull(value::date)   => #value
+define dateOrNull(value)         => orNullWrap(#value, ::date)
