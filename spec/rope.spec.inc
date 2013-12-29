@@ -415,7 +415,7 @@ describe(::rope) => {
     
     
     describe(`-> extension`) => {
-        it(`returns the extention at the end of the URL path when it exits`) => {
+        it(`returns the extention at the end of the URL path when it exists`) => {
             web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext.init')
             
             expect(`init`, rope->extension)
@@ -424,6 +424,18 @@ describe(::rope) => {
             web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext/init')
             
             expect(`html`, rope->extension)
+        }
+    }
+    describe(`-> path`) => {
+        it(`returns the path portion of the url`) => {
+            web_request = mock('requestUri' = '/my/path')
+
+            expect(`/my/path`, rope->path)
+        }
+        it(`strips the GET params out of the path portion of the URL`) => {
+            web_request = mock('requestUri' = '/my/path?user=1&admin=one')
+
+            expect(`/my/path`, rope->path)
         }
     }
     

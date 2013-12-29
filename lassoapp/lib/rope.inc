@@ -334,18 +334,27 @@ define rope_impl => type {
     public method   => .param(`_method`) || web_request->requestMethod
     public hostname => web_request->httpHost
     public path     => {
-        local(path) = web_request->requestUri->split('?')->get(1)->split('/')
-        #path->last->contains('.')
-            ? #path->get(#path->size) = #path->last->split('.')->remove&join('.')
+        local(path) = web_request->requestUri
+        // Strip off GET params, if any
+        #path = #path->sub(1, (#path->find('?') or (#path->size+1)) - 1)
         
-        #path->size > 2 and #path->last->isEmpty ? #path->remove
-        return #path->join('/')
+//        // Remvove the extension
+//        local(ext_start) = #path->findLast('.')
+//        local(last_slash) = #path->findLast('/')
+//        #ext_start > #last_slash
+//            ? #path = #path->sub(1, #ext_start - 1)
+
+        return #path
     }
     public extension => {
-        local(ext) = web_request->requestUri->split('?')->get(1)->split('/')->last->split('.')
-        #ext->size > 1
-            ? return #ext->last
-        return 'html'
+        local(ext)        = `html`
+        local(path)       = web_request->requestUri
+        local(ext_start)  = #path->findLast('.')
+        local(last_slash) = #path->findLast('/')
+        #ext_start > #last_slash
+            ? #ext = #path->sub(#ext_start+1)
+        
+        return #ext
     }
     
 
