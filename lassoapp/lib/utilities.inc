@@ -118,6 +118,17 @@ define integerOrNull(value::void)    => null
 define integerOrNull(value::integer) => #value
 /**!
 This method takes in a bytes object and returns null if it is empty or the value
+as an integer if it is not. It is meant to be used in the ``-as`` paramater of a
+``rope->param()`` (and it's siblings) method call. Ex::
+    
+    rope->param('rhino', -as=::integerOrNull)
+*/
+define decimalOrNull(value)          => orNullWrap(#value, ::decimal)
+define decimalOrNull(value::null)    => null
+define decimalOrNull(value::void)    => null
+define decimalOrNull(value::decimal) => #value
+/**!
+This method takes in a bytes object and returns null if it is empty or the value
 as a date if it is not. It is meant to be used in the ``-as`` paramater of a
 ``rope->param()`` (and it's siblings) method call. Ex::
     
