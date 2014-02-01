@@ -259,7 +259,7 @@ define rope_impl => type {
 
             #. It is an error if no routes are found or if more than one route matches.
     */
-    public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
+    public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&removeTrailing('/')&split('/'))
     private matchRoute(path::array) => {
         local(i)     = #path->size
         local(found) = rope_thread->findRoutesSized(#i)

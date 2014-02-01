@@ -141,6 +141,10 @@ describe(::rope) => {
             rope->register('matchRoute', -routes=(:'/fly/you/fools'))
             expect('matchRoute', rope->matchRoute('/fly/you/fools')->second)
         }
+        it(`matches routes without trailing / if the path has a trialing /`) => {
+            rope->register('matchRoute', -routes=(:'/fly/you/fools'))
+            expect('matchRoute', rope->matchRoute('/fly/you/fools/')->second)
+        }
         it(`can match the root route (/)`) => {
             rope->register(`matchRoute`, -routes=(:`/`))
             expect(`matchRoute`, rope->matchRoute('/')->second)
