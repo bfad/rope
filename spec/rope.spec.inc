@@ -168,6 +168,19 @@ describe(::rope) => {
             
             expect(`matchRoute`, rope->matchRoute('/great/scott')->second)
         }
+
+        it(`ignores the extension when matching a route`) => {
+            rope->register(`matchRoute`, -routes=(:`/this/is/heavy`))
+
+            expect(`matchRoute`, rope->matchRoute(`/this/is/heavy.json`)->second)
+            expect(`matchRoute`, rope->matchRoute(`/this/is/heavy.html`)->second)
+        }
+        it(`ignores the extension when matching a route, even if it's the wild-card`) => {
+            rope->register(`matchRoute`, -routes=(:`/this/is/:adj`))
+
+            expect(`matchRoute`, rope->matchRoute(`/this/is/light.json`)->second)
+            expect(`matchRoute`, rope->matchRoute(`/this/is/heavy.html`)->second)
+        }
         
         it(`if rope-fallback controller is defined it is called when no route matches`) => {
             expect->error(error_code_fileNotFound, `No matching route found`) => {
@@ -198,6 +211,13 @@ describe(::rope) => {
             
             rope->invoke
             expect(session_id(`RopeSession`)->size > 0)
+        }
+        it(`doesn't have any extensions if the URL parameter is the last element in the path`) => {
+            new_fake_conn
+            var(_req_params) = map(::REQUEST_URI='/person/robinmckinley.json')
+
+            expect(`sunshine`, rope->invoke)
+            expect(`robinmckinley`, rope->urlParam(`id`))
         }
 
         context(`when ROPE_ENV environment variable not set to production`) => {

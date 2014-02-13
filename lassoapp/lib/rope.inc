@@ -158,17 +158,9 @@ define rope_impl => type {
         `production` != .env
             ? .startupCheckNLoad
 
-        local(path)  = .path->asCopy->remove(1,1)&split('/')
-        local(route) = .matchRoute(#path)
+        // Matches route & sets up URL parameters
+        local(route) = .matchRoute(.path)
         
-        //Setup URL parameters
-        local(i) = #path->size
-        while(#i--) => {
-            local(part) = #route->first->get(loop_count)
-            
-            `:` == #part->get(1)
-                ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
-        }
         .continueSession
         return .controller(#route->second)->invoke
     }
@@ -259,7 +251,16 @@ define rope_impl => type {
 
             #. It is an error if no routes are found or if more than one route matches.
     */
-    public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&removeTrailing('/')&split('/'))
+    public matchRoute(path::string) => {
+        // Remvove the extension (if there) or just get a copy to work with
+        local(ext_start)  = #path->findLast('.')
+        local(last_slash) = #path->findLast('/')
+        #ext_start > #last_slash
+            ? #path = #path->sub(1, #ext_start - 1)
+            | #path = #path->asCopy
+
+        return .matchRoute(#path->remove(1,1)&removeTrailing('/')&split('/'))
+    }
     private matchRoute(path::array) => {
         local(i)     = #path->size
         local(found) = rope_thread->findRoutesSized(#i)
@@ -281,13 +282,25 @@ define rope_impl => type {
                 | #found = #good
         }
         #found->size == 0 and .controllerExist(`rope-fallback`)
-            ? return pair(#path=`rope-fallback`)
+            ? #found = (:pair(#path=`rope-fallback`))
         #found->size == 0
             ? fail(error_code_fileNotFound, `No matching route found`)
         #found->size > 1
             ? fail(`Multiple routes matched the given path`)
             
-        return #found->first
+        local(result) = #found->first
+
+        //Setup URL parameters
+        local(i) = #path->size
+        local(p) = #result->first
+        while(#i--) => {
+            local(part) = #p->get(loop_count)
+            
+            `:` == #part->get(1)
+                ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
+        }
+
+        return #result
     }
     
     
