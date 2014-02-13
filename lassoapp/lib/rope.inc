@@ -361,7 +361,7 @@ define rope_impl => type {
     }
     public extension => {
         local(ext)        = `html`
-        local(path)       = web_request->requestUri
+        local(path)       = .path
         local(ext_start)  = #path->findLast('.')
         local(last_slash) = #path->findLast('/')
         #ext_start > #last_slash

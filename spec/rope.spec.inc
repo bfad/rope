@@ -449,6 +449,11 @@ describe(::rope) => {
             
             expect(`html`, rope->extension)
         }
+        it(`returns just the extension and no query params`) => {
+            web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext.init?q=now')
+
+            expect(`init`, rope->extension)
+        }
     }
     describe(`-> path`) => {
         it(`returns the path portion of the url`) => {
