@@ -400,7 +400,7 @@ define rope_impl => type {
     public statusMsg(-status::boolean=false, -message::boolean=false) => {
         fail_if(#status && #message, error_code_invalidParameter, `You can't specify both the status and the message`)
           
-        null === .`status_msg`
+        .`status_msg`->isA(::null)
             ? return null
         
         #status
