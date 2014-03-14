@@ -395,6 +395,17 @@ define rope_impl => type {
         
         return #default
     }
+
+    public fileUploads => {
+        local(result) = array
+        local(info)   = web_request->fileUploads
+
+        loop(#info->size) => {
+            #result->insert(map(:#info->get(loop_count)))
+        }
+
+        return #result
+    }
     
     
     public statusMsg(-status::boolean=false, -message::boolean=false) => {
