@@ -58,84 +58,19 @@ define run_new => {
 
 define run_server => {
     // Default Values
-    local(httpAddr)   = '0.0.0.0'
-    local(httpPort)   = 8000
-    local(httpRoot)   = '/' + io_file_getcwd + '/webroot/'
-    local(scriptExts) = (:'lasso','inc')
-    local(project_path) = io_file_getcwd
-    
-    
-    define dir_import(d::dir, ext::staticarray=(:'lasso', 'inc')) => {
-        with f in #d->eachFile
-        where #ext->contains(#f->path->split('.')->last) 
-        do file_import(#f)
-    
-        with f in #d->eachDir do dir_import(#f)
-    }
-    define file_import(f::file) => {
-        sourcefile(#f->readString, #f->path, false, false)->invoke
-    }
-
-
-		// 9.2.6 bug
-		library_thread_loader->loadLibrary((sys_masterHomePath || sys_homePath) + '/LassoLibraries/builtins/list.' + sys_dll_ext)
-		library_thread_loader->loadLibrary((sys_masterHomePath || sys_homePath) + '/LassoLibraries/lassoserver/http_server.' + sys_dll_ext) 
-
-    define rope_connection_handler => type { parent http_server_connection_handler
-        public onCreate(root::string, exts::trait_forEach) => ..onCreate(#root, #exts)
-    
-        public invoke(con::http_server_web_connection) => {
-            protect => {
-                handle_failure => {
-                    stdoutnl(error_msg)
-                    stdoutnl(error_stack)
-                }
-
-                web_request  = web_request_impl(#con) // make it available for the thread
-                web_response = web_response_impl(#con)
-
-                local(path)     = #con->requestParams->get(::PATH_INFO)->asString
-                local(ext)      = #path->splitExtension->second
-                local(document) = file(.documentRoot + #path)
-                //local(is_lasso) = (#path->beginsWith(http_server_apps_path) or not #document->exists or (#ext->size and .scriptExtensions >> #ext))
-                local(is_lasso) = (#path->beginsWith(`/lasso9/`) or (#ext->size and .scriptExtensions >> #ext))
-            
-                if(not #is_lasso and #document->exists and not #document->isDir) => {
-                    web_response->setStatus(200, 'OK')
-                    .sendFile(#document, #ext)
-                // pass off non-existing files to rope
-                else(not #is_lasso)
-                    #is_lasso = true
-                    #con->requestParams->insert(::LASSOSERVER_APP_PREFIX=`/lasso9/rope`)
-                    #con->requestParams->insert(::PATH_INFO=`/rope/url_handler.lasso`)
-                }
-                if(#is_lasso) => {
-                    #con->requestParams->insert(::LASSOSERVER_DOCUMENT_ROOT=.documentRoot)
-                    web_response->respond
-                }
-            }
-            // keep alive requests use the same thread, so reset thread-local data
-            web_request  = null
-            web_response = null
-            document     = null
-            var(_rope_)  = null
-            var(_lassoapp_include_stack_) = null
-            var(__HTML_REPLY__) = ''
-        }
-    }
-    // This allows me to access /lasso9/admin without errors
-    define lassopro_system_status => thread {
-        data private start::integer = date->asInteger
-        public uptime => date->asInteger - .start
-    }
-
+    local(httpAddr)    = '0.0.0.0'
+    local(httpPort)    = 8000
+    local(httpRoot)    = '/' + io_file_getcwd + '/webroot/'
+    local(scriptExts)  = (:'lasso','inc')
+    local(projectPath) = io_file_getcwd
+    local(lassoHome)   = (sys_getEnv(`LASSO9_HOME`) == '/var/lasso/home' ? null | sys_getEnv(`LASSO9_HOME`))
 
     // Parse any command-line arguments
     local(opts) = $argv->asArray
     #opts->remove(1,2)
     while(#opts->size > 0) => {
         if(#opts->size == 1) => {
-            #project_path = #opts(1)
+            #projectPath = #opts(1)
             #opts->remove
             loop_abort
         }
@@ -155,56 +90,33 @@ define run_server => {
         }
         #opts->remove(1,2)
     }
-    not dir(#project_path)->exists or not dir(#project_path + '/lasso_home/')->exists
-        ? fail('The specified project path does not exist or is not a valid rope project')
+
+    #lassoHome = (#lassoHome || #projectPath + '/lasso_home') + '/'
+    not dir(#lassoHome)->exists
+        ? fail('Could not find the Lasso home directory')
         
     if(not file(path_master_home + 'LassoApps/rope.lassoapp')->exists
-        and not file(#project_path + '/lasso_home/LassoApps/rope.lassoapp')->exists
+        and not file(#lassoHome  + 'LassoApps/rope.lassoapp')->exists
     ) => {
-        stdoutnl("ERROR: Could not find rope.lassoapp in " + path_master_home + " directory.")
+        stdoutnl("ERROR: Could not find rope.lassoapp in " + path_master_home + " or " + #lassoHome)
         sys_exit(-1)
     }
 
-    // Set everything up
-    /*
-    When the Lasso interpreter starts, if no LASSO9_HOME env variable has been defined, then
-    it defaults to /var/lasso/home (for OS X & Linux). If no LASSO9_MASTER_HOME is specified,
-    then it doesn't define it - just leaves it blank as the home is the most important thing.
+    local(proc) = sys_process
+    handle => { #proc->close }
+    #proc->open(
+        '/usr/sbin/lassoserver',
+        (:'-httproot', #httpRoot, '-scriptextensions', #scriptExts->join(';'), '-addr', #httpAddr, '-p', #httpPort),
+        (:'LASSO9_MASTER_HOME=' + path_master_home, 'LASSO9_HOME=' + #lassoHome)
+    )
+    while(#proc->isOpen) => {
+        local(stdout, stderr) = (:#proc->read,#proc->readError)
+        #stdout
+            ? file_stdout->writeBytes(#stdout)
+        #stderr
+            ? file_stderr->writeBytes(#stderr)
 
-    If you have specified a home, you better have either specified a master home or that home
-    better contain everything (such as Lasso Admin). Typically, instance manager specifies
-    the default home path (/var/lasso/home) as the LASSO9_MASTER_HOME and allows you to
-    create multiple instance with their own LASSO9_HOME's. This allows every instance to
-    share the code in the LASSO9_MASTER_HOME so that each instance doesn't need its own copy
-    of the Lasso Admin code or its own copy of the Lasso core libraries, etc.
-
-    For the Rope server, both LASSO9_HOME and LASSO9_MASTER_HOME will always be set. Users
-    can specify their own LASSO9_MASTER_HOME env variable or the default of /var/lasso/home
-    will be used. The default LASSO9_HOME is the curreent working directory, but users can
-    specify a different home using command-line options. (Any user-set LASSO9_HOME env 
-    variable will be ignored and overridden.)
-    */
-    sys_setEnv('LASSO9_MASTER_HOME', path_master_home)
-    sys_setEnv('LASSO9_HOME'       , #project_path + '/lasso_home/')
-
-    protect => {
-        handle_error => {
-            stdoutnl(error_code + ': ' + error_msg + '\n' + error_stack)
-        }
-        database_initialize
-         session_initialize
-        lassoapp_initialize
-           admin_initialize
-             log_initialize
-           email_initialize
-           ljapi_initialize
-        security_initialize
-
-        stdoutnl('Loading Startup Items')
-        dir_import(dir(sys_userStartupPath), #scriptExts)
-
-        stdoutnl('Starting webserver on ' + #httpAddr + ':' + #httpPort)
-        http_server->start(#httpPort, #httpAddr, -handler=rope_connection_handler(#httpRoot, #scriptExts))
+        sleep(1000)
     }
 }
 
