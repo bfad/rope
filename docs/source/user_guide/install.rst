@@ -7,7 +7,7 @@ relative to your ``LASSO9_MASTER_HOME`` environment variable or
 line script must be installed at ``LASSO9_MASTER_HOME/bin/`` while the LassoApp
 can be installed at ``LASSO9_MASTER_HOME/LassoApps/`` if you want it available
 for every instance of Lasso, or at ``LASSO9_MASTER_HOME/LassoApps-disabled/`` if
-you want Rope to copy the LassoApp into each Rope application. (If you start
+you want Rope to copy the LassoApp into each new Rope application. (If you start
 with it installed for all Lasso processes and decide you want to change it
 later, then don't forget to copy it to each projects' ``lasso_home/LassoApps``
 directory.)

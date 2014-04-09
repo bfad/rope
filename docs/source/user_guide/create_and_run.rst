@@ -29,7 +29,7 @@ Ex::
    $> cd ~/projects/do_list
    $> rope s
 
-This starts the built-in web server and loads up your Rope application. While
-this web server is suitable for development work, you should look into deploying
-your application with a dedicated web server such as Apache or Nginx. (See the
+This starts the built-in web server and loads your Rope application. While this
+web server is suitable for development work, you should look into deploying your
+application with a dedicated web server such as Apache or Nginx. (See the
 instructions on :doc:`deploying Rope applications <deploy>` for details.)

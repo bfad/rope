@@ -4,12 +4,12 @@ The Rope framework encourages separating your view code from your controller
 code. Your controller code should be placed in the "webapp" directory while the
 view code should be placed in the "views" directory. To assist your controllers
 in loading the view code in response to a request, you can use the
-``rope->render`` method. To do this, pass a string starting specifying the path
-to the view code you wish to render. The path should start with a "/" which
-represents the "views" directory. You can pass values / setup local variables
-for the view code by passing the method keyword parameters - the key of which
-will be the name of a local variable whose value is set to the value of the
-keyword parameter.
+``rope->render`` method. To do this, pass a string specifying the path to the
+view code you wish to render. The path should start with a "/" which represents
+the "views" directory. You can also pass values / setup local variables for the
+view code by passing the method keyword parameters - the key of which will be
+the name of a local variable whose value is set to the value of the keyword
+parameter.
 
 Example::
 
@@ -42,7 +42,7 @@ parameters to setup local variables for use.
 Example::
 
    // webapp/my_controller.inc
-   rope->register(`hello-name`, -routes(:'/')) => {
+   rope->register(`hello-name`, -routes=(:'/')) => {
        rope->render('/home.lasso')
    }
    

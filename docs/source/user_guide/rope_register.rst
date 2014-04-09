@@ -4,7 +4,7 @@ The most basic functionallity of any modern framework is matching URLs to the
 code that needs to run to fulfill the request. Rope calls the code that runs
 based on a URL request a "controller", and the mechanism it uses to match URLs
 it calls "routes". The ``rope->register`` method is what is used to register a
-block of code as a controller, and is used to register routes to a controller.
+controller (block of code) to a route (a matcher for a URL).
 
 
 Registering a Controller
@@ -40,7 +40,7 @@ done in one step.
 Registering a Controller Code Block and Routes
 ----------------------------------------------
 It is possible to register a controller with a block of code and the routes it
-responds all at once::
+responds to all at once::
 
    rope->register(`hello-name`, -routes(:'/:name')) => {
       content_body = "Hello, " + rope->param('name')
@@ -50,11 +50,12 @@ In this example, I have registered a code block and its route all at once. This
 route is a wild-card route that will match any URL that is only one level deep.
 In other words, it would match "http://example.com/John" but not 
 "http://example.com/John/Doe". Wild-card routes allow you to reference the part
-of the path they represent by their name using the ``rope->param`` method.
+of the path they represent by passing the ``rope->urlParam`` or ``rope->param``
+methods the wild-card name. (Ex: ``rope->urlParam(`name`)``)
 
 .. note::
-   Now that the controller has been registered, I could register additional routes
-   later on if I wanted to using the sytax shown
+   Now that the controller has been registered, additional routes can be
+   registered later on using the sytax shown
    :ref:`above <rope-register-block-and-routes>`.
 
 

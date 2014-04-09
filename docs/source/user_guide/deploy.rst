@@ -59,5 +59,5 @@ host setup and adapt it to your system's Apache configuration.
       RewriteRule ^(.*)$ /lasso9/rope/url_handler.lasso [L,NS,H=lasso9-handler,E=LASSOSERVER_APP_PREFIX:/lasso9/rope]
    </VirtualHost>
    
-#. Once your Apache settings are setup, reload Apache and your should now be
+#. Once your Apache settings are setup, reload Apache and your app should now be
    running.
