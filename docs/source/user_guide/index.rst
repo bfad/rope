@@ -22,5 +22,4 @@ Contents:
    rope_user
    rope_validate
    rope_utilities
-   environments
    deploy
