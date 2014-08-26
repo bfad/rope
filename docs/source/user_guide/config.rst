@@ -1,8 +1,24 @@
-Configure Settings
-==================
-When you create a new Rope application, a file named "_config.inc" is created
-with the name of your project automatically set to the "app-name" configuration
-value. The following are a list of Rope configuration settings, their default
+Configuration
+=============
+When you create a new Rope application, a file named "_config.inc" is created in
+the "webapp" directory. This file has code that looks like the following::
+
+   not rope->configLoaded?
+   rope->config(
+       `app-name` = `MyApp`
+   )
+
+This code checks to see if the configuration has been loaded, and loads it if it
+has not using ``rope->config``.  The ``rope->config`` method takes an arbitrary
+number of pairs whose first element is a string specifying the name of the
+configuration setting and whose second element is the value to assign to it. In
+the code above, just the "app-name" setting is being set to the name of your
+application.
+
+
+Configuration Settings
+----------------------
+The following are a list of Rope configuration settings, their default
 values, and what they do:
 
 app-name

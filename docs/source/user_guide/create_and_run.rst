@@ -19,6 +19,30 @@ The above example will create a directory named "do_list" in the projects
 directory in your home folder. That new directory will contain the basic file
 and directory layout for your Rope application.
 
+Project Directory Layout
+^^^^^^^^^^^^^^^^^^^^^^^^
+Rope is meant to be very flexible, so it's default folder structure doesn't try
+and impose any architectural model on your project. Below is a list of the
+folders that are created and a description of what they are used for.
+
+lasso_home/
+   This is the Lasso instance home folder for your application. When you run the
+   built-in web server, it sets this as your LASSO9_HOME environment variable.
+
+views/
+   This is a special folder used with ``rope->include`` that allows for it to be
+   the default root instead of your webroot. This allows your webroot to contain
+   no Lasso code if you desire.
+
+webapp/
+   This is the directory where you will probably keep all your business logic.
+   This folder is actually symbolically linked as the LassoStartup folder in the
+   lasso_home directory.
+
+webroot/
+   This is the webroot for your web application. Stick all your javascript, css,
+   and other assets in here.
+
 
 Running the Built-in Web Server
 -------------------------------

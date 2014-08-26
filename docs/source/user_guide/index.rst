@@ -16,4 +16,11 @@ Contents:
    config
    rope_register
    views
+   links
+   web_request_helpers
+   status_message
+   rope_user
+   rope_validate
+   rope_utilities
+   environments
    deploy

@@ -7,7 +7,7 @@ in loading the view code in response to a request, you can use the
 ``rope->render`` method. To do this, pass a string specifying the path to the
 view code you wish to render. The path should start with a "/" which represents
 the "views" directory. You can also pass values / setup local variables for the
-view code by passing the method keyword parameters - the key of which will be
+view code by passing keyword parameters to the method - the key of which will be
 the name of a local variable whose value is set to the value of the keyword
 parameter.
 
@@ -63,3 +63,27 @@ Example::
    [if(#jqueryUI)]
      <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
    [/if]
+
+
+Rendering JSON Data
+-------------------
+The ``rope->renderJSON`` method can be used to set the web response body to a
+JSON formatted string with the correct Content-Type header as well. In the
+following example, the JSON formatted string will be set as the response body,
+and the header will include a "Content-type application/json; charset=UTF-8"
+header.
+
+Example::
+
+   rope->register(`hello-world`, -routes=(:'/')) => {
+      rope->renderJSON('{"status": "success", "hello": "world"}')
+   }
+
+
+Objects that are not strings will have the ``json_serialize`` method called on
+them to create the JSON-formatted string for the response body. The following
+code will produce the same response as the first example::
+
+   rope->register(`hello-world`, -routes=(:'/')) => {
+      rope->renderJSON(map(`status` = "success", `hello` = "world"))
+   }

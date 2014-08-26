@@ -25,7 +25,7 @@ Registering a Route to a Controller
 Once a controller has been registered into your application, it can then be
 assigned to a route::
 
-   rope->register(`home`, -routes=(:'/'))
+   rope->register(`home`, -routes=(:'/home'))
 
 The "routes" named parameter takes a staticarray of routes that Rope will use to
 match URLs to that controller. (For details on the matching process, see the
@@ -50,13 +50,26 @@ In this example, I have registered a code block and its route all at once. This
 route is a wild-card route that will match any URL that is only one level deep.
 In other words, it would match "http://example.com/John" but not 
 "http://example.com/John/Doe". Wild-card routes allow you to reference the part
-of the path they represent by passing the ``rope->urlParam`` or ``rope->param``
-methods the wild-card name. (Ex: ``rope->urlParam(`name`)``)
+of the path they represent by passing the the wild-card name to either the
+``rope->urlParam`` or ``rope->param`` method. (Ex: ``rope->urlParam(`name`)``)
 
 .. note::
    Now that the controller has been registered, additional routes can be
    registered later on using the sytax shown
    :ref:`above <rope-register-block-and-routes>`.
+
+
+Unregister a Controller
+-----------------------
+After a controller has been registered, it is possible to unregister it by using
+the ``rope->deregister`` method with the name of the controller you wish to
+unregister. The following example removes the "hello-name" controller defined
+above::
+   
+   rope->deregister(`hello-name`)
+
+There is also a special method ``rope->deregisterAll`` that removes all
+controllers from being tracked by rope.
 
 
 .. _ug-matching-url-to-routes:
@@ -80,3 +93,33 @@ names are matched as URL parameters later.) When matching routes with wild-card
 parts, the matcher prefers those routes whose earliest parts match non-wildcard
 parts. This means that for two routes "/prada/:id" and "/:designer/shoes", the
 URL path "/prada/shoes" will match the first - "/prada/:id".
+
+
+Special Controller Names
+------------------------
+By default, rope comes with one controller already registered that matches the
+root of your domain and is given the name "root". The code for it looks like
+this::
+
+   rope->register(`root`, -routes=(:'/')) => { redirect_url('/lasso9/rope') }
+
+You can easily overwrite this controller by registering a new block to "root"::
+
+   rope->register(`root`) => {
+      content_body = "<h1>It Works!</h1>"
+   }
+
+You could also unregister the "root" controller and register a new controller
+with a different name and the root path::
+
+   rope->deregister(`root`)
+   rope->register(`home`, -routes=(:'/')) => {
+      content_body = "<h1>It Works!</h1>"
+   }
+
+There is also a special controller name "rope-fallback" that is **not**
+registered by default, but that you can register if needed. This controller
+doesn't take any routes, but is called anytime rope can't find a matching route
+in it's system. If you do not specify the "rope-fallback" controller, then rope
+will throw a "404 No matching route found" error if it can't find a route that
+matches the URL.
