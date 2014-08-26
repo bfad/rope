@@ -27,6 +27,11 @@ utilities
     encodes the plaintext with the salt in RIPEMD160 hash the specified number of
     iterations and then returns the whole thing in hexadecimal.
     
+.. method:: rope_randomAlphaNumeric(len::integer)
+
+    Returns the specified number of random characters - each being one of 0-9, a-z,
+    or A-Z
+    
 .. method:: rope_randomASCII(len::integer)
 
     Returns the specified number of random characters - each character is from the

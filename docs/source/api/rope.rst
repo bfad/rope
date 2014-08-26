@@ -62,6 +62,12 @@ rope
 
     .. method:: removeController(key::string)
 
+    .. method:: routeLink(key::string)
+
+    .. method:: routeLinks()
+
+    .. method:: routeLinks=(routeLinks::map)
+
     .. method:: routes()
 
     .. method:: routes=(routes::map)
@@ -88,9 +94,17 @@ rope
 
     .. method:: deregisterAll()
 
+    .. method:: env()
+
+        This method returns "dev" if the ROPE_ENV environment variable has not been set.
+        Otherwise it returns the value stored in the environment variable, even if that
+        value is an empty string
+        
     .. method:: extension()
 
-    .. method:: getParam(type::string, key::string, selectall::boolean)
+    .. method:: fileUploads()
+
+    .. method:: getParam(type::string, key::string, as::tag, default, selectall::boolean)
 
     .. method:: hostname()
 
@@ -130,6 +144,16 @@ rope
         
             #. It executes the controller block that matches the route that was found.
         
+    .. method:: link(key::string, index::integer =?, values::trait_positionallyKeyed =?)
+
+    .. method:: link(key::string, index::integer)
+
+    .. method:: link(key::string, values::trait_positionallyKeyed)
+
+    .. method:: links()
+
+    .. method:: links=(links::map)
+
     .. method:: matchRoute(path::array)
 
     .. method:: matchRoute(path::string)
@@ -152,19 +176,19 @@ rope
         
     .. method:: method()
 
-    .. method:: param(key::string, -selectall::boolean =?)
+    .. method:: param(key::string, -as::tag =?, -default =?, -selectall::boolean =?)
 
     .. method:: params()
 
     .. method:: path()
 
-    .. method:: postParam(key::string, -selectall::boolean =?)
+    .. method:: postParam(key::string, -as::tag =?, -default =?, -selectall::boolean =?)
 
     .. method:: postParams()
 
     .. method:: protocol()
 
-    .. method:: queryParam(key::string, -selectall::boolean =?)
+    .. method:: queryParam(key::string, -as::tag =?, -default =?, -selectall::boolean =?)
 
     .. method:: queryParams()
 
@@ -210,13 +234,31 @@ rope
 
     .. method:: startupCheckNLoad()
 
-    .. method:: urlParam(key::string, -selectall::boolean =?)
+    .. method:: status_msg()
+
+    .. method:: status_msg=(status_msg)
+
+    .. method:: statusMsg(-status::boolean =?, -message::boolean =?)
+
+    .. method:: statusMsg(stat::string, msg::string)
+
+    .. method:: statusMsg(stat_msg::pair)
+
+    .. method:: statusMsgError(msg::string)
+
+    .. method:: statusMsgSuccess(msg::string)
+
+    .. method:: statusMsgWarning(msg::string)
+
+    .. method:: urlParam(key::string, -as::tag =?, -default =?, -selectall::boolean =?)
 
     .. method:: urlParams()
 
     .. method:: urlParams=(urlParams::array)
 
     .. method:: user()
+
+    .. method:: user=(rhs::null)
 
     .. method:: user=(rhs::trait_rope_user)
 

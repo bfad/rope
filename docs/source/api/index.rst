@@ -1,5 +1,5 @@
 .. Rope documentation master file, created by
-   gen_api on Wed Dec 26 22:43:48 2012.
+   gen_api on Tue Aug 26 19:58:03 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 

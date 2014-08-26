@@ -1,25 +1,21 @@
 rope_validator
 ==============
 
-.. class:: rope_validator
+.. class:: trait_rope_objectValidator
 
-    .. method:: allValid()
+    Required Methods:
 
-    .. method:: failed()
+        * ropeValidations()
 
-    .. method:: failed=(failed::staticarray)
+    .. method:: ropeValidate(item::string)
 
-    .. method:: hasAllValidRun()
+    .. method:: ropeValidate(item::tag)
 
-    .. method:: oncreate(validations::map, ...)
+    .. method:: ropeValidate(keys::trait_foreach =?)
 
-    .. method:: validate(key::string)
+    .. method:: ropeIsValid()
 
-    .. method:: validations()
+    .. method:: ropeIsValid(item::string)
 
-    .. method:: validations=(validations::map)
-
-    .. method:: values()
-
-    .. method:: values=(values::map)
+    .. method:: ropeIsValid(item::tag)
 
