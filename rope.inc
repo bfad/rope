@@ -13,6 +13,23 @@ usage: " + #cmd + " new PROJECT_NAME\n
 
 define path_master_home => (sys_getEnv(`LASSO9_MASTER_HOME`) || '/var/lasso/home') + '/'
 
+define passThruStdoutStderr(proc::sys_process) => {
+    local(did_read) = false
+    // Until there's nothing there, keep reading from the child process
+    // and writing it to the parent process
+    local(stdout, stderr) = (:#proc->read,#proc->readError)
+    while(#stdout->size or #stderr->size) => {
+        #did_read = true
+        #stdout
+            ? file_stdout->writeBytes(#stdout)
+        #stderr
+            ? file_stderr->writeBytes(#stderr)
+        local(stdout, stderr) = (:#proc->read,#proc->readError)
+    }
+
+    return #did_read
+}
+
 define run_new => {
     $argc < 3 ? usage
     
@@ -109,15 +126,16 @@ define run_server => {
         (:'-httproot', #httpRoot, '-scriptextensions', #scriptExts->join(';'), '-addr', #httpAddr, '-p', #httpPort),
         (:'LASSO9_MASTER_HOME=' + path_master_home, 'LASSO9_HOME=' + #lassoHome)
     )
+    local(sleep) = 0
     while(#proc->isOpen) => {
-        local(stdout, stderr) = (:#proc->read,#proc->readError)
-        #stdout
-            ? file_stdout->writeBytes(#stdout)
-        #stderr
-            ? file_stderr->writeBytes(#stderr)
-
-        sleep(1000)
+        passThruStdoutStderr(#proc)
+            ? #sleep  = 0
+            | #sleep += 1
+        #sleep > 1000
+            ? #sleep = 1000
+        sleep(#sleep)
     }
+    passThruStdoutStderr(#proc)
 }
 
 1 == $argv->size
