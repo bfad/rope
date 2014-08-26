@@ -54,7 +54,7 @@ define generateSeries->by   => .`by`
 * Validators
 */
 define rv_notEmpty => \rv_notEmpty
-define rv_notEmpty(value, message::string=`Field can not be empty`) => {
+define rv_notEmpty(value, -message::string=`Field can not be empty`) => {
     (: ::void, ::null)->contains(#value->type) or #value->size == 0
         ? return #message
 }
@@ -62,19 +62,14 @@ define rv_notEmpty(value, message::string=`Field can not be empty`) => {
 define rv_containedIn => type {
     data list, message::string
 
-    public onCreate(list) => {
-        .`list`    = #list
-        .`message` = ``
-        return self->\invoke
-    }
-    public onCreate(list, message::string) => {
+    public onCreate(list, -message::string=``) => {
         .`list`    = #list
         .`message` = #message
 
         return self->\invoke
     }
-    public onCreate(value, list, message::string=``) => {
-        return (.onCreate(#list, #message))->invoke(#value)
+    public onCreate(value, list, -message::string=``) => {
+        return (.onCreate(#list, -message=#message))->invoke(#value)
     }
 
     public invoke(value, message::string=``) => {
@@ -93,19 +88,14 @@ define rv_containedIn => type {
 define rv_notContainedIn => type {
     data list, message::string
 
-    public onCreate(list) => {
-        .`list`    = #list
-        .`message` = ``
-        return self->\invoke
-    }
-    public onCreate(list, message::string) => {
+    public onCreate(list, -message::string=``) => {
         .`list`    = #list
         .`message` = #message
 
         return self->\invoke
     }
-    public onCreate(value, list, message::string=``) => {
-        return (.onCreate(#list, #message))->invoke(#value)
+    public onCreate(value, list, -message::string=``) => {
+        return (.onCreate(#list, -message=#message))->invoke(#value)
     }
 
     public invoke(value, message::string=``) => {
@@ -126,16 +116,16 @@ define rv_inRange => type {
         series::generateSeries,
         message::string
 
-    public onCreate(series::generateSeries, message::string=`Field must be between ` + math_min(#series->from, #series->to) + ` and ` + math_max(#series->from, #series->to)) => {
+    public onCreate(series::generateSeries, -message::string=`Field must be between ` + math_min(#series->from, #series->to) + ` and ` + math_max(#series->from, #series->to)) => {
         .`series`  = #series
         .`message` = #message
 
         return self->\invoke
     }
 
-    public onCreate(value, series::generateSeries, message::string=``) => {
+    public onCreate(value, series::generateSeries, -message::string=``) => {
         #message->size > 0
-            ? return (.onCreate(#series, #message))->invoke(#value)
+            ? return (.onCreate(#series, -message=#message))->invoke(#value)
             | return (.onCreate(#series))->invoke(#value)
     }
 
@@ -154,16 +144,16 @@ define rv_notInRange => type {
         series::generateSeries,
         message::string
 
-    public onCreate(series::generateSeries, message::string=`Field must not be between ` + math_min(#series->from, #series->to) + ` and ` + math_max(#series->from, #series->to)) => {
+    public onCreate(series::generateSeries, -message::string=`Field must not be between ` + math_min(#series->from, #series->to) + ` and ` + math_max(#series->from, #series->to)) => {
         .`series`  = #series
         .`message` = #message
 
         return self->\invoke
     }
 
-    public onCreate(value, series::generateSeries, message::string=``) => {
+    public onCreate(value, series::generateSeries, -message::string=``) => {
         #message->size > 0
-            ? return (.onCreate(#series, #message))->invoke(#value)
+            ? return (.onCreate(#series, -message=#message))->invoke(#value)
             | return (.onCreate(#series))->invoke(#value)
     }
 
@@ -184,29 +174,29 @@ define rv_greaterThan => type {
         bound,
         message::string
 
-    public onCreate(bound::integer, message::string=`Field must be greater than ` + #bound) => {
+    public onCreate(bound::integer, -message::string=`Field must be greater than ` + #bound) => {
         .`bound`  = #bound
         .`message` = #message
 
         return self->\invoke
     }
 
-    public onCreate(bound::decimal, message::string=`Field must be greater than ` + #bound) => {
+    public onCreate(bound::decimal, -message::string=`Field must be greater than ` + #bound) => {
         .`bound`  = #bound
         .`message` = #message
 
         return self->\invoke
     }
 
-    public onCreate(value, bound::integer, message::string=``) => {
+    public onCreate(value, bound::integer, -message::string=``) => {
         #message->size > 0
-            ? return (.onCreate(#bound, #message))->invoke(#value)
+            ? return (.onCreate(#bound, -message=#message))->invoke(#value)
             | return (.onCreate(#bound))->invoke(#value)
     }
 
-    public onCreate(value, bound::decimal, message::string=``) => {
+    public onCreate(value, bound::decimal, -message::string=``) => {
         #message->size > 0
-            ? return (.onCreate(#bound, #message))->invoke(#value)
+            ? return (.onCreate(#bound, -message=#message))->invoke(#value)
             | return (.onCreate(#bound))->invoke(#value)
     }
 
@@ -221,29 +211,29 @@ define rv_lessThan => type {
         bound,
         message::string
 
-    public onCreate(bound::integer, message::string=`Field must be less than ` + #bound) => {
+    public onCreate(bound::integer, -message::string=`Field must be less than ` + #bound) => {
         .`bound`  = #bound
         .`message` = #message
 
         return self->\invoke
     }
 
-    public onCreate(bound::decimal, message::string=`Field must be less than ` + #bound) => {
+    public onCreate(bound::decimal, -message::string=`Field must be less than ` + #bound) => {
         .`bound`  = #bound
         .`message` = #message
 
         return self->\invoke
     }
 
-    public onCreate(value, bound::integer, message::string=``) => {
+    public onCreate(value, bound::integer, -message::string=``) => {
         #message->size > 0
-            ? return (.onCreate(#bound, #message))->invoke(#value)
+            ? return (.onCreate(#bound, -message=#message))->invoke(#value)
             | return (.onCreate(#bound))->invoke(#value)
     }
 
-    public onCreate(value, bound::decimal, message::string=``) => {
+    public onCreate(value, bound::decimal, -message::string=``) => {
         #message->size > 0
-            ? return (.onCreate(#bound, #message))->invoke(#value)
+            ? return (.onCreate(#bound, -message=#message))->invoke(#value)
             | return (.onCreate(#bound))->invoke(#value)
     }
 
@@ -322,14 +312,14 @@ define rv_isA => type {
         expected::tag,
         message::string
 
-    public onCreate(expected::tag, message::string=`Field must be a ` + #expected) => {
+    public onCreate(expected::tag, -message::string=`Field must be a ` + #expected) => {
         .`expected` = #expected
         .`message`  = #message
 
         return self->\invoke
     }
-    public onCreate(value, expected::tag, message::string=`Field must be a ` + #expected) => {
-        return (.onCreate(#expected, #message))->invoke(#value)
+    public onCreate(value, expected::tag, -message::string=`Field must be a ` + #expected) => {
+        return (.onCreate(#expected, -message=#message))->invoke(#value)
     }
 
     public invoke(value, message::string=``) => {
@@ -344,14 +334,14 @@ define rv_isNotA => type {
         expected::tag,
         message::string
 
-    public onCreate(expected::tag, message::string=`Field must not be a ` + #expected) => {
+    public onCreate(expected::tag, -message::string=`Field must not be a ` + #expected) => {
         .`expected` = #expected
         .`message`  = #message
 
         return self->\invoke
     }
-    public onCreate(value, expected::tag, message::string=`Field must not be a ` + #expected) => {
-        return (.onCreate(#expected, #message))->invoke(#value)
+    public onCreate(value, expected::tag, -message::string=`Field must not be a ` + #expected) => {
+        return (.onCreate(#expected, -message=#message))->invoke(#value)
     }
 
     public invoke(value, message::string=``) => {

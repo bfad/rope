@@ -154,7 +154,7 @@ describe(::rv_notEmpty) => {
         }
 
         it(`allows the message to be set by an optional second param`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notEmpty(void, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notEmpty(void, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 }
@@ -164,7 +164,7 @@ describe(::rv_containedIn) => {
         expect(::memberstream, rv_containedIn((:1,'a'))->type)
     }
     it(`takes an object that understands the >> operator and a string to use for message and returns a memberstream of the method to call`) => {
-        expect(::memberstream, rv_containedIn((:1, 'a'), 'bad')->type)
+        expect(::memberstream, rv_containedIn((:1, 'a'), -message='bad')->type)
     }
 
     context(`passed both a value and a container list`) => {
@@ -175,7 +175,7 @@ describe(::rv_containedIn) => {
             expect(`Field must be one of 1, a`, rv_containedIn('z', (:1,'a')))
         }
         it(`allows an optional custom validation message to be returned if the value is not in the set`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_containedIn('z', (:1,'a'), `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_containedIn('z', (:1,'a'), -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -198,7 +198,7 @@ describe(::rv_notContainedIn) => {
         expect(::memberstream, rv_notContainedIn((:1,'a'))->type)
     }
     it(`Takes a an object that understands the !>> operator and a string to use for the error message returning a memberstream to call`) => {
-        expect(::memberstream, rv_notContainedIn((:1,'a'), `bad`)->type)
+        expect(::memberstream, rv_notContainedIn((:1,'a'), -message=`bad`)->type)
     }
 
     context(`passed a given value and a container list`) => {
@@ -209,7 +209,7 @@ describe(::rv_notContainedIn) => {
             expect(`Field must not be one of 1, a`, rv_notContainedIn('a', (:1,'a')))
         }
         it(`allows for a custom validation messag if the value is in the set`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notContainedIn('a', (:1,'a'), `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notContainedIn('a', (:1,'a'), -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -232,7 +232,7 @@ describe(::rv_inRange) => {
         expect(::memberstream, rv_inRange(1 to 10)->type)
     }
     it(`takes a generateSeries and string to use for message and returns a memberstream of the method to call`) => {
-        expect(::memberstream, rv_inRange(1 to 10, `bad`)->type)
+        expect(::memberstream, rv_inRange(1 to 10, -message=`bad`)->type)
     }
 
     context(`passed both a value and a generateSeries`) => {
@@ -243,7 +243,7 @@ describe(::rv_inRange) => {
             expect(`Field must be between 1 and 5`, rv_inRange(-3, 1 to 5))
         }
         it(`allows an optional custom validation message to be returned if the value is not in the series`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_inRange(-3, 1 to 5, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_inRange(-3, 1 to 5, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -266,7 +266,7 @@ describe(::rv_notInRange) => {
         expect(::memberstream, rv_notInRange(1 to 10)->type)
     }
     it(`takes a generateSeries and string to use for message and returns a memberstream of the method to call`) => {
-        expect(::memberstream, rv_notInRange(1 to 10, `bad`)->type)
+        expect(::memberstream, rv_notInRange(1 to 10, -message=`bad`)->type)
     }
 
     context(`passed both a value and a generateSeries`) => {
@@ -277,7 +277,7 @@ describe(::rv_notInRange) => {
             expect(`Field must not be between 1 and 5`, rv_notInRange(3, 1 to 5))
         }
         it(`allows an optional custom validation message to be returned if the value is in the series`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notInRange(3, 1 to 5, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_notInRange(3, 1 to 5, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -451,7 +451,7 @@ describe(::rv_isA) => {
         expect(::memberstream, rv_isA(::string)->type)
     }
     it(`Takes a tag and a string to use for the error message returning a memberstream to call`) => {
-        expect(::memberstream, rv_isA(::string, `Wrong question`)->type)
+        expect(::memberstream, rv_isA(::string, -message=`Wrong question`)->type)
     }
 
     context(`passed a given value and an expected tag`) => {
@@ -462,7 +462,7 @@ describe(::rv_isA) => {
             expect(`Field must be a string`, rv_isA(null, ::string))
         }
         it(`allows for a custom validation messag if the value is not an object that is a type or tait specified by the tag`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isA(void, ::string, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isA(void, ::string, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -485,7 +485,7 @@ describe(::rv_isNotA) => {
         expect(::memberstream, rv_isNotA(::string)->type)
     }
     it(`Takes a tag and a string to use for the error message returning a memberstream to call`) => {
-        expect(::memberstream, rv_isNotA(::string, `Wrong question`)->type)
+        expect(::memberstream, rv_isNotA(::string, -message=`Wrong question`)->type)
     }
 
     context(`passed a given value and an expected tag`) => {
@@ -496,7 +496,7 @@ describe(::rv_isNotA) => {
             expect(`Field must not be a null`, rv_isNotA(null, ::null))
         }
         it(`allows for a custom validation messag if the value is an object that is a type or tait specified by the tag`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isNotA(void, ::void, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_isNotA(void, ::void, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -520,7 +520,7 @@ describe(::rv_greaterThan) => {
         expect(::memberstream, rv_greaterThan(10)->type)
     }
     it(`takes an integer and string to use for message and returns a memberstream of the method to call`) => {
-        expect(::memberstream, rv_greaterThan(10, `bad`)->type)
+        expect(::memberstream, rv_greaterThan(10, -message=`bad`)->type)
     }
 
     context(`passed both an integer value to check and an integer`) => {
@@ -531,7 +531,7 @@ describe(::rv_greaterThan) => {
             expect(`Field must be greater than 1`, rv_greaterThan(-3, 1))
         }
         it(`allows an optional custom validation message to be returned if the value is less than the integer`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_greaterThan(-3, 1, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_greaterThan(-3, 1, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
@@ -554,7 +554,7 @@ describe(::rv_lessThan) => {
         expect(::memberstream, rv_lessThan(10)->type)
     }
     it(`takes an integer and string to use for message and returns a memberstream of the method to call`) => {
-        expect(::memberstream, rv_lessThan(10, `bad`)->type)
+        expect(::memberstream, rv_lessThan(10, -message=`bad`)->type)
     }
 
     context(`passed both an integer value to check and an integer`) => {
@@ -565,7 +565,7 @@ describe(::rv_lessThan) => {
             expect(`Field must be less than 5`, rv_lessThan(30, 5))
         }
         it(`allows an optional custom validation message to be returned if the value is greater than the integer`) => {
-            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_lessThan(30, 5, `rhinos run rapidly, reaching rates of 35 mph`))
+            expect(`rhinos run rapidly, reaching rates of 35 mph`, rv_lessThan(30, 5, -message=`rhinos run rapidly, reaching rates of 35 mph`))
         }
     }
 
