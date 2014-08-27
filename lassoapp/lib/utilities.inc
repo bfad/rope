@@ -71,14 +71,25 @@ define rope_randomAlphaNumeric(len::integer) => {
 }
 
 
+/**!
+    This method takes a dir object. Starting with that directory, it calls
+    ``file_import`` on all files whose extensions match those passed in the "ext"
+    parameter's staticarray, and then proceeds to do the same thing recursively
+    through all the other directories contained in the directory.
 
+    The default value of "ext" is ``(:'lasso', 'inc')``.
+*/
 define dir_import(d::dir, ext::staticarray=(:'lasso', 'inc')) => {
     with f in #d->eachFile
-    where #ext->contains(#f->path->split('.')->last) 
+    where #ext->contains(#f->path->split('.')->last)
     do file_import(#f)
 
     with f in #d->eachDir do dir_import(#f)
 }
+/**!
+    This method takes in an file object and executes the contents of the file as
+    Lasso source code. (It's similar to the ``library`` method.)
+*/
 define file_import(f::file) => {
     sourcefile(#f->readString, #f->path, false, false)->invoke
 }
@@ -119,7 +130,7 @@ define integerOrNull(value)          => orNullWrap(#value, ::integer)
 
 /**!
 This method takes in a bytes object and returns null if it is empty or the value
-as an integer if it is not. It is meant to be used in the ``-as`` paramater of a
+as a decimal if it is not. It is meant to be used in the ``-as`` paramater of a
 ``rope->param()`` (and it's siblings) method call. Ex::
     
     rope->param('rhino', -as=::integerOrNull)
