@@ -80,7 +80,11 @@ define run_server => {
     local(httpRoot)    = '/' + io_file_getcwd + '/webroot/'
     local(scriptExts)  = (:'lasso','inc')
     local(projectPath) = io_file_getcwd
-    local(lassoHome)   = (sys_getEnv(`LASSO9_HOME`) == '/var/lasso/home' ? null | sys_getEnv(`LASSO9_HOME`))
+    local(lassoHome)   = sys_getEnv(`LASSO9_HOME`)->asString
+
+    #lassoHome->removeTrailing('/')
+    staticarray('', '/var/lasso/home', '/var/lasso/global_cli_home') >> #lassoHome
+        ? #lassoHome = null
 
     // Parse any command-line arguments
     local(opts) = $argv->asArray
