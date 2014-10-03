@@ -53,10 +53,30 @@ define generateSeries->by   => .`by`
 /*
 * Validators
 */
-define rv_notEmpty => \rv_notEmpty
-define rv_notEmpty(value, -message::string=`Field can not be empty`) => {
-    (: ::void, ::null)->contains(#value->type) or #value->size == 0
-        ? return #message
+define rv_notEmpty => type {
+    data message::string
+
+    public onCreate(-message::string=``) => {
+        .`message` = #message
+
+        return self->\invoke
+    }
+
+    public onCreate(value, -message::string=``) => {
+        return (.onCreate(-message=#message))->invoke(#value)
+    }
+
+    public invoke(value, message::string=``) => {
+        (: ::void, ::null) !>> #value->type and #value->size > 0
+            ? return void
+
+        #message->size > 0
+            ? return #message
+        .`message`->size > 0
+            ? return .`message`
+
+        return `Field can not be empty`
+    }
 }
 
 define rv_containedIn => type {
