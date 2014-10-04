@@ -82,9 +82,10 @@ define rope_randomAlphaNumeric(len::integer) => {
 define dir_import(d::dir, ext::staticarray=(:'lasso', 'inc')) => {
     with f in #d->eachFile
     where #ext->contains(#f->path->split('.')->last)
+    order by #f->name
     do file_import(#f)
 
-    with f in #d->eachDir do dir_import(#f)
+    with f in #d->eachDir order by #f->name do dir_import(#f)
 }
 /**!
     This method takes in an file object and executes the contents of the file as
