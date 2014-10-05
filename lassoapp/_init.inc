@@ -7,7 +7,10 @@ local(lib) = (:
 )
 with f in #lib do lassoapp_include_current(#f)
 
+define rope_webappPath => sys_homePath + '/rope_webapp/'
+
 rope->register(`root`, -routes=(:'/')) => { redirect_url('/lasso9/rope') }
+
 protect => {\http_server_connection_handler}
 define http_server_connection_handler->invoke(con::http_server_web_connection) => {
     protect => {

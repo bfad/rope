@@ -36,7 +36,7 @@ views/
 
 webapp/
    This is the directory where you will probably keep all your business logic.
-   This folder is actually symbolically linked as the LassoStartup folder in the
+   This folder is actually symbolically linked as the rope_webapp folder in the
    lasso_home directory.
 
 webroot/

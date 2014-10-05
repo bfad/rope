@@ -1,4 +1,4 @@
-    local(dir2list) = dir('/' + string(web_request->queryParam('path') || sys_userStartupPath))
+    local(dir2list) = dir('/' + string(web_request->queryParam('path') || rope_webappPath))
     local(exts) = (
         with item in string(web_request->queryParam('exts'))->split(' ') 
         where #item->size > 0 

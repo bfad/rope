@@ -30,10 +30,20 @@ host setup and adapt it to your system's Apache configuration.
    $> sudo rm -rf /var/lasso/instances/default
    $> sudo ln -s /var/www/example/lasso_home /var/lasso/instances/default
 
+#. Delete the SQLite databases and logs generated during development::
+
+   $> rm /var/www/example/lasso_home/SQLiteDBs/*
+   $> rm /var/www/example/lasso_home/lasso_logbook.txt
+   $> rm /var/www/example/lasso_home/lasso.err.txt
+   $> rm /var/www/example/lasso_home/lasso.out.txt
+
 #. Back in the browser, navigate to the environment variable and add the
    following environment variable: ``ROPE_ENV=production``.
 
 #. Start the instance.
+
+#. Go to the Lasso Administrator application for your app and setup an
+   administrative user and any other settings such as database connections.
 
 #. Make your Apache virtual host site configuration look something like the
    following::

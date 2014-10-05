@@ -66,8 +66,13 @@ define run_new => {
     dir('LassoApps/')    ->create
     dir('LassoModules/') ->create
     dir('SQLiteDBs/')    ->create
+    dir('LassoStartup/') -> create
     
-    io_file_symlink('../webapp' , 'LassoStartup')
+    io_file_symlink('../webapp' , 'rope_webapp')
+    file('LassoStartup/_load_rope_webapp.lasso')->doWithClose => {
+        #1->openTruncate&writeString(`dir_import(dir(sys_homePath + '/rope_webapp/'))`)
+    }
+
     local(f_ropeapp) = file(path_master_home + 'LassoApps-disabled/rope.lassoapp')
     #f_ropeapp->exists
         ? #f_ropeapp->copyTo('LassoApps/' + #f_ropeapp->name)
