@@ -16,10 +16,7 @@ In the steps below, we will be assuming that you will be installing Rope into
 the ``/var/lasso/home/`` directory:
 
 #. Download the binaries for your platform:
-
-   * `OS X <http://bitbucket.org/bfad/rope/>`_
-   * `Ubuntu 11.04 <http://bitbucket.org/bfad/rope/>`_
-   * `Ubuntu 12.04 <http://bitbucket.org/bfad/rope/>`_
+   `Bitbucket Download Page <https://bitbucket.org/bfad/rope/downloads>`_
 
 #. Decompress and untar the downloaded file::
 
