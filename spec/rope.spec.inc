@@ -8,6 +8,29 @@ if(not var_defined('_rope_loaded')) => {
 }
 
 describe(::rope) => {
+    describe(`-> env`) => {
+        afterAll => {
+            sys_unsetEnv('ROPE_ENV')
+        }
+        it(`returns "dev" when ROPE_ENV variable not set`) => {
+            expect(::void, sys_getEnv('ROPE_ENV')->type)
+            expect("dev", rope->env)
+        }
+        it(`returns the value set in the ROPE_ENV variable`) => {
+            sys_setEnv('ROPE_ENV', 'fast')
+            
+            expect('fast', sys_getEnv('ROPE_ENV'))
+            expect('fast', rope->env)
+        }
+        it(`returns "" when ROPE_ENV variable is set to an empty string`) => {
+            sys_setEnv('ROPE_ENV', '')
+            
+            expect('', sys_getEnv('ROPE_ENV'))
+            expect('', rope->env)
+        }
+    }
+    
+    
     describe(`-> register`) => {
         context(`passed a givenBlock`) => {
             it(`registers the givenBlock to the controller`) => {
@@ -19,10 +42,6 @@ describe(::rope) => {
                 local(num_routes) = rope->routesSized(2)->size
                 rope->register('new', -routes=(:'/moose/hair', '/foo/bar')) => {}
                 expect(2 + #num_routes, rope->routesSized(2)->size)
-            }
-            it(`registers the file path where the given block is registered`) => {
-                rope->register(`new`) => {}
-                expect(rope->absPath(currentCapture->callsite_file), rope->controllerPath('new'))
             }
             it(`overwrites an existing controller with the same name`) => {
                 rope->register(`new-rewrite`) => { return 'first' }
@@ -89,7 +108,6 @@ describe(::rope) => {
             
             rope->deregister(`deregister`)
             expect(not rope->controllerExist('deregister'))
-            expect(void, rope_thread->code_paths->find('deregister'))
             expect->error(error_code_fileNotFound, `No matching route found`) => {
                 rope->matchRoute(`/deregister`)
             }
@@ -107,7 +125,6 @@ describe(::rope) => {
             rope->deregisterAll
             expect(0, rope_thread->controllers->size)
             expect(0, rope_thread->routes->size)
-            expect(0, rope_thread->code_paths->size)
         }
     }
     
@@ -123,6 +140,10 @@ describe(::rope) => {
         it(`matches routes if the whole path matches`) => {
             rope->register('matchRoute', -routes=(:'/fly/you/fools'))
             expect('matchRoute', rope->matchRoute('/fly/you/fools')->second)
+        }
+        it(`matches routes without trailing / if the path has a trialing /`) => {
+            rope->register('matchRoute', -routes=(:'/fly/you/fools'))
+            expect('matchRoute', rope->matchRoute('/fly/you/fools/')->second)
         }
         it(`can match the root route (/)`) => {
             rope->register(`matchRoute`, -routes=(:`/`))
@@ -146,6 +167,19 @@ describe(::rope) => {
             rope->register('matchRoute2', -routes=(:'/:adj/scott')) => {}
             
             expect(`matchRoute`, rope->matchRoute('/great/scott')->second)
+        }
+
+        it(`ignores the extension when matching a route`) => {
+            rope->register(`matchRoute`, -routes=(:`/this/is/heavy`))
+
+            expect(`matchRoute`, rope->matchRoute(`/this/is/heavy.json`)->second)
+            expect(`matchRoute`, rope->matchRoute(`/this/is/heavy.html`)->second)
+        }
+        it(`ignores the extension when matching a route, even if it's the wild-card`) => {
+            rope->register(`matchRoute`, -routes=(:`/this/is/:adj`))
+
+            expect(`matchRoute`, rope->matchRoute(`/this/is/light.json`)->second)
+            expect(`matchRoute`, rope->matchRoute(`/this/is/heavy.html`)->second)
         }
         
         it(`if rope-fallback controller is defined it is called when no route matches`) => {
@@ -178,14 +212,20 @@ describe(::rope) => {
             rope->invoke
             expect(session_id(`RopeSession`)->size > 0)
         }
+        it(`doesn't have any extensions if the URL parameter is the last element in the path`) => {
+            new_fake_conn
+            var(_req_params) = map(::REQUEST_URI='/person/robinmckinley.json')
+
+            expect(`sunshine`, rope->invoke)
+            expect(`robinmckinley`, rope->urlParam(`id`))
+        }
 
         context(`when ROPE_ENV environment variable not set to production`) => {
             beforeAll => {
-                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
                 sys_setEnv('ROPE_ENV', 'dev')
             }
             afterAll => {
-                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+                sys_unsetEnv('ROPE_ENV')
             }
             it(`loads new files that it finds in LassoStartup`) => {
                 local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
@@ -217,11 +257,10 @@ describe(::rope) => {
         }
         context(`when ROPE_ENV environment variable is set to production`) => {
             beforeAll => {
-                var(tmp_rope_env_value) = sys_getEnv('ROPE_ENV')->asString
                 sys_setEnv('ROPE_ENV', 'production')
             }
             afterAll => {
-                sys_setEnv('ROPE_ENV', $tmp_rope_env_value)
+                sys_unsetEnv('ROPE_ENV')
             }
             it(`ignores new files that it finds in LassoStartup`) => {
                 local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
@@ -400,7 +439,7 @@ describe(::rope) => {
     
     
     describe(`-> extension`) => {
-        it(`returns the extention at the end of the URL path when it exits`) => {
+        it(`returns the extention at the end of the URL path when it exists`) => {
             web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext.init')
             
             expect(`init`, rope->extension)
@@ -409,6 +448,23 @@ describe(::rope) => {
             web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext/init')
             
             expect(`html`, rope->extension)
+        }
+        it(`returns just the extension and no query params`) => {
+            web_request = mock('requestUri' = '/long.ish/path.with/multiple.ext.init?q=now')
+
+            expect(`init`, rope->extension)
+        }
+    }
+    describe(`-> path`) => {
+        it(`returns the path portion of the url`) => {
+            web_request = mock('requestUri' = '/my/path')
+
+            expect(`/my/path`, rope->path)
+        }
+        it(`strips the GET params out of the path portion of the URL`) => {
+            web_request = mock('requestUri' = '/my/path?user=1&admin=one')
+
+            expect(`/my/path`, rope->path)
         }
     }
     
@@ -434,54 +490,6 @@ describe(::rope) => {
         it(`takes a map and sets the content_body to a serialize form of that map`) => {
             rope->renderJSON(map('moose'='hair'))
             expect('{"moose": "hair"}', content_body)
-        }
-    }
-    
-    
-    describe(`-> reload`) => {
-        it(`reprocesses the file where the specified controller was registered`) => {
-            local(f) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
-            handle => { #f->exists? #f->delete }
-            
-            #f->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload') => { return 'moose' }`)) }
-            import_file(#f)
-            local(first) = rope->controller('reload')->invoke
-            
-            #f->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload') => { return 'hair' }`)) }
-            rope->reload('reload')
-            local(second) = rope->controller('reload')->invoke
-            
-            expect('moose', #first)
-            expect('hair', #second)
-        }
-        it(`reloads all registered controllers`) => {
-            // First clear any controllers registered in here or we'll have an infinite loop!
-            rope->deregisterAll
-            
-            local(f1) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
-            local(f2) = file(`//tmp/rope-` + lasso_uniqueID + '.inc')
-            handle => {
-                #f1->exists? #f1->delete
-                #f2->exists? #f2->delete
-            }
-            
-            #f1->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload1') => { return 'moose' }`)) }
-            #f2->doWithClose => { #1->openWrite&writeBytes(bytes(`rope->register('reload2') => { return 'duck' }`)) }
-            import_file(#f1)
-            import_file(#f2)
-            local(first1) = rope->controller('reload1')->invoke
-            local(first2) = rope->controller('reload2')->invoke
-            
-            #f1->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload1') => { return 'hair' }`)) }
-            #f2->doWithClose => { #1->openTruncate&writeBytes(bytes(`rope->register('reload2') => { return 'goose' }`)) }
-            rope->reload
-            local(second1) = rope->controller('reload1')->invoke
-            local(second2) = rope->controller('reload2')->invoke
-            
-            expect('moose', #first1)
-            expect('duck' , #first2)
-            expect('hair' , #second1)
-            expect('goose', #second2)
         }
     }
     
@@ -690,6 +698,103 @@ describe(::rope) => {
             
             expect(`GET`, web_request->requestMethod)
             expect(`PUT`, rope->method)
+        }
+    }
+    
+    
+    describe(`-> statusMsg`) => {
+        define rope_impl->tmpStatusMsg      => .`status_msg`
+        define rope_impl->tmpStatusMsg(set) => { .`status_msg` = #set }
+        
+        context(`called without any parameters`) => {
+            beforeAll => { rope->tmpStatusMsg(null) }
+            afterAll  => { rope->tmpStatusMsg(null) }
+            it(`returns "null" when no status message has been set`) => {
+                expect(null, rope->statusMsg)
+            }
+            it(`returns a map of the set status and message`) => {
+                local(item) = map(`status`=`error`, `message`=`Help! Help!`)
+                rope->tmpStatusMsg(#item)
+                local(result) = rope->statusMsg
+                
+                expect(#item->size, #result->size)
+                with key in #item->keys
+                let elm1 = #item->find(#key)
+                let elm2 = #result->find(#key)
+                do { expect(#elm1, #elm2) }
+            }
+        }
+        
+        it(`takes in a pair and sets the first item to the status and second to the message`) => {
+            rope->tmpStatusMsg(null)
+            rope->statusMsg(`success`=`rhino`)
+            local(result) = rope->statusMsg
+            
+            expect(`success`, #result->find('status'))
+            expect(`rhino`  , #result->find('message'))
+        }
+        it(`takes two arguments, the first is set to the status and the second to the message`) => {
+            rope->statusMsg(`warning`, `moose hair!`)
+            local(result) = rope->statusMsg
+            
+            expect(`warning`    , #result->find('status'))
+            expect(`moose hair!`, #result->find('message'))
+        }
+        
+        context(`called with the -status parameter`) => {
+            it(`returns "null" when no status message has been set`) => {
+                rope->tmpStatusMsg(null)
+                expect(null, rope->statusMsg(-status))
+            }
+            it(`returns just the status part of the status message`) => {
+                rope->statusMsg(`status`, `fire`)
+                expect(`status`, rope->statusMsg(-status))
+            }
+        }
+        
+        context(`called with the -message parameter`) => {
+            it(`returns "null" when no status message has been set`) => {
+                rope->tmpStatusMsg(null)
+                expect(null, rope->statusMsg(-message))
+            }
+            it(`returns just the message part of the status message`) => {
+                rope->statusMsg(``, `Inconceivable!`)
+                expect(`Inconceivable!`, rope->statusMsg(-message))
+            }
+        }
+        
+        it(`throws an error if both -status and -message are passed to it`) => {
+            expect->error(error_code_invalidParameter, `You can't specify both the status and the message`) => {
+                rope->statusMsg(-status, -message)
+            }
+        }
+    
+        describe(`-> statusMsgSuccess`) => {
+            it(`sets the status_msg data element up with a status of "success" and a message of whatever is passed to it`) => {
+                rope->tmpStatusMsg(null)
+                rope->statusMsgSuccess(`My message`)
+
+                expect(`success`   , rope->statusMsg->find(`status`))
+                expect(`My message`, rope->statusMsg->find('message'))
+            }
+        }
+        describe(`-> statusMsgWarning`) => {
+            it(`sets the status_msg data element up with a status of "warning" and a message of whatever is passed to it`) => {
+                rope->tmpStatusMsg(null)
+                rope->statusMsgWarning(`you've been warned`)
+
+                expect(`warning`           , rope->statusMsg->find(`status`))
+                expect(`you've been warned`, rope->statusMsg->find('message'))
+            }
+        }
+        describe(`-> statusMsgError`) => {
+            it(`sets the status_msg data element up with a status of "error" and a message of whatever is passed to it`) => {
+                rope->tmpStatusMsg(null)
+                rope->statusMsgError(`No Error`)
+
+                expect(`error`   , rope->statusMsg->find(`status`))
+                expect(`No Error`, rope->statusMsg->find('message'))
+            }
         }
     }
 }

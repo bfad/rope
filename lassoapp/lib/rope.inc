@@ -12,7 +12,7 @@ define rope_thread => thread {
     data private startupFiles::map = map,
          private controllers ::map = map,
          private routes      ::map = map,
-         private code_paths  ::map = map,
+         private routeLinks  ::map = map,
          private configLoaded::boolean = false,
          private config      ::map = map(
                 `app-name`         = pair(`UnNamed`,::string),
@@ -20,10 +20,11 @@ define rope_thread => thread {
                 `sessions-expires` = pair(1440, ::integer)
             )
 
-    public controllers  => .`controllers`
-    public routes       => .`routes`
-    public code_paths   => .'code_paths'
-    public configLoaded => .`configLoaded`
+    public
+        controllers  => .`controllers`,
+        routes       => .`routes`,
+        routeLinks   => .`routeLinks`,
+        configLoaded => .`configLoaded`
     /**!
         When not in a poduction environment, Rope grabs the current modification times
         for all files in LassoStartup so that each time ``rope->invoke`` is called
@@ -67,13 +68,12 @@ define rope_thread => thread {
 
     public controller(key::string)      => .`controllers`->get(#key)
     public controllerExist(key::string) => .`controllers`->contains(#key)
-    public insertController(item::pair, path::string) => {
+    public insertController(item::pair) => {
         .`controllers`->insert(#item)
-        .`code_paths` ->insert(#item->first=#path)
     }
     public removeController(key::string) => {
         .`controllers`->remove(#key)
-        .`code_paths` ->remove(#key)
+        .`routeLinks` ->remove(#key)
         
         with item in .'routes'->eachPair do {
             local(routes) = #item->second
@@ -86,11 +86,10 @@ define rope_thread => thread {
     }
     public removeAllControllers => {
         .'controllers' = map
-        .`code_paths`  = map
         .`routes`      = map
+        .`routeLinks`  = map
     }
     
-    public codePath(key::string) => .`code_paths`->get(#key)
     
     public insertRoute(item::pair) => {
         local(path_size) = #item->first->size
@@ -99,8 +98,19 @@ define rope_thread => thread {
 
         not .`routes`->get(#path_size)->contains(#item)
             ? .`routes`->get(#path_size)->insert(#item)
+
+        local(key)  = #item->second
+        local(path) = #item->first
+        not .`routeLinks`->contains(#key)
+            ? .`routeLinks`->insert(#key=array)
+        
+        not .`routeLinks`->find(#key)->contains(#path)
+            ? .`routeLinks`->find(#key)->insert(#path)
+        
     }
     public findRoutesSized(key::integer) => .`routes`->find(#key)
+
+    public routeLink(key::string) => .`routeLinks`->find(#key)
     
     public config(key::string) => .`config`->find(#key)->first
     /**!
@@ -126,37 +136,31 @@ define rope_thread => thread {
 }
 ::rope_thread->doccomment = tag('rope_thread_thread$')->doccomment
 define rope_impl => type {
-    data public urlParams::array = array
+    data public urlParams::array = array,
+        private status_msg,
+        private links::map = map
     
     /**!
         This is where the magic all happens. Every web request that rope handles runs
         this method and follows these steps:
 
             #. If we are not running in production mode, it checks for any new files in
-            LassoStartup or any modified existing files and loads them. 
+               LassoStartup or any modified existing files and loads them. 
 
             #. It matches the URL path to a route. If there are any URL parameters in 
-            the path then it also loads them up.
+               the path then it also loads them up.
 
             #. It continues the Rope Session as long as sessions aren't turned off.
 
             #. It executes the controller block that matches the route that was found.
     */
     public invoke => {
-        `production` != sys_getEnv(`ROPE_ENV`)
+        `production` != .env
             ? .startupCheckNLoad
 
-        local(path)  = .path->asCopy->remove(1,1)&split('/')
-        local(route) = .matchRoute(#path)
+        // Matches route & sets up URL parameters
+        local(route) = .matchRoute(.path)
         
-        //Setup URL parameters
-        local(i) = #path->size
-        while(#i--) => {
-            local(part) = #route->first->get(loop_count)
-            
-            `:` == #part->get(1)
-                ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
-        }
         .continueSession
         return .controller(#route->second)->invoke
     }
@@ -164,7 +168,8 @@ define rope_impl => type {
         with path in rope_thread->findFilesToReload do sourcefile(file(`/` + #path)->readString, #path, false, false)->invoke
     }
     
-    public config(...) => rope_thread->config(:#rest)
+    public config(...)  => rope_thread->config(:#rest)
+    public configLoaded => rope_thread->configLoaded
     
     /**!
         This method serves two functions: 1) It registers a controller and its code 
@@ -192,7 +197,7 @@ define rope_impl => type {
             rope->register('new-controller', -routes=(:'/moose/hair/rhino'))
     */
     public register(controller::string, -routes::staticarray=(:)) => {
-        givenBlock? rope_thread->insertController(#controller=givenBlock, .absolutePath(currentCapture->continuation->callsite_file))
+        givenBlock? rope_thread->insertController(#controller=givenBlock)
         
         not givenBlock and #routes->size == 0
             ? fail(`This method requires you to either also pass routes or a givenBlock`)
@@ -223,18 +228,6 @@ define rope_impl => type {
         
         return '/' + #path
     }
-    public reload(controller::string) => {
-        local(path) = .controllerPath(#controller)
-        sourcefile(file(#path)->readString, #path, false, false)->invoke
-    }
-    public reload => {
-        local(paths)      = rope_thread->code_paths->values
-        local(paths_done) = set
-        with path in #paths where not #paths_done->contains(#path) do {
-            #paths_done->insert(#path)
-            sourcefile(file(#path)->readString, #path, false, false)->invoke
-        }
-    }
 
     public deregister(controller::string) => {
         rope_thread->removeController(#controller)
@@ -249,16 +242,25 @@ define rope_impl => type {
             #. The Route must be the same number of parts as the path.
 
             #. Routes can have wild-card parts, indicated by the part starting with a
-            colon. (These are matched as URL parameters later.) However, the matcher
-            prefers those routes whose earliest parts match non-wildcard parts. This
-            means that for two routes "/prada/:id" and "/:designer/shoes", the URL 
-            "/prada/shoes" will match the first - "/prada/:id".
+               colon. (These are matched as URL parameters later.) However, the matcher
+               prefers those routes whose earliest parts match non-wildcard parts. This
+               means that for two routes "/prada/:id" and "/:designer/shoes", the URL 
+               "/prada/shoes" will match the first - "/prada/:id".
 
             #. All the parts must be found to match either exactly or a wildcard.
 
             #. It is an error if no routes are found or if more than one route matches.
     */
-    public matchRoute(path::string) => .matchRoute(#path->asCopy->remove(1,1)&split('/'))
+    public matchRoute(path::string) => {
+        // Remvove the extension (if there) or just get a copy to work with
+        local(ext_start)  = #path->findLast('.')
+        local(last_slash) = #path->findLast('/')
+        #ext_start > #last_slash
+            ? #path = #path->sub(1, #ext_start - 1)
+            | #path = #path->asCopy
+
+        return .matchRoute(#path->remove(1,1)&removeTrailing('/')&split('/'))
+    }
     private matchRoute(path::array) => {
         local(i)     = #path->size
         local(found) = rope_thread->findRoutesSized(#i)
@@ -280,39 +282,92 @@ define rope_impl => type {
                 | #found = #good
         }
         #found->size == 0 and .controllerExist(`rope-fallback`)
-            ? return pair(#path=`rope-fallback`)
+            ? #found = (:pair(#path=`rope-fallback`))
         #found->size == 0
             ? fail(error_code_fileNotFound, `No matching route found`)
         #found->size > 1
             ? fail(`Multiple routes matched the given path`)
             
-        return #found->first
+        local(result) = #found->first
+
+        //Setup URL parameters
+        local(i) = #path->size
+        local(p) = #result->first
+        while(#i--) => {
+            local(part) = #p->get(loop_count)
+            
+            `:` == #part->get(1)
+                ? .'urlParams'->insert(#part->sub(2)=#path->get(loop_count))
+        }
+
+        return #result
     }
     
     
     public controller     (key::string) => rope_thread->controller(#key)
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
-    public controllerPath (key::string) => rope_thread->codePath(#key)
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
+
+    public link(key::string, index::integer)                  => .link(#key, #index, (:))
+    public link(key::string, values::trait_positionallyKeyed) => .link(#key,      1, #values)
+    public link(key::string, index::integer=1, values::trait_positionallyKeyed=(:)) => {
+        local(paths) = .`links`->find(#key) || rope_thread->routeLink(#key)
+        .`links` !>> #key
+            ? .`links`->insert(#key=#paths)
+
+        // vp is value position - used to keep track of where we're at in the params list
+        local(vp)     = 1
+        local(v_size) = #values->size
+        local(result) = ''
+        with item in #paths->get(#index) do {
+            // Deal with dynamic URL params
+            if(#item->beginsWith(':')) => {
+                #vp > #v_size
+                    ? fail('Link has missing dynamic values')
+
+                #result->append('/' + string(#values->get(#vp++))->asBytes->encodeUrl)
+            else
+                #result->append('/' + #item)
+            }
+        }
+
+        return #result || '/'
+    }
+    
+    /**!
+        This method returns "dev" if the ROPE_ENV environment variable has not been set.
+        Otherwise it returns the value stored in the environment variable, even if that
+        value is an empty string
+    */
+    public env => (sys_getEnv('ROPE_ENV')->isA(::void) ? 'dev' | sys_getEnv('ROPE_ENV'))
     
     
     public protocol => (web_request->isHttps ? 'https://' | 'http://')
     public method   => .param(`_method`) || web_request->requestMethod
     public hostname => web_request->httpHost
     public path     => {
-        local(path) = web_request->requestUri->split('?')->get(1)->split('/')
-        #path->last->contains('.')
-            ? #path->get(#path->size) = #path->last->split('.')->remove&join('.')
+        local(path) = web_request->requestUri
+        // Strip off GET params, if any
+        #path = #path->sub(1, (#path->find('?') or (#path->size+1)) - 1)
         
-        #path->size > 2 and #path->last->isEmpty ? #path->remove
-        return #path->join('/')
+//        // Remvove the extension
+//        local(ext_start) = #path->findLast('.')
+//        local(last_slash) = #path->findLast('/')
+//        #ext_start > #last_slash
+//            ? #path = #path->sub(1, #ext_start - 1)
+
+        return #path
     }
     public extension => {
-        local(ext) = web_request->requestUri->split('?')->get(1)->split('/')->last->split('.')
-        #ext->size > 1
-            ? return #ext->last
-        return 'html'
+        local(ext)        = `html`
+        local(path)       = .path
+        local(ext_start)  = #path->findLast('.')
+        local(last_slash) = #path->findLast('/')
+        #ext_start > #last_slash
+            ? #ext = #path->sub(#ext_start+1)
+        
+        return #ext
     }
     
 
@@ -320,26 +375,60 @@ define rope_impl => type {
     public postParams  => web_request->postParams
     public params      => tie(.urlParams, tie(.queryParams, .postParams))->asStaticArray
     
-    public urlParam  (key::string, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #selectAll)
-    public queryParam(key::string, -selectAll::boolean=false) => .getParam('queryParams', #key, #selectAll)
-    public postParam (key::string, -selectAll::boolean=false) => .getParam('postParams' , #key, #selectAll)
-    public param     (key::string, -selectAll::boolean=false) => .getParam('params'     , #key, #selectAll)
+    public urlParam  (key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('urlParams'  , #key, #as, #default, #selectAll)
+    public queryParam(key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('queryParams', #key, #as, #default, #selectAll)
+    public postParam (key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('postParams' , #key, #as, #default, #selectAll)
+    public param     (key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false) => .getParam('params'     , #key, #as, #default, #selectAll)
     
-    private getParam(type::string, key::string, selectAll::boolean) => {    
+    private getParam(type::string, key::string, as::tag, default::any, selectAll::boolean) => {
         if(#selectAll) => {
             return (
                 with param in self->\(tag(#type))->invoke
                 where #param->first == #key
-                select #param->second
+                select \#as(#param->second)
             )->asStaticArray
         }
         
         with param in self->\(tag(#type))->invoke
         where #param->first == #key
-        do { return #param->second }
+        do { return \#as(#param->second) }
         
-        return void
+        return #default
     }
+
+    public fileUploads => {
+        local(result) = array
+        local(info)   = web_request->fileUploads
+
+        loop(#info->size) => {
+            #result->insert(map(:#info->get(loop_count)))
+        }
+
+        return #result
+    }
+    
+    
+    public statusMsg(-status::boolean=false, -message::boolean=false) => {
+        fail_if(#status && #message, error_code_invalidParameter, `You can't specify both the status and the message`)
+          
+        .`status_msg`->isA(::null)
+            ? return null
+        
+        #status
+            ? return .`status_msg`->find(`status`)
+        #message
+            ? return .`status_msg`->find(`message`)
+
+        return .`status_msg`
+    }
+    public statusMsg(stat::string, msg::string) => { 
+        .`status_msg` = map(`status`=#stat, `message`=#msg)
+    }
+    public statusMsg(stat_msg::pair) => .statusMsg(#stat_msg->first, #stat_msg->second)
+    
+    public statusMsgSuccess(msg::string) => .statusMsg(`success`, #msg)
+    public statusMsgWarning(msg::string) => .statusMsg(`warning`, #msg)
+    public statusMsgError  (msg::string) => .statusMsg(`error`  , #msg)
     
     
     public continueSession => {
@@ -371,6 +460,11 @@ define rope_impl => type {
         return $_sess_user
     }
     public user=(rhs::trait_rope_user) => {
+        not .config(`sessions-enabled`)
+            ? fail(`Sessions are disabled`)
+        $_sess_user = #rhs
+    }
+    public user=(rhs::null) => {
         not .config(`sessions-enabled`)
             ? fail(`Sessions are disabled`)
         $_sess_user = #rhs
@@ -432,6 +526,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.9`
+    public version => `1.0`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl

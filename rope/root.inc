@@ -1,1 +1,0 @@
-rope->register(`root`, -routes=(:'/')) => { redirect_url('/lasso9/rope') }
