@@ -94,5 +94,5 @@ request.
    This method returns the same information as ``web_request->fileUploads`` but
    as an array of maps rather than an array of arrays with pairs. (See the
    documentation in `the LassoGuide
-   <http://lassoguide.com/operations/requests-responses.html#web_request->fileUploads>`_
+   <http://lassoguide.com/operations/requests-responses.html#uploading-files>`_
    for map keys and their corresponding values.)
