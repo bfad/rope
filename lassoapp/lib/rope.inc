@@ -526,6 +526,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `0.9`
+    public version => `1.0`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
