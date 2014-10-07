@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Registering Controllers and Routes &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Rendering Views" href="views.html" />
+    <link rel="prev" title="Configuration" href="config.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="views.html" title="Rendering Views"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="Configuration"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="registering-controllers-and-routes">
+<h1>Registering Controllers and Routes<a class="headerlink" href="#registering-controllers-and-routes" title="Permalink to this headline">¶</a></h1>
+<p>The most basic functionallity of any modern framework is matching URLs to the
+code that needs to run to fulfill the request. Rope calls the code that runs
+based on a URL request a &#8220;controller&#8221;, and the mechanism it uses to match URLs
+it calls &#8220;routes&#8221;. The <tt class="docutils literal"><span class="pre">rope-&gt;register</span></tt> method is what is used to register a
+controller (block of code) to a route (a matcher for a URL).</p>
+<div class="section" id="registering-a-controller">
+<h2>Registering a Controller<a class="headerlink" href="#registering-a-controller" title="Permalink to this headline">¶</a></h2>
+<p>The example below registers a block of code in the Rope application:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`home`) =&gt; {
+   content_body = "Hello, World!"
+}</pre>
+</div>
+<p>Your Rope application now has a controller named &#8220;home&#8221; that could be executed
+by calling <tt class="docutils literal"><span class="pre">rope-&gt;controller('home')-&gt;invoke</span></tt>. It is currently not attached to
+any routes, and is therefore not able to be accessed by a URL. Let&#8217;s fix that.</p>
+</div>
+<div class="section" id="registering-a-route-to-a-controller">
+<h2>Registering a Route to a Controller<a class="headerlink" href="#registering-a-route-to-a-controller" title="Permalink to this headline">¶</a></h2>
+<p>Once a controller has been registered into your application, it can then be
+assigned to a route:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`home`, -routes=(:'/home'))</pre>
+</div>
+<p>The &#8220;routes&#8221; named parameter takes a staticarray of routes that Rope will use to
+match URLs to that controller. (For details on the matching process, see the
+discusison <a class="reference internal" href="#ug-matching-url-to-routes"><em>below</em></a>.) It is important to note
+that in this scenario, the controller must already be registered in your
+application. However, registering the block of code and the routes can all be
+done in one step.</p>
+</div>
+<div class="section" id="registering-a-controller-code-block-and-routes">
+<span id="rope-register-block-and-routes"></span><h2>Registering a Controller Code Block and Routes<a class="headerlink" href="#registering-a-controller-code-block-and-routes" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to register a controller with a block of code and the routes it
+responds to all at once:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`hello-name`, -routes(:'/:name')) =&gt; {
+   content_body = "Hello, " + rope-&gt;param('name')
+}</pre>
+</div>
+<p>In this example, I have registered a code block and its route all at once. This
+route is a wild-card route that will match any URL that is only one level deep.
+In other words, it would match &#8220;<a class="reference external" href="http://example.com/John">http://example.com/John</a>&#8221; but not
+&#8220;<a class="reference external" href="http://example.com/John/Doe">http://example.com/John/Doe</a>&#8221;. Wild-card routes allow you to reference the part
+of the path they represent by passing the the wild-card name to either the
+<tt class="docutils literal"><span class="pre">rope-&gt;urlParam</span></tt> or <tt class="docutils literal"><span class="pre">rope-&gt;param</span></tt> method. (Ex: <tt class="docutils literal"><span class="pre">rope-&gt;urlParam(`name`)</span></tt>)</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Now that the controller has been registered, additional routes can be
+registered later on using the sytax shown
+<a class="reference internal" href="#rope-register-block-and-routes"><em>above</em></a>.</p>
+</div>
+</div>
+<div class="section" id="unregister-a-controller">
+<h2>Unregister a Controller<a class="headerlink" href="#unregister-a-controller" title="Permalink to this headline">¶</a></h2>
+<p>After a controller has been registered, it is possible to unregister it by using
+the <tt class="docutils literal"><span class="pre">rope-&gt;deregister</span></tt> method with the name of the controller you wish to
+unregister. The following example removes the &#8220;hello-name&#8221; controller defined
+above:</p>
+<div class="highlight-python"><pre>rope-&gt;deregister(`hello-name`)</pre>
+</div>
+<p>There is also a special method <tt class="docutils literal"><span class="pre">rope-&gt;deregisterAll</span></tt> that removes all
+controllers from being tracked by rope.</p>
+</div>
+<div class="section" id="how-urls-are-matched-to-routes">
+<span id="ug-matching-url-to-routes"></span><h2>How URLs Are Matched to Routes<a class="headerlink" href="#how-urls-are-matched-to-routes" title="Permalink to this headline">¶</a></h2>
+<p>Since routes are used to match the code that should be run when a URL is
+requested, it is important to understand them and get them right. Rope will
+throw an error if no route matches the URL, or if it finds more than one match.</p>
+<p>In order for a route to match a URL, it must have the same number of parts as
+the URL path. For example, the route &#8220;/rhino&#8221; will match URLs whose path are
+&#8220;/rhino&#8221; or &#8220;/rhino/&#8221; since each only have one part and that part matches the
+route, but it wouldn&#8217;t match &#8220;/rhino/horn&#8221; since it has more parts than the
+route.</p>
+<p>Routes can be used to match URL paths exactly, but they can also contain
+wild-card parts that can match anything for that part of the URL path. These
+wild-cards are specified by prefixing the name of that part with a colon. (These
+names are matched as URL parameters later.) When matching routes with wild-card
+parts, the matcher prefers those routes whose earliest parts match non-wildcard
+parts. This means that for two routes &#8220;/prada/:id&#8221; and &#8220;/:designer/shoes&#8221;, the
+URL path &#8220;/prada/shoes&#8221; will match the first - &#8220;/prada/:id&#8221;.</p>
+</div>
+<div class="section" id="special-controller-names">
+<h2>Special Controller Names<a class="headerlink" href="#special-controller-names" title="Permalink to this headline">¶</a></h2>
+<p>By default, rope comes with one controller already registered that matches the
+root of your domain and is given the name &#8220;root&#8221;. The code for it looks like
+this:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`root`, -routes=(:'/')) =&gt; { redirect_url('/lasso9/rope') }</pre>
+</div>
+<p>You can easily overwrite this controller by registering a new block to &#8220;root&#8221;:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`root`) =&gt; {
+   content_body = "&lt;h1&gt;It Works!&lt;/h1&gt;"
+}</pre>
+</div>
+<p>You could also unregister the &#8220;root&#8221; controller and register a new controller
+with a different name and the root path:</p>
+<div class="highlight-python"><pre>rope-&gt;deregister(`root`)
+rope-&gt;register(`home`, -routes=(:'/')) =&gt; {
+   content_body = "&lt;h1&gt;It Works!&lt;/h1&gt;"
+}</pre>
+</div>
+<p>There is also a special controller name &#8220;rope-fallback&#8221; that is <strong>not</strong>
+registered by default, but that you can register if needed. This controller
+doesn&#8217;t take any routes, but is called anytime rope can&#8217;t find a matching route
+in it&#8217;s system. If you do not specify the &#8220;rope-fallback&#8221; controller, then rope
+will throw a &#8220;404 No matching route found&#8221; error if it can&#8217;t find a route that
+matches the URL.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Registering Controllers and Routes</a><ul>
+<li><a class="reference internal" href="#registering-a-controller">Registering a Controller</a></li>
+<li><a class="reference internal" href="#registering-a-route-to-a-controller">Registering a Route to a Controller</a></li>
+<li><a class="reference internal" href="#registering-a-controller-code-block-and-routes">Registering a Controller Code Block and Routes</a></li>
+<li><a class="reference internal" href="#unregister-a-controller">Unregister a Controller</a></li>
+<li><a class="reference internal" href="#how-urls-are-matched-to-routes">How URLs Are Matched to Routes</a></li>
+<li><a class="reference internal" href="#special-controller-names">Special Controller Names</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="config.html"
+                        title="previous chapter">Configuration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="views.html"
+                        title="next chapter">Rendering Views</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/rope_register.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="views.html" title="Rendering Views"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="config.html" title="Configuration"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

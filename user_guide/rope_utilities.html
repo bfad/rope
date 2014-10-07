@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Utility Methods &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Deploying Rope Apps" href="deploy.html" />
+    <link rel="prev" title="Validations" href="rope_validate.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="deploy.html" title="Deploying Rope Apps"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rope_validate.html" title="Validations"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="utility-methods">
+<h1>Utility Methods<a class="headerlink" href="#utility-methods" title="Permalink to this headline">¶</a></h1>
+<p>Rope comes with some utility methods that you may find handy. These methods are
+documented below with both a description of their usage and an example.</p>
+<dl class="method">
+<dt>
+<tt class="descname">rope_randomASCII</tt><big>(</big><em>len::integer</em><big>)</big></dt>
+<dd><p>Returns the specified number of random characters - each character is from
+the printable ASCII character set. Please note that your ouput will not match
+the output in the example below as the point of this method is to output
+random characters.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>rope_randomASCII(8)
+// =&gt; j^e2Z1w~</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope_randomAlphaNumeric</tt><big>(</big><em>len::integer</em><big>)</big></dt>
+<dd><p>Returns the specified number of random characters - each being one of 0-9,
+a-z, or A-Z. Please note that your ouput will not match
+the output in the example below as the point of this method is to output
+random characters.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>rope_randomAlphaNumeric(8)
+// =&gt; apS292Ow</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope_hash</tt><big>(</big><em>plain::string</em>, <em>salt::string</em>, <em>cost::integer =?</em><big>)</big></dt>
+<dd><p>A helper method that takes in a plaintext string, a salt string, and the
+number of iterations. It then encrypts the plaintext using the salt with the
+RIPEMD160 hashing algorithm the specified number of iterations. It returns
+the result in hexadecimal.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>rope_hash('My Secret', 'Mmmm...Tasty', 10)
+// =&gt; 07679C7DB191A15386CB4317D9EC00C074AA4C36</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope_cycle</tt><big>(</big><em>...</em><big>)</big></dt>
+<dd><p>A helper method that allows for cycling through a list of objects. The
+<tt class="docutils literal"><span class="pre">rope_cycle</span></tt> method takes in an indeterminate number of parameters and
+returns an anonymous capture. When this capture is invoked it returns the
+next item in the list of objects. Once it reaches the end of the list, it
+just starts back at the beginning.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>local(colors) = rope_cycle('red', 'green', 'blue')
+#colors-&gt;invoke
+   // =&gt; red
+#colors()
+   // =&gt; green
+#colors-&gt;invoke
+   // =&gt; blue
+#colors()
+   // =&gt; red</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">dir_import</tt><big>(</big><em>d::dir</em>, <em>ext::staticarray =?</em><big>)</big></dt>
+<dd><p>This method takes a dir object. Starting with that directory, it calls
+<tt class="docutils literal"><span class="pre">file_import</span></tt> on all files whose extensions match those passed in the &#8220;ext&#8221;
+parameter&#8217;s staticarray, and then proceeds to do the same thing recursively
+through all the other directories contained in the directory.</p>
+<p>The default value of &#8220;ext&#8221; is <tt class="docutils literal"><span class="pre">(:'lasso',</span> <span class="pre">'inc')</span></tt>.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dir_import</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="s">&#39;//my/cool/path/&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">file_import</tt><big>(</big><em>f::file</em><big>)</big></dt>
+<dd><p>This method takes in an file object and executes the contents of the file as
+Lasso source code. (It&#8217;s similar to the <tt class="docutils literal"><span class="pre">library</span></tt> method.)</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">file_import</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="s">&#39;//my/cool/file.lasso&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="stringOrNull">
+<tt class="descname">stringOrNull</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#stringOrNull" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">stringOrNull</tt><big>(</big><em>value::string</em><big>)</big></dt>
+<dd><p>This method takes in an object and returns null if it is empty or the value
+as a string if it is not. It is meant to be used in the <tt class="docutils literal"><span class="pre">-as</span></tt> paramater of
+a <tt class="docutils literal"><span class="pre">rope-&gt;param()</span></tt> (and it&#8217;s siblings) method call. Ex:</p>
+<div class="highlight-python"><pre>rope-&gt;param('rhino', -as=::stringOrNull)</pre>
+</div>
+<p>But it can also be used by itself:</p>
+<div class="highlight-python"><pre>stringOrNull(#my_value)</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="integerOrNull">
+<tt class="descname">integerOrNull</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#integerOrNull" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">integerOrNull</tt><big>(</big><em>value::integer</em><big>)</big></dt>
+<dd><p>This method takes in an object and returns null if it is empty or the value
+as an integer if it is not. It is meant to be used in the <tt class="docutils literal"><span class="pre">-as</span></tt> paramater
+of a <tt class="docutils literal"><span class="pre">rope-&gt;param()</span></tt> (and it&#8217;s siblings) method call. Ex:</p>
+<div class="highlight-python"><pre>rope-&gt;param('rhino', -as=::integerOrNull)</pre>
+</div>
+<p>But it can also be used by itself:</p>
+<div class="highlight-python"><pre>integerOrNull(#my_value)</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="decimalOrNull">
+<tt class="descname">decimalOrNull</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#decimalOrNull" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">decimalOrNull</tt><big>(</big><em>value::decimal</em><big>)</big></dt>
+<dd><p>This method takes in an object and returns null if it is empty or the value
+as a decimal if it is not. It is meant to be used in the <tt class="docutils literal"><span class="pre">-as</span></tt> paramater of
+a <tt class="docutils literal"><span class="pre">rope-&gt;param()</span></tt> (and it&#8217;s siblings) method call. Ex:</p>
+<div class="highlight-python"><pre>rope-&gt;param('rhino', -as=::integerOrNull)</pre>
+</div>
+<p>But it can also be used by itself:</p>
+<div class="highlight-python"><pre>decimalOrNull(#my_value)</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="dateOrNull">
+<tt class="descname">dateOrNull</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#dateOrNull" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">dateOrNull</tt><big>(</big><em>value::date</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">dateOrNull</tt><big>(</big><em>value::bytes</em><big>)</big></dt>
+<dd><p>This method takes in an object and returns null if it is empty or the value
+as a date if it is not. It is meant to be used in the <tt class="docutils literal"><span class="pre">-as</span></tt> paramater of a
+<tt class="docutils literal"><span class="pre">rope-&gt;param()</span></tt> (and it&#8217;s siblings) method call. Ex:</p>
+<div class="highlight-python"><pre>rope-&gt;param('rhino', -as=::dateOrNull)</pre>
+</div>
+<p>But it can also be used by itself:</p>
+<div class="highlight-python"><pre>dateOrNull(#my_value)</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="orNullWrap">
+<tt class="descname">orNullWrap</tt><big>(</big><em>value::void</em>, <em>method::tag</em><big>)</big><a class="headerlink" href="#orNullWrap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">orNullWrap</tt><big>(</big><em>value::null</em>, <em>method::tag</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">orNullWrap</tt><big>(</big><em>value::string</em>, <em>method::tag</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">orNullWrap</tt><big>(</big><em>value::bytes</em>, <em>method::tag</em><big>)</big></dt>
+<dd><p>This method takes in an object of the specified type and returns null if it
+is empty or the value as returned by the invocation of the tag passed as the
+second parameter. (Note, this may actually be the &#8220;onCreate&#8221; method of a
+type.)</p>
+<p>It is meant to be used as the &#8220;private&#8221; method that gets called behind the
+scenes for the &#8221;...OrNull&#8221; methods: <tt class="docutils literal"><span class="pre">stringOrNull</span></tt>, <tt class="docutils literal"><span class="pre">dateOrNull</span></tt>, etc.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rope_validate.html"
+                        title="previous chapter">Validations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="deploy.html"
+                        title="next chapter">Deploying Rope Apps</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/rope_utilities.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="deploy.html" title="Deploying Rope Apps"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rope_validate.html" title="Validations"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Rope Route Links &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Inpsecting an HTTP Request" href="web_request_helpers.html" />
+    <link rel="prev" title="Rendering Views" href="views.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="web_request_helpers.html" title="Inpsecting an HTTP Request"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="views.html" title="Rendering Views"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rope-route-links">
+<h1>Rope Route Links<a class="headerlink" href="#rope-route-links" title="Permalink to this headline">¶</a></h1>
+<p>Registered routes can be referenced by their names to create URL paths those
+routes will respond to by using the <tt class="docutils literal"><span class="pre">rope-&gt;link</span></tt> method. Using this method
+allows for simple changes to URL paths to be easily made in one place. And even
+if the need arises to make a change in every place a particular path is used,
+using the method allows for you to easily find all those places.</p>
+<p>Because of the complexity of registering routes, the <tt class="docutils literal"><span class="pre">rope-&gt;link</span></tt> method has
+several different implementations. The simplest route registrations can use the
+simplest <tt class="docutils literal"><span class="pre">rope-&gt;link</span></tt> API. In the example below, the route only has one URL
+path associated with it and that path doesn&#8217;t contain any URL parameters.</p>
+<div class="highlight-python"><pre>rope-&gt;register(`home-dashboard`, -routes=(:'/home/dashboard')) =&gt; {}
+
+rope-&gt;link(`home-dashboard`)
+// =&gt; /home/dashboard</pre>
+</div>
+<p>If you have multiple URL paths registered to the route, you can specify which
+path you want by providing the index of the path in the array. (By default, the
+first path will be used if you don&#8217;t specify an index.)</p>
+<div class="highlight-python"><pre>rope-&gt;register(`login`, -routes=(:'/login', '/logout')) =&gt; {}
+
+rope-&gt;link(`login`)
+// =&gt; /login
+
+rope-&gt;link(`login`, 2)
+// =&gt; /logout</pre>
+</div>
+<p>If the URL path of the route has any wild-card parameters, values for those
+parameters must be specified in an array or staticarray:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`user-photo`, -routes=(:'/user/:id/photo/:photo_id')) =&gt; {}
+
+rope-&gt;link(`user-photo`, (:5, 42))
+// =&gt; /user/5/photo/42</pre>
+</div>
+<p>If the route contains both multiple URL paths and wild-card parameters then both
+the index of the URL path and the values for the wild-cards must be specified:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`phone-add-edit`, -routes=(:'/phones/new', '/phone/:id')) =&gt; {}
+
+rope-&gt;link(`phone-add-edit`, 2, (:12))
+/ =&gt; /phone/12</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="views.html"
+                        title="previous chapter">Rendering Views</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="web_request_helpers.html"
+                        title="next chapter">Inpsecting an HTTP Request</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/links.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="web_request_helpers.html" title="Inpsecting an HTTP Request"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="views.html" title="Rendering Views"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

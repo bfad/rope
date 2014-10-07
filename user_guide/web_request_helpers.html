@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Inpsecting an HTTP Request &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Status Messages" href="status_message.html" />
+    <link rel="prev" title="Rope Route Links" href="links.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="status_message.html" title="Status Messages"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="links.html" title="Rope Route Links"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="inpsecting-an-http-request">
+<h1>Inpsecting an HTTP Request<a class="headerlink" href="#inpsecting-an-http-request" title="Permalink to this headline">¶</a></h1>
+<p>Rope has many methods to inspect various parts of an HTTP request. Many of these
+methods are similar to member methods of the <tt class="docutils literal"><span class="pre">web_request</span></tt> type, but with
+additional functionality.</p>
+<div class="section" id="inspecting-the-url-request">
+<h2>Inspecting the URL Request<a class="headerlink" href="#inspecting-the-url-request" title="Permalink to this headline">¶</a></h2>
+<p>Each part of the URL can be inspected by one of the following methods:</p>
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;protocol</tt></dt>
+<dd><p>This method returns the protocol part of the URL request: &#8220;<a class="reference external" href="https://">https://</a>&#8221; if the
+request is over an SSL connection and &#8220;<a class="reference external" href="http://">http://</a>&#8221; if it is not.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;method</tt></dt>
+<dd><p>This method returns the HTTP method used for the HTTP request (eg &#8220;GET&#8221; or
+&#8220;POST&#8221;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;hostname</tt></dt>
+<dd><p>This method returns the hostname portion of the URL request (eg
+&#8220;www.example.com&#8221;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;path</tt></dt>
+<dd><p>This method returns the path portion of the URL request. For example, if the
+URL is &#8220;<a class="reference external" href="http://www.example.com/my/path.json?foo=bar">http://www.example.com/my/path.json?foo=bar</a>&#8221;, this method would
+return &#8220;/my/path.json&#8221;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;extension</tt></dt>
+<dd><p>This method returns the file extension of the URL path or &#8220;html&#8221; if the path
+doesn&#8217;t have an extension. For example, it returns &#8220;json&#8221; if the URL is
+&#8220;<a class="reference external" href="http://www.example.com/my/path.json?foo=bar">http://www.example.com/my/path.json?foo=bar</a>&#8221;.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="inspecting-the-request-parameters">
+<h2>Inspecting the Request Parameters<a class="headerlink" href="#inspecting-the-request-parameters" title="Permalink to this headline">¶</a></h2>
+<p>Rope has convenience methods to inspect HTTP query and post parameters. It has
+similar methods for inspecting <a class="reference internal" href="rope_register.html#rope-register-block-and-routes"><em>Rope URL parameters</em></a>.</p>
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;urlParams</tt></dt>
+<dd><p>This method returns an array of url paramaters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;queryParams</tt></dt>
+<dd><p>This method returns an array of query paramaters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;postParams</tt></dt>
+<dd><p>This method returns an array of post paramaters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;params</tt></dt>
+<dd><p>This method returns an array of all the paramaters.</p>
+</dd></dl>
+
+<p>Rope also has methods for extracting specific values using the parameter name.
+Once again, there are different methods for each parameter type as well as a
+method that will search all parameter types. Each of them take the same options:</p>
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;urlParam(key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;queryParam(key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;postParam(key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;param(key::string, -as::tag=::stringOrNull, -default::any=void, -selectAll::boolean=false)</tt></dt>
+<dd><p>Each method requires the name of the parameter whose value(s) you want to
+extract. The &#8220;-as&#8221; parameter allows for converting the value to a type by
+passing a tag of the type name or a tag of a method name. The value returned
+to you will be the result of passing the parameter value to either the type&#8217;s
+creator method or the specified method. The default is to return the value as
+a string or to return <tt class="docutils literal"><span class="pre">null</span></tt> if the parameter is passed without a value. If
+the parameter has not been passed, then these methods will return the value
+you set in the &#8220;-default&#8221; parameter (which defaults to <tt class="docutils literal"><span class="pre">void</span></tt>). If multiple
+parameters have the same name, only the value from the first parameter found
+will be returned unless the &#8220;-selectAll&#8221; flag is passed to the method in
+which case a <tt class="docutils literal"><span class="pre">staticarray</span></tt> of all the values will be returned.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="file-uploads">
+<h2>File Uploads<a class="headerlink" href="#file-uploads" title="Permalink to this headline">¶</a></h2>
+<p>Rope also has a convience method for inspecting any files uploaded by the web
+request.</p>
+<dl class="method">
+<dt>
+<tt class="descname">rope-&gt;fileUploads</tt></dt>
+<dd><p>This method returns the same information as <tt class="docutils literal"><span class="pre">web_request-&gt;fileUploads</span></tt> but
+as an array of maps rather than an array of arrays with pairs. (See the
+documentation in <a class="reference external" href="http://lassoguide.com/operations/requests-responses.html#uploading-files">the LassoGuide</a>
+for map keys and their corresponding values.)</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Inpsecting an HTTP Request</a><ul>
+<li><a class="reference internal" href="#inspecting-the-url-request">Inspecting the URL Request</a></li>
+<li><a class="reference internal" href="#inspecting-the-request-parameters">Inspecting the Request Parameters</a></li>
+<li><a class="reference internal" href="#file-uploads">File Uploads</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="links.html"
+                        title="previous chapter">Rope Route Links</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="status_message.html"
+                        title="next chapter">Status Messages</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/web_request_helpers.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="status_message.html" title="Status Messages"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="links.html" title="Rope Route Links"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

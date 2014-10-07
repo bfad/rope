@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Rendering Views &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Rope Route Links" href="links.html" />
+    <link rel="prev" title="Registering Controllers and Routes" href="rope_register.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="links.html" title="Rope Route Links"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rope_register.html" title="Registering Controllers and Routes"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rendering-views">
+<h1>Rendering Views<a class="headerlink" href="#rendering-views" title="Permalink to this headline">¶</a></h1>
+<p>The Rope framework encourages separating your view code from your controller
+code. Your controller code should be placed in the &#8220;webapp&#8221; directory while the
+view code should be placed in the &#8220;views&#8221; directory. To assist your controllers
+in loading the view code in response to a request, you can use the
+<tt class="docutils literal"><span class="pre">rope-&gt;render</span></tt> method. To do this, pass a string specifying the path to the
+view code you wish to render. The path should start with a &#8220;/&#8221; which represents
+the &#8220;views&#8221; directory. You can also pass values / setup local variables for the
+view code by passing keyword parameters to the method - the key of which will be
+the name of a local variable whose value is set to the value of the keyword
+parameter.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>// webapp/my_controller.inc
+rope-&gt;register(`hello-name`, -routes(:'/:name')) =&gt; {
+    rope-&gt;render('/hello.lasso', -name=rope-&gt;param('name'))
+}
+
+// views/hello.lasso
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;&lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello, [#name]&lt;/h1&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+<p>In this example, the controller calls the view code in <tt class="docutils literal"><span class="pre">views/hello.lasso</span></tt> and
+by passing the keyword parameter <tt class="docutils literal"><span class="pre">-name</span></tt> it sets up a local variable named
+&#8220;name&#8221; for the view code to use.</p>
+<div class="section" id="including-a-view-from-a-view">
+<h2>Including a View from a View<a class="headerlink" href="#including-a-view-from-a-view" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to render views inside each other. This is done with the
+<tt class="docutils literal"><span class="pre">rope-&gt;include</span></tt> method which, like the <tt class="docutils literal"><span class="pre">rope-&gt;render</span></tt> method takes a string
+specifying the path to the view to be included. It can also take keyword
+parameters to setup local variables for use.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>// webapp/my_controller.inc
+rope-&gt;register(`hello-name`, -routes=(:'/')) =&gt; {
+    rope-&gt;render('/home.lasso')
+}
+
+// views/home.lasso
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Home&lt;/title&gt;
+    [rope-&gt;include('/_helpers/html_head.lasso', -jqueryUI=true)]
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello, World!&lt;/h1&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+// views/_helpers/html_head.lasso
+&lt;script src="http://code.jquery.com/jquery-latest.js"&gt;&lt;/script&gt;
+[if(#jqueryUI)]
+  &lt;script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"&gt;&lt;/script&gt;
+[/if]</pre>
+</div>
+</div>
+<div class="section" id="rendering-json-data">
+<h2>Rendering JSON Data<a class="headerlink" href="#rendering-json-data" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">rope-&gt;renderJSON</span></tt> method can be used to set the web response body to a
+JSON formatted string with the correct Content-Type header as well. In the
+following example, the JSON formatted string will be set as the response body,
+and the header will include a &#8220;Content-type application/json; charset=UTF-8&#8221;
+header.</p>
+<p>Example:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`hello-world`, -routes=(:'/')) =&gt; {
+   rope-&gt;renderJSON('{"status": "success", "hello": "world"}')
+}</pre>
+</div>
+<p>Objects that are not strings will have the <tt class="docutils literal"><span class="pre">json_serialize</span></tt> method called on
+them to create the JSON-formatted string for the response body. The following
+code will produce the same response as the first example:</p>
+<div class="highlight-python"><pre>rope-&gt;register(`hello-world`, -routes=(:'/')) =&gt; {
+   rope-&gt;renderJSON(map(`status` = "success", `hello` = "world"))
+}</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Rendering Views</a><ul>
+<li><a class="reference internal" href="#including-a-view-from-a-view">Including a View from a View</a></li>
+<li><a class="reference internal" href="#rendering-json-data">Rendering JSON Data</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rope_register.html"
+                        title="previous chapter">Registering Controllers and Routes</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="links.html"
+                        title="next chapter">Rope Route Links</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/views.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="links.html" title="Rope Route Links"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rope_register.html" title="Registering Controllers and Routes"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

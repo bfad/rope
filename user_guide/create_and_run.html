@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Creating and Running a Rope App &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Configuration" href="config.html" />
+    <link rel="prev" title="Installing Rope" href="install.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="config.html" title="Configuration"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installing Rope"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="creating-and-running-a-rope-app">
+<h1>Creating and Running a Rope App<a class="headerlink" href="#creating-and-running-a-rope-app" title="Permalink to this headline">¶</a></h1>
+<p>In this section, you will learn how to create a Rope application and run the
+built-in web server for development. All examples will assume that you have
+successfully installed Rope and that you have set up your <tt class="docutils literal"><span class="pre">PATH</span></tt> environment
+variable so that you don&#8217;t have to specify the full path to the Rope script.</p>
+<div class="section" id="creating-a-new-project">
+<h2>Creating a New Project<a class="headerlink" href="#creating-a-new-project" title="Permalink to this headline">¶</a></h2>
+<p>To create a new Rope application, open a terminal and change to the directory
+you want to create the new project in and issue the <tt class="docutils literal"><span class="pre">rope</span> <span class="pre">new</span> <span class="pre">&lt;NAME&gt;</span></tt> command
+or the short-cut <tt class="docutils literal"><span class="pre">rope</span> <span class="pre">n</span> <span class="pre">&lt;NAME&gt;</span></tt> command. Ex:</p>
+<div class="highlight-python"><pre>$&gt; cd ~/projects/
+$&gt; rope new do_list</pre>
+</div>
+<p>The above example will create a directory named &#8220;do_list&#8221; in the projects
+directory in your home folder. That new directory will contain the basic file
+and directory layout for your Rope application.</p>
+<div class="section" id="project-directory-layout">
+<h3>Project Directory Layout<a class="headerlink" href="#project-directory-layout" title="Permalink to this headline">¶</a></h3>
+<p>Rope is meant to be very flexible, so it&#8217;s default folder structure doesn&#8217;t try
+and impose any architectural model on your project. Below is a list of the
+folders that are created and a description of what they are used for.</p>
+<dl class="docutils">
+<dt>lasso_home/</dt>
+<dd>This is the Lasso instance home folder for your application. When you run the
+built-in web server, it sets this as your LASSO9_HOME environment variable.</dd>
+<dt>views/</dt>
+<dd>This is a special folder used with <tt class="docutils literal"><span class="pre">rope-&gt;include</span></tt> that allows for it to be
+the default root instead of your webroot. This allows your webroot to contain
+no Lasso code if you desire.</dd>
+<dt>webapp/</dt>
+<dd>This is the directory where you will probably keep all your business logic.
+This folder is actually symbolically linked as the rope_webapp folder in the
+lasso_home directory.</dd>
+<dt>webroot/</dt>
+<dd>This is the webroot for your web application. Stick all your javascript, css,
+and other assets in here.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="running-the-built-in-web-server">
+<h2>Running the Built-in Web Server<a class="headerlink" href="#running-the-built-in-web-server" title="Permalink to this headline">¶</a></h2>
+<p>To run your Rope application, change your working directory to the top-level of
+your Rope application and then issue the <tt class="docutils literal"><span class="pre">rope</span> <span class="pre">server</span></tt> or <tt class="docutils literal"><span class="pre">rope</span> <span class="pre">s</span></tt> command.
+Ex:</p>
+<div class="highlight-python"><pre>$&gt; cd ~/projects/do_list
+$&gt; rope s</pre>
+</div>
+<p>This starts the built-in web server and loads your Rope application. While this
+web server is suitable for development work, you should look into deploying your
+application with a dedicated web server such as Apache or Nginx. (See the
+instructions on <a class="reference internal" href="deploy.html"><em>deploying Rope applications</em></a> for details.)</p>
+<div class="section" id="using-environments">
+<h3>Using Environments<a class="headerlink" href="#using-environments" title="Permalink to this headline">¶</a></h3>
+<p>Rope has the concept of running in different environments. You may want to be
+able to set things up that work one way while testing, another while developing,
+and another when in production. For example, you may want to differentiate the
+database each environment connects to by appending to the database name an
+underscore and the name of the environment. Or, you may want your tests to run
+quickly, so you set up your password hashing to only run the hash method once
+instead of the thousands of times for production.</p>
+<p>In the places where you want to configure your code to work differently
+depending on the environment, use the <tt class="docutils literal"><span class="pre">rope-&gt;env</span></tt> method to retrieve the
+current environment and use boolean constructs to run the appropriate code. The
+default environment in &#8216;dev&#8217;, and this can be changed by setting a <tt class="docutils literal"><span class="pre">ROPE_ENV</span></tt>
+environmental variable to the desired value. This can be done when running rope
+via the command-line on OS X or Linux like so:</p>
+<div class="highlight-python"><pre>ROPE_ENV=test rope s</pre>
+</div>
+<p>The above sets the value produced by <tt class="docutils literal"><span class="pre">rope-&gt;env</span></tt> to &#8220;test&#8221;. If running via the
+Instance Manager, it allows for adding the environment variable using its web
+interface.</p>
+<p>The following example has the <tt class="docutils literal"><span class="pre">db_name</span></tt> method return a different value
+depending on the environment that has been setup:</p>
+<div class="highlight-python"><pre>define db_name =&gt; `database` + '_' + rope-&gt;env</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Creating and Running a Rope App</a><ul>
+<li><a class="reference internal" href="#creating-a-new-project">Creating a New Project</a><ul>
+<li><a class="reference internal" href="#project-directory-layout">Project Directory Layout</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-the-built-in-web-server">Running the Built-in Web Server</a><ul>
+<li><a class="reference internal" href="#using-environments">Using Environments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="previous chapter">Installing Rope</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="config.html"
+                        title="next chapter">Configuration</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/create_and_run.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="config.html" title="Configuration"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installing Rope"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Deploying Rope Apps &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Welcome to Rope’s API Reference!" href="../api/index.html" />
+    <link rel="prev" title="Utility Methods" href="rope_utilities.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../api/index.html" title="Welcome to Rope’s API Reference!"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rope_utilities.html" title="Utility Methods"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="deploying-rope-apps">
+<h1>Deploying Rope Apps<a class="headerlink" href="#deploying-rope-apps" title="Permalink to this headline">¶</a></h1>
+<p>Every web application is different, so there&#8217;s no way we can cover everything
+about deploying your Rope application. The instructions below will walk you
+through deploying a basic Rope application using a modern version of Apache and
+the Lasso Instance Manager.</p>
+<div class="section" id="deploying-with-apache-lassoim">
+<h2>Deploying with Apache &amp; LassoIM<a class="headerlink" href="#deploying-with-apache-lassoim" title="Permalink to this headline">¶</a></h2>
+<p>This deployment guide assumes that you can install Apache, Lasso, and the Lasso
+Instance Manager on your server OS of choice. It assumes a fresh installation
+with no additional setup. It assumes you can take the provided Apache virtual
+host setup and adapt it to your system&#8217;s Apache configuration.</p>
+<ol class="arabic">
+<li><p class="first">Copy your Rope application directory to your deployment server. For the sake
+of this example, we will have a Rope application named &#8220;example&#8221; that we copy
+to the <tt class="docutils literal"><span class="pre">/var/www/</span></tt> directory. (So the application directory path is
+<tt class="docutils literal"><span class="pre">/var/www/example</span></tt>.)</p>
+</li>
+<li><p class="first">Open a web browser and navigate to the server&#8217;s instance manager
+configuration page (<a class="reference external" href="http://example.com/lasso9/instancemanager">http://example.com/lasso9/instancemanager</a>).</p>
+</li>
+<li><p class="first">Stop (disable) the default instance that got created.</p>
+</li>
+<li><p class="first">From the command-line, remove the instance&#8217;s home folder and symbolically
+link the &#8220;lasso_home&#8221; directory in your Rope application to where the
+instance&#8217;s home directory used to be:</p>
+<div class="highlight-python"><pre>$&gt; sudo rm -rf /var/lasso/instances/default
+$&gt; sudo ln -s /var/www/example/lasso_home /var/lasso/instances/default</pre>
+</div>
+</li>
+<li><p class="first">Delete the SQLite databases and logs generated during development:</p>
+<div class="highlight-python"><pre>$&gt; rm /var/www/example/lasso_home/SQLiteDBs/*
+$&gt; rm /var/www/example/lasso_home/lasso_logbook.txt
+$&gt; rm /var/www/example/lasso_home/lasso.err.txt
+$&gt; rm /var/www/example/lasso_home/lasso.out.txt</pre>
+</div>
+</li>
+<li><p class="first">Back in the browser, navigate to the environment variable and add the
+following environment variable: <tt class="docutils literal"><span class="pre">ROPE_ENV=production</span></tt>.</p>
+</li>
+<li><p class="first">Start the instance.</p>
+</li>
+<li><p class="first">Go to the Lasso Administrator application for your app and setup an
+administrative user and any other settings such as database connections.</p>
+</li>
+<li><p class="first">Make your Apache virtual host site configuration look something like the
+following:</p>
+<div class="highlight-python"><pre>&lt;VirtualHost *:80&gt;
+   ServerAdmin webmaster@localhost
+
+   DocumentRoot /var/www/example/webroot
+   &lt;Directory /&gt;
+      Options FollowSymLinks
+      AllowOverride None
+   &lt;/Directory&gt;
+   &lt;Directory /var/www/example/webroot/&gt;
+      Options FollowSymLinks
+      AllowOverride None
+      Order allow,deny
+      allow from all
+   &lt;/Directory&gt;
+
+   RewriteEngine on
+   RewriteCond %{REQUEST_URI}  !^/lasso9/.*$
+   RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+   RewriteRule ^(.*)$ /lasso9/rope/url_handler.lasso [L,NS,H=lasso9-handler,E=LASSOSERVER_APP_PREFIX:/lasso9/rope]
+&lt;/VirtualHost&gt;</pre>
+</div>
+</li>
+<li><p class="first">Once your Apache settings are setup, reload Apache and your app should now be
+running.</p>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Deploying Rope Apps</a><ul>
+<li><a class="reference internal" href="#deploying-with-apache-lassoim">Deploying with Apache &amp; LassoIM</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rope_utilities.html"
+                        title="previous chapter">Utility Methods</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../api/index.html"
+                        title="next chapter">Welcome to Rope&#8217;s API Reference!</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/deploy.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../api/index.html" title="Welcome to Rope’s API Reference!"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rope_utilities.html" title="Utility Methods"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

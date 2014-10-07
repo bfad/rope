@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Status Messages &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s Users’ Guide!" href="index.html" />
+    <link rel="next" title="Rope User" href="rope_user.html" />
+    <link rel="prev" title="Inpsecting an HTTP Request" href="web_request_helpers.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="rope_user.html" title="Rope User"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="web_request_helpers.html" title="Inpsecting an HTTP Request"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="status-messages">
+<h1>Status Messages<a class="headerlink" href="#status-messages" title="Permalink to this headline">¶</a></h1>
+<p>The various <tt class="docutils literal"><span class="pre">rope-&gt;statusMsg...</span></tt> methods can be used to temporarily store a
+a message that you can then display in any template however you want. This part
+of the Rope framework needs some work or some re-thinking, so consider these
+methods deprecated.</p>
+<p>A status message consists of a status and a message. A status message can be set
+using the <tt class="docutils literal"><span class="pre">rope-&gt;statusMsg(stat::string,</span> <span class="pre">msg::string)</span></tt> setter and retrieved as
+a map with with a <cite>status</cite> key and a <cite>message</cite> key. with the <tt class="docutils literal"><span class="pre">rope-&gt;statusMsg</span></tt>
+getter method. Just the status can be retrieved by calling
+<tt class="docutils literal"><span class="pre">rope-&gt;statusMsg(-status)</span></tt>, and just the message can be retrieved by calling
+<tt class="docutils literal"><span class="pre">rope-&gt;statusMsg(-message)</span></tt>.</p>
+<p>On top of that, there are a few convenience methods that require a message, but
+will automatically set the status portion. The <tt class="docutils literal"><span class="pre">rope-&gt;statusMsgSuccess</span></tt> method
+will set the status to &#8220;success&#8221;, the <tt class="docutils literal"><span class="pre">rope-&gt;statusMsgWarning</span></tt> method will set
+the status to &#8220;warning&#8221;, and the <tt class="docutils literal"><span class="pre">rope-&gt;statusMsgError</span></tt> method will set the
+status to &#8220;error&#8221;.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="web_request_helpers.html"
+                        title="previous chapter">Inpsecting an HTTP Request</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rope_user.html"
+                        title="next chapter">Rope User</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/user_guide/status_message.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="rope_user.html" title="Rope User"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="web_request_helpers.html" title="Inpsecting an HTTP Request"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s Users&#8217; Guide!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>
