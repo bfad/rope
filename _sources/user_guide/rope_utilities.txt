@@ -69,7 +69,6 @@ documented below with both a description of their usage and an example.
 
    
 .. method:: dir_import(d::dir, ext::staticarray =?)
-   :noindex:
 
    This method takes a dir object. Starting with that directory, it calls
    ``file_import`` on all files whose extensions match those passed in the "ext"
@@ -84,7 +83,6 @@ documented below with both a description of their usage and an example.
    
 
 .. method:: file_import(f::file)
-   :noindex:
 
    This method takes in an file object and executes the contents of the file as
    Lasso source code. (It's similar to the ``library`` method.)
@@ -96,7 +94,6 @@ documented below with both a description of their usage and an example.
 
 .. method:: stringOrNull(value)
 .. method:: stringOrNull(value::string)
-   :noindex:
 
    This method takes in an object and returns null if it is empty or the value
    as a string if it is not. It is meant to be used in the ``-as`` paramater of
@@ -111,7 +108,6 @@ documented below with both a description of their usage and an example.
 
 .. method:: integerOrNull(value)
 .. method:: integerOrNull(value::integer)
-   :noindex:
 
    This method takes in an object and returns null if it is empty or the value
    as an integer if it is not. It is meant to be used in the ``-as`` paramater
@@ -126,7 +122,6 @@ documented below with both a description of their usage and an example.
 
 .. method:: decimalOrNull(value)
 .. method:: decimalOrNull(value::decimal)
-   :noindex:
 
    This method takes in an object and returns null if it is empty or the value
    as a decimal if it is not. It is meant to be used in the ``-as`` paramater of
@@ -142,7 +137,6 @@ documented below with both a description of their usage and an example.
 .. method:: dateOrNull(value)
 .. method:: dateOrNull(value::date)
 .. method:: dateOrNull(value::bytes)
-   :noindex:
 
    This method takes in an object and returns null if it is empty or the value
    as a date if it is not. It is meant to be used in the ``-as`` paramater of a
@@ -159,7 +153,6 @@ documented below with both a description of their usage and an example.
 .. method:: orNullWrap(value::null, method::tag)
 .. method:: orNullWrap(value::string, method::tag)
 .. method:: orNullWrap(value::bytes, method::tag)
-   :noindex:
 
    This method takes in an object of the specified type and returns null if it
    is empty or the value as returned by the invocation of the tag passed as the

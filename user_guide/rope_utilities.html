@@ -116,8 +116,8 @@ just starts back at the beginning.</p>
 </dd></dl>
 
 <dl class="method">
-<dt>
-<tt class="descname">dir_import</tt><big>(</big><em>d::dir</em>, <em>ext::staticarray =?</em><big>)</big></dt>
+<dt id="dir_import">
+<tt class="descname">dir_import</tt><big>(</big><em>d::dir</em>, <em>ext::staticarray =?</em><big>)</big><a class="headerlink" href="#dir_import" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method takes a dir object. Starting with that directory, it calls
 <tt class="docutils literal"><span class="pre">file_import</span></tt> on all files whose extensions match those passed in the &#8220;ext&#8221;
 parameter&#8217;s staticarray, and then proceeds to do the same thing recursively
@@ -130,8 +130,8 @@ through all the other directories contained in the directory.</p>
 </dd></dl>
 
 <dl class="method">
-<dt>
-<tt class="descname">file_import</tt><big>(</big><em>f::file</em><big>)</big></dt>
+<dt id="file_import">
+<tt class="descname">file_import</tt><big>(</big><em>f::file</em><big>)</big><a class="headerlink" href="#file_import" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method takes in an file object and executes the contents of the file as
 Lasso source code. (It&#8217;s similar to the <tt class="docutils literal"><span class="pre">library</span></tt> method.)</p>
 <p>Example:</p>

@@ -1,0 +1,618 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rope &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s API Reference!" href="index.html" />
+    <link rel="next" title="rope_user" href="rope_user.html" />
+    <link rel="prev" title="Welcome to Rope’s API Reference!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="rope_user.html" title="rope_user"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Rope’s API Reference!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s API Reference!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rope">
+<h1>rope<a class="headerlink" href="#rope" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rope_thread">
+<em class="property">class </em><tt class="descname">rope_thread</tt><a class="headerlink" href="#rope_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>A thread object that tracks configuration settings, routes, and controllers.
+When not in produciton mode it also tracks files in LassoStartup. Due to the
+nature of thread objects, it can&#8217;t reload changed files, but relies on the
+main thread to do the actual reloading.</p>
+<p>This thread object is what Rope uses internally, and is not meant to be
+accessed by a user directly. All interaction with the framework is meant to go
+through the <tt class="docutils literal"><span class="pre">rope</span></tt> method.</p>
+<dl class="method">
+<dt id="rope_thread.config">
+<tt class="descname">config</tt><big>(</big><em>...</em><big>)</big><a class="headerlink" href="#rope_thread.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method expects an argument list of pairs whose first value is the name of
+the configuration being set and the second is the value to set it to. The list
+of configurations and their defaults is stored in a private <tt class="docutils literal"><span class="pre">config</span></tt> type
+variable. Errors will be thrown if the configuration doesn&#8217;t exist or if the
+value passed for the configuration is not of the correct type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">config</tt><big>(</big><em>key::string</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">config=(config::map)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.configLoaded">
+<tt class="descname">configLoaded</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.configLoaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">configLoaded=(configLoaded::boolean)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.controller">
+<tt class="descname">controller</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_thread.controller" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.controllerExist">
+<tt class="descname">controllerExist</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_thread.controllerExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.controllers">
+<tt class="descname">controllers</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.controllers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">controllers=(controllers::map)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.findFilesToReload">
+<tt class="descname">findFilesToReload</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.findFilesToReload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Due to the nature of thread objects and that the files that need reloading
+could call methods that try to access <tt class="docutils literal"><span class="pre">rope_thread</span></tt>, the thread object can&#8217;t
+reload changed files, but it can return an array of files for the main thread
+to reload.</p>
+<p>While looking for files to reload, this method also sees if any files have
+been deleted and removes them from being tracked by Rope.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.findRoutesSized">
+<tt class="descname">findRoutesSized</tt><big>(</big><em>key::integer</em><big>)</big><a class="headerlink" href="#rope_thread.findRoutesSized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.insertController">
+<tt class="descname">insertController</tt><big>(</big><em>item::pair</em><big>)</big><a class="headerlink" href="#rope_thread.insertController" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.insertRoute">
+<tt class="descname">insertRoute</tt><big>(</big><em>item::pair</em><big>)</big><a class="headerlink" href="#rope_thread.insertRoute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.oncreate">
+<tt class="descname">oncreate</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.oncreate" title="Permalink to this definition">¶</a></dt>
+<dd><p>When not in a poduction environment, Rope grabs the current modification times
+for all files in LassoStartup so that each time <tt class="docutils literal"><span class="pre">rope-&gt;invoke</span></tt> is called
+(every request), it will reload any files whose modification time has changed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.removeAllControllers">
+<tt class="descname">removeAllControllers</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.removeAllControllers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.removeController">
+<tt class="descname">removeController</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_thread.removeController" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.routeLink">
+<tt class="descname">routeLink</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_thread.routeLink" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.routeLinks">
+<tt class="descname">routeLinks</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.routeLinks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">routeLinks=(routeLinks::map)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.routes">
+<tt class="descname">routes</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.routes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">routes=(routes::map)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_thread.startupFiles">
+<tt class="descname">startupFiles</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_thread.startupFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">startupFiles=(startupFiles::map)</tt></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rope_impl">
+<em class="property">class </em><tt class="descname">rope_impl</tt><a class="headerlink" href="#rope_impl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rope_impl.absolutePath">
+<tt class="descname">absolutePath</tt><big>(</big><em>path::string</em><big>)</big><a class="headerlink" href="#rope_impl.absolutePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.config">
+<tt class="descname">config</tt><big>(</big><em>...</em><big>)</big><a class="headerlink" href="#rope_impl.config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.configLoaded">
+<tt class="descname">configLoaded</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.configLoaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.continueSession">
+<tt class="descname">continueSession</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.continueSession" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.controller">
+<tt class="descname">controller</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_impl.controller" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.controllerExist">
+<tt class="descname">controllerExist</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_impl.controllerExist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.deregister">
+<tt class="descname">deregister</tt><big>(</big><em>controller::string</em><big>)</big><a class="headerlink" href="#rope_impl.deregister" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.deregisterAll">
+<tt class="descname">deregisterAll</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.deregisterAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.env">
+<tt class="descname">env</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.env" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns &#8220;dev&#8221; if the ROPE_ENV environment variable has not been set.
+Otherwise it returns the value stored in the environment variable, even if that
+value is an empty string</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.extension">
+<tt class="descname">extension</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.extension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.fileUploads">
+<tt class="descname">fileUploads</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.fileUploads" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.getParam">
+<tt class="descname">getParam</tt><big>(</big><em>type::string</em>, <em>key::string</em>, <em>as::tag</em>, <em>default</em>, <em>selectall::boolean</em><big>)</big><a class="headerlink" href="#rope_impl.getParam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.hostname">
+<tt class="descname">hostname</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.hostname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.include">
+<tt class="descname">include</tt><big>(</big><em>path::string</em>, <em>...</em><big>)</big><a class="headerlink" href="#rope_impl.include" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <tt class="docutils literal"><span class="pre">include</span></tt> member method accepts either a file or a string which is a path
+to a file in the view folder. The string can be a relative path if this method
+is being called in a view itself and the file will be assumed to be relative to
+the current file. If passed an absolute path - a path starting with a single
+slash (/) - it will be assumed that the path is actually relative from the view
+folder itself. A fully-qualified absolute path - a path that starts with two or
+more slashes - will be treated like an absolute path from the root of the file
+system.</p>
+<p>Optionally, this method can take any number of keyword parameters. These
+parameters are setup as local variables for the file they are including. The
+name of the local variable is the parameter name and the value for the variable
+is the corresponding parameter value. Essentially, this allows you to easily
+&#8220;pass&#8221; local variables for use inside your views.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">include</tt><big>(</big><em>view::file</em>, <em>...</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">include</tt><big>(</big><em>view::file</em>, <em>params::staticarray</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.invoke">
+<tt class="descname">invoke</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.invoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the magic all happens. Every web request that rope handles runs
+this method and follows these steps:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>If we are not running in production mode, it checks for any new files in
+LassoStartup or any modified existing files and loads them.</li>
+<li>It matches the URL path to a route. If there are any URL parameters in
+the path then it also loads them up.</li>
+<li>It continues the Rope Session as long as sessions aren&#8217;t turned off.</li>
+<li>It executes the controller block that matches the route that was found.</li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.link">
+<tt class="descname">link</tt><big>(</big><em>key::string</em>, <em>index::integer =?</em>, <em>values::trait_positionallyKeyed =?</em><big>)</big><a class="headerlink" href="#rope_impl.link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">link</tt><big>(</big><em>key::string</em>, <em>index::integer</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">link</tt><big>(</big><em>key::string</em>, <em>values::trait_positionallyKeyed</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.links">
+<tt class="descname">links</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.links" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">links=(links::map)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.matchRoute">
+<tt class="descname">matchRoute</tt><big>(</big><em>path::array</em><big>)</big><a class="headerlink" href="#rope_impl.matchRoute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">matchRoute</tt><big>(</big><em>path::string</em><big>)</big></dt>
+<dd><p>This method can take either a string that&#8217;s the URL path or an array, each
+element of which is part of the path. The algorithm for matching routes is a bit
+complex:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The Route must be the same number of parts as the path.</li>
+<li>Routes can have wild-card parts, indicated by the part starting with a
+colon. (These are matched as URL parameters later.) However, the matcher
+prefers those routes whose earliest parts match non-wildcard parts. This
+means that for two routes &#8220;/prada/:id&#8221; and &#8220;/:designer/shoes&#8221;, the URL
+&#8220;/prada/shoes&#8221; will match the first - &#8220;/prada/:id&#8221;.</li>
+<li>All the parts must be found to match either exactly or a wildcard.</li>
+<li>It is an error if no routes are found or if more than one route matches.</li>
+</ol>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.method">
+<tt class="descname">method</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.param">
+<tt class="descname">param</tt><big>(</big><em>key::string</em>, <em>-as::tag =?</em>, <em>-default =?</em>, <em>-selectall::boolean =?</em><big>)</big><a class="headerlink" href="#rope_impl.param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.params">
+<tt class="descname">params</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.path">
+<tt class="descname">path</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.postParam">
+<tt class="descname">postParam</tt><big>(</big><em>key::string</em>, <em>-as::tag =?</em>, <em>-default =?</em>, <em>-selectall::boolean =?</em><big>)</big><a class="headerlink" href="#rope_impl.postParam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.postParams">
+<tt class="descname">postParams</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.postParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.protocol">
+<tt class="descname">protocol</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.protocol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.queryParam">
+<tt class="descname">queryParam</tt><big>(</big><em>key::string</em>, <em>-as::tag =?</em>, <em>-default =?</em>, <em>-selectall::boolean =?</em><big>)</big><a class="headerlink" href="#rope_impl.queryParam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.queryParams">
+<tt class="descname">queryParams</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.queryParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.register">
+<tt class="descname">register</tt><big>(</big><em>controller::string</em>, <em>-routes::staticarray =?</em><big>)</big><a class="headerlink" href="#rope_impl.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method serves two functions: 1) It registers a controller and its code
+block into Rope. 2) It registers routes with an existing controller.</p>
+<p>If a controller of a given name doesn&#8217;t exist, then this method expects a block
+to be passed in for it to register the controller. You can register routes at
+the same time you are registering the controller with its code block. If you do
+not pass a code block, then it is assumed that you are registering routes to an
+existing controller and an error will be thrown if that controller does not
+exist.</p>
+<p>Examples:</p>
+<div class="highlight-python"><pre>// Good
+rope-&gt;register('products') =&gt; {
+    .... snip ....
+}
+rope-&gt;register('product-show', -routes=(:'/product/:id')) =&gt; {
+    .... snip ....
+}
+rope-&gt;register('product-show', -routes=(:'/widget/:id'))
+
+// Bad
+rope-&gt;register('new-controller', -routes=(:'/moose/hair/rhino'))</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.render">
+<tt class="descname">render</tt><big>(</big><em>path::string</em>, <em>...</em><big>)</big><a class="headerlink" href="#rope_impl.render" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">render</tt><big>(</big><em>view::file</em>, <em>...</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.renderJSON">
+<tt class="descname">renderJSON</tt><big>(</big><em>content::string</em><big>)</big><a class="headerlink" href="#rope_impl.renderJSON" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">renderJSON</tt><big>(</big><em>item</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.routesSized">
+<tt class="descname">routesSized</tt><big>(</big><em>size::integer</em><big>)</big><a class="headerlink" href="#rope_impl.routesSized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.sess">
+<tt class="descname">sess</tt><big>(</big><em>key::string</em><big>)</big><a class="headerlink" href="#rope_impl.sess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">sess=(rhs::trait_serializable, key::string)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.startupCheckNLoad">
+<tt class="descname">startupCheckNLoad</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.startupCheckNLoad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.status_msg">
+<tt class="descname">status_msg</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.status_msg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">status_msg=(status_msg)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.statusMsg">
+<tt class="descname">statusMsg</tt><big>(</big><em>-status::boolean =?</em>, <em>-message::boolean =?</em><big>)</big><a class="headerlink" href="#rope_impl.statusMsg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">statusMsg</tt><big>(</big><em>stat::string</em>, <em>msg::string</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">statusMsg</tt><big>(</big><em>stat_msg::pair</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.statusMsgError">
+<tt class="descname">statusMsgError</tt><big>(</big><em>msg::string</em><big>)</big><a class="headerlink" href="#rope_impl.statusMsgError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.statusMsgSuccess">
+<tt class="descname">statusMsgSuccess</tt><big>(</big><em>msg::string</em><big>)</big><a class="headerlink" href="#rope_impl.statusMsgSuccess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.statusMsgWarning">
+<tt class="descname">statusMsgWarning</tt><big>(</big><em>msg::string</em><big>)</big><a class="headerlink" href="#rope_impl.statusMsgWarning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.urlParam">
+<tt class="descname">urlParam</tt><big>(</big><em>key::string</em>, <em>-as::tag =?</em>, <em>-default =?</em>, <em>-selectall::boolean =?</em><big>)</big><a class="headerlink" href="#rope_impl.urlParam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.urlParams">
+<tt class="descname">urlParams</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.urlParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">urlParams=(urlParams::array)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.user">
+<tt class="descname">user</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">user=(rhs::null)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">user=(rhs::trait_rope_user)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.version">
+<tt class="descname">version</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_impl.version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_impl.viewForPath">
+<tt class="descname">viewForPath</tt><big>(</big><em>path::string</em><big>)</big><a class="headerlink" href="#rope_impl.viewForPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">rope</tt><big>(</big><big>)</big></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Rope&#8217;s API Reference!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rope_user.html"
+                        title="next chapter">rope_user</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/rope.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="rope_user.html" title="rope_user"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Rope’s API Reference!"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s API Reference!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>

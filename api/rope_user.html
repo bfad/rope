@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rope_user &mdash; Rope 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Rope 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Welcome to Rope’s API Reference!" href="index.html" />
+    <link rel="next" title="rope_validator" href="rope_validator.html" />
+    <link rel="prev" title="rope" href="rope.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="rope_validator.html" title="rope_validator"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rope.html" title="rope"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Welcome to Rope&#8217;s API Reference!</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rope-user">
+<h1>rope_user<a class="headerlink" href="#rope-user" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="trait_rope_user">
+<em class="property">class </em><tt class="descname">trait_rope_user</tt><a class="headerlink" href="#trait_rope_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <tt class="docutils literal"><span class="pre">rope-&gt;user=</span></tt> method requires that the object it is being set to implement
+this trait. This allows for custom user types to be used, but also require those
+types to have certain methods. (In this case, it&#8217;s important for them to have
+methods to implement <tt class="docutils literal"><span class="pre">trait_serializable</span></tt> and an <tt class="docutils literal"><span class="pre">isAuthenticated</span></tt> method.)</p>
+<p>Imported Traits:</p>
+<blockquote>
+<div><ul class="simple">
+<li>trait_serializable</li>
+</ul>
+</div></blockquote>
+<p>Required Methods:</p>
+<blockquote>
+<div><ul class="simple">
+<li>isAuthenticated()</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="rope_user">
+<em class="property">class </em><tt class="descname">rope_user</tt><a class="headerlink" href="#rope_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>A very basic user type that implments <tt class="docutils literal"><span class="pre">trait_rope_user</span></tt> and tracks ID, first
+name, lastname, and username. While it can be used if this is all you need, it&#8217;s
+meant to be a reference for web applications to create their own user types.</p>
+<dl class="method">
+<dt id="rope_user.acceptDeserializedElement">
+<tt class="descname">acceptDeserializedElement</tt><big>(</big><em>d::serialization_element</em><big>)</big><a class="headerlink" href="#rope_user.acceptDeserializedElement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.id">
+<tt class="descname">id</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">id=(id::integer)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.isAuthenticated">
+<tt class="descname">isAuthenticated</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.isAuthenticated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.nameFirst">
+<tt class="descname">nameFirst</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.nameFirst" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">nameFirst=(nameFirst::string)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.nameLast">
+<tt class="descname">nameLast</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.nameLast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">nameLast=(nameLast::string)</tt></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.oncreate">
+<tt class="descname">oncreate</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.oncreate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">oncreate</tt><big>(</big><em>id::integer</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">oncreate</tt><big>(</big><em>id::integer</em>, <em>name_first::string</em>, <em>name_last::string</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">oncreate</tt><big>(</big><em>id::integer</em>, <em>name_first::string</em>, <em>name_last::string</em>, <em>username::string</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">oncreate</tt><big>(</big><em>id::integer</em>, <em>username::string</em><big>)</big></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.serializationElements">
+<tt class="descname">serializationElements</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.serializationElements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rope_user.username">
+<tt class="descname">username</tt><big>(</big><big>)</big><a class="headerlink" href="#rope_user.username" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">username=(username::string)</tt></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rope.html"
+                        title="previous chapter">rope</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rope_validator.html"
+                        title="next chapter">rope_validator</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/rope_user.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="rope_validator.html" title="rope_validator"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rope.html" title="rope"
+             >previous</a> |</li>
+        <li><a href="../index.html">Rope 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Welcome to Rope&#8217;s API Reference!</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brad Lindsay.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+    </div>
+  </body>
+</html>
