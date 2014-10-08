@@ -24,7 +24,8 @@ define rope_thread => thread {
         controllers  => .`controllers`,
         routes       => .`routes`,
         routeLinks   => .`routeLinks`,
-        configLoaded => .`configLoaded`
+        configLoaded => .`configLoaded`,
+        startupPath  => sys_homePath + '/rope_webapp/'
     /**!
         When not in a poduction environment, Rope grabs the current modification times
         for all files in LassoStartup so that each time ``rope->invoke`` is called
@@ -32,7 +33,7 @@ define rope_thread => thread {
     */
     public onCreate => {
         if(`production` != sys_getEnv(`ROPE_ENV`)) => {
-            with path in dir(sys_userStartupPath)->eachFilePathRecursive 
+            with path in dir(.startupPath)->eachFilePathRecursive 
             do .`startupFiles`->insert(#path=file(#path)->modificationTime)
         }
     }
@@ -52,7 +53,7 @@ define rope_thread => thread {
         local(cur_files_tracking) = .startupFiles->keys->asArray
         local(files_to_reload)    = array
 
-        with path in dir(sys_userStartupPath)->eachFilePathRecursive
+        with path in dir(.startupPath)->eachFilePathRecursive
         let f = file(#path) do {
             .startupFiles->contains(#path)
                 ? #cur_files_tracking->removeAll(#path)
@@ -526,6 +527,6 @@ define rope_impl => type {
     }
     public renderJSON(item) => .renderJSON(json_serialize(#item))
     
-    public version => `1.0`
+    public version => `1.0.1`
 }
 define rope => var(_rope_) || $_rope_ := rope_impl
