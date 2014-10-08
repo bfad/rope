@@ -13,6 +13,12 @@ validations for custom types, and more.
 Release Notes
 -------------
 
+New in version 1.0.1
+
+- Bugfix: The automatic reloader works again - it had been looking in "$LASSO9_HOME/LassoStartup/" and it's been changed to "$LASSO9_HOME/rope_webapp/"
+
+***
+
 New in version 1.0
 
 - Deprecated: The [rope->user] capabilities will be removed in a future version of rope
