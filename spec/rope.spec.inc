@@ -228,7 +228,7 @@ describe(::rope) => {
                 sys_unsetEnv('ROPE_ENV')
             }
             it(`loads new files that it finds in LassoStartup`) => {
-                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                local(new_file) = file(`/` + sys_homePath + '/rope_webapp/' + `rope_test_file_` + lasso_uniqueID + '.inc')
                 handle => {
                     #new_file->exists? #new_file->delete
                 }
@@ -239,7 +239,7 @@ describe(::rope) => {
                 expect(`moose`, my_test_method)
             }
             it(`detects and reloads files that have changed in LassoStartup`) => {
-                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                local(new_file) = file(`/` + sys_homePath + '/rope_webapp/' + `rope_test_file_` + lasso_uniqueID + '.inc')
                 handle => {
                     #new_file->exists? #new_file->delete
                 }
@@ -263,7 +263,7 @@ describe(::rope) => {
                 sys_unsetEnv('ROPE_ENV')
             }
             it(`ignores new files that it finds in LassoStartup`) => {
-                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                local(new_file) = file(`/` + sys_homePath + '/rope_webapp/' + `rope_test_file_` + lasso_uniqueID + '.inc')
                 handle => {
                     #new_file->exists? #new_file->delete
                 }
@@ -274,7 +274,7 @@ describe(::rope) => {
                 expect->error => { my_test_method2 }
             }
             it(`ignores files that have changed in LassoStartup`) => {
-                local(new_file) = file(`/` + sys_userStartupPath + `rope_test_file_` + lasso_uniqueID + '.inc')
+                local(new_file) = file(`/` + sys_homePath + '/rope_webapp/' + `rope_test_file_` + lasso_uniqueID + '.inc')
                 handle => {
                     #new_file->exists? #new_file->delete
                 }
