@@ -139,7 +139,8 @@ define rope_thread => thread {
 define rope_impl => type {
     data public urlParams::array = array,
         private status_msg,
-        private links::map = map
+        private links::map = map,
+        private currentRoute
     
     /**!
         This is where the magic all happens. Every web request that rope handles runs
@@ -160,7 +161,8 @@ define rope_impl => type {
             ? .startupCheckNLoad
 
         // Matches route & sets up URL parameters
-        local(route) = .matchRoute(.path)
+        local(route)  = .matchRoute(.path)
+        .currentRoute = #route
         
         .continueSession
         return .controller(#route->second)->invoke
@@ -307,6 +309,7 @@ define rope_impl => type {
     
     public controller     (key::string) => rope_thread->controller(#key)
     public controllerExist(key::string) => rope_thread->controllerExist(#key)
+    public matchedControllerName        => .currentRoute->second
 
     public routesSized(size::integer) => rope_thread->findRoutesSized(#size)
 
