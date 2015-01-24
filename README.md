@@ -1,6 +1,8 @@
 Rope
 ====
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/bfad/rope?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Rope is a light-weight web application framework built for Lasso 9. Rope was
 designed to make it easy for developers to create web applications with clean
 URLs while promoting best-practices such as keeping presentation code and logic
