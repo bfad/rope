@@ -439,7 +439,7 @@ define rope_impl => type {
         not .config(`sessions-enabled`)? return
         
         session_start(`RopeSession`, -expires=.config(`sessions-expires`), -useCookie)
-        if(session_result != "load") => {
+        if(session_result(`RopeSession`) != "load") => {
             session_addVar(-name='RopeSession', '_sess_rope')
             session_addVar(-name='RopeSession', '_sess_user')
             var(_sess_rope) = map

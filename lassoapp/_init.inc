@@ -13,6 +13,9 @@ rope->register(`root`, -routes=(:'/')) => { redirect_url('/lasso9/rope') }
 
 protect => {\http_server_connection_handler}
 define http_server_connection_handler->invoke(con::http_server_web_connection) => {
+    if(lasso_version(-lassoVersion)->beginsWith('9.3.')) => {
+        #con->pullRequest & pullPOST
+    }
     protect => {
         handle_failure => {
             stdoutnl(error_msg)
