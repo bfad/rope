@@ -438,7 +438,7 @@ define rope_impl => type {
     public continueSession => {
         not .config(`sessions-enabled`)? return
         
-        session_start(`RopeSession`, -expires=.config(`sessions-expires`), -useCookie)
+        session_start(`RopeSession`, -expires=.config(`sessions-expires`), -useCookie, -useAuto=false)
         if(session_result(`RopeSession`) != "load") => {
             session_addVar(-name='RopeSession', '_sess_rope')
             session_addVar(-name='RopeSession', '_sess_user')
