@@ -15,6 +15,12 @@ validations for custom types, and more.
 Release Notes
 -------------
 
+New in version 1.0.2
+
+- Bugfix: You should no longer see any session links - it should be set to only use cookies
+
+***
+
 New in version 1.0.1
 
 - Bugfix: The automatic reloader works again - it had been looking in "$LASSO9_HOME/LassoStartup/" and it's been changed to "$LASSO9_HOME/rope_webapp/"
